@@ -150,7 +150,7 @@ export default function App() {
       {view === 'espaces' && <div className="max-w-5xl mx-auto px-4 py-4"><Espaces lang={lang} session={session} /></div>}
       {view === 'lecons' && <div className="max-w-5xl mx-auto px-4 pt-3"><Curriculum lang={lang} done={done} /></div>}
       <div className={`max-w-5xl mx-auto px-4 py-4 grid gap-4 md:grid-cols-[220px_1fr] ${view !== 'lecons' ? 'hidden' : ''}`}>
-        <nav aria-label={t.lessons}>
+        <nav aria-label={t.lessons} className="min-w-0">
           <h2 className="text-xs uppercase tracking-wide text-ink/60 mb-2">{t.lessons}</h2>
           <ol className="flex md:flex-col gap-2 overflow-x-auto">
             {lessons.map((l, i) => (
