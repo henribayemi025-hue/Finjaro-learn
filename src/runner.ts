@@ -53,6 +53,7 @@ onmessage = async (e) => {
       postMessage({ type: 'ready' })
       return
     }
+    if (d.type === 'load') { await py.loadPackage(d.packages); postMessage({ type: 'loaded' }); return }
     const out = []
     py.setStdout({ batched: (s) => out.push(s) })
     py.setStderr({ batched: (s) => out.push(s) })
@@ -60,6 +61,7 @@ onmessage = async (e) => {
     try {
       py.runPython(d.code, { globals: ns })
       ns.set('__out', out.join('\\n'))
+      for (const mod of ['numpy as np', 'pandas as pd']) { try { py.runPython('import ' + mod, { globals: ns }) } catch (e) { /* bibliothèque non chargée */ } }
       py.runPython('def __raises(f, e=Exception):\\n    try:\\n        f()\\n    except e:\\n        return True\\n    return False', { globals: ns })
       const results = d.checks.map((c) => !!py.runPython(c, { globals: ns }))
       postMessage({ type: 'done', output: out, error: null, passed: d.checks.length === 0 ? null : results.every(Boolean) })
@@ -89,11 +91,26 @@ function startPython(): Promise<void> {
   return pyReady
 }
 
-function reset() { pyWorker?.terminate(); pyWorker = null; pyReady = null }
+function reset() { pyWorker?.terminate(); pyWorker = null; pyReady = null; loadedPkgs.clear() }
 
 /** Exécute du Python dans un Worker isolé (Pyodide). Boucle infinie : le Worker est arrêté après 6 s. */
-export async function runPython(code: string, checks: string[]): Promise<RunResult> {
-  try { await startPython() } catch (e) { return { output: [], error: String((e as Error).message), passed: false } }
+const loadedPkgs = new Set<string>()
+
+/** Charge numpy, pandas… à la demande (jsDelivr, gratuit) ; une seule fois par session. */
+async function ensurePackages(pkgs: string[]) {
+  const need = pkgs.filter((p) => !loadedPkgs.has(p))
+  if (!need.length) return
+  const w = pyWorker!
+  await new Promise<void>((resolve, reject) => {
+    const t = setTimeout(() => { reset(); loadedPkgs.clear(); reject(new Error('Python : chargement des bibliothèques trop long (réseau ?)')) }, 120000)
+    w.onmessage = (e) => { if (e.data.type === 'loaded') { clearTimeout(t); need.forEach((p) => loadedPkgs.add(p)); resolve() } else if (e.data.type === 'fatal') { clearTimeout(t); reject(new Error(e.data.error)) } }
+    w.onerror = (e) => { clearTimeout(t); reset(); loadedPkgs.clear(); reject(new Error(e.message)) }
+    w.postMessage({ type: 'load', packages: need })
+  })
+}
+
+export async function runPython(code: string, checks: string[], packages: string[] = []): Promise<RunResult> {
+  try { await startPython(); await ensurePackages(packages) } catch (e) { return { output: [], error: String((e as Error).message), passed: false } }
   const w = pyWorker!
   return new Promise<RunResult>((resolve) => {
     const t = setTimeout(() => { reset(); resolve({ output: [], error: 'Timeout (boucle infinie ?)', passed: false }) }, 6000)
@@ -104,6 +121,6 @@ export async function runPython(code: string, checks: string[]): Promise<RunResu
 }
 
 /** Lance le code d'une leçon dans le bon langage. */
-export function runLesson(lesson: { lang?: 'js' | 'py'; checks: string[] }, code: string): Promise<RunResult> {
-  return lesson.lang === 'py' ? runPython(code, lesson.checks) : runCode(code, lesson.checks)
+export function runLesson(lesson: { lang?: 'js' | 'py'; checks: string[]; packages?: string[] }, code: string): Promise<RunResult> {
+  return lesson.lang === 'py' ? runPython(code, lesson.checks, lesson.packages) : runCode(code, lesson.checks)
 }

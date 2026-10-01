@@ -23,6 +23,14 @@ const GROUPS = {
   'py-bases': { fr: 'Python · bases', en: 'Python · basics' },
   'py-algo': { fr: 'Python · algorithmes et structures', en: 'Python · algorithms and structures' },
   'py-projets': { fr: 'Python · projets', en: 'Python · projects' },
+  'ds-numpy': { fr: 'Data science · NumPy', en: 'Data science · NumPy' },
+  'ds-pandas': { fr: 'Data science · pandas', en: 'Data science · pandas' },
+  'ds-ml': { fr: 'Data science · statistiques et apprentissage', en: 'Data science · statistics and learning' },
+  dl: { fr: 'Deep learning · les bases', en: 'Deep learning · the basics' },
+  'dl-reseaux': { fr: 'Deep learning · réseaux de neurones', en: 'Deep learning · neural networks' },
+  'ai-rag': { fr: 'AI engineering · recherche et RAG', en: 'AI engineering · retrieval and RAG' },
+  'ai-agents': { fr: 'AI engineering · agents et production', en: 'AI engineering · agents and production' },
+  pe: { fr: 'Prompt engineering', en: 'Prompt engineering' },
 } as const
 
 function getLang(): Lang {

@@ -1,7 +1,9 @@
 import type { Lang } from './i18n'
 import { pyLessons } from './lessonsPy'
+import { dataLessons } from './lessonsData'
 
 type T = Record<Lang, string>
+export type Group = 'js' | 'py-bases' | 'py-algo' | 'py-projets' | 'ds-numpy' | 'ds-pandas' | 'ds-ml' | 'dl' | 'dl-reseaux' | 'ai-rag' | 'ai-agents' | 'pe'
 
 export interface Lesson {
   id: string
@@ -17,7 +19,9 @@ export interface Lesson {
   /** Langage de l'exercice (JavaScript par défaut). */
   lang?: 'js' | 'py'
   /** Section du parcours Programmation dans la liste des leçons. */
-  group?: 'js' | 'py-bases' | 'py-algo' | 'py-projets'
+  group?: Group
+  /** Bibliothèques Python à charger (numpy, pandas…). */
+  packages?: string[]
 }
 
 const jsLessons: Lesson[] = [
@@ -103,8 +107,8 @@ const jsLessons: Lesson[] = [
   },
 ]
 
-const ORDER = ['js', 'py-bases', 'py-algo', 'py-projets']
-export const lessons: Lesson[] = [...jsLessons.map((l) => ({ ...l, lang: 'js' as const, group: 'js' as const })), ...pyLessons]
+const ORDER: Group[] = ['js', 'py-bases', 'py-algo', 'py-projets', 'ds-numpy', 'ds-pandas', 'ds-ml', 'dl', 'dl-reseaux', 'ai-rag', 'ai-agents', 'pe']
+export const lessons: Lesson[] = [...jsLessons.map((l) => ({ ...l, lang: 'js' as const, group: 'js' as const })), ...pyLessons, ...dataLessons]
   .map((l, i) => ({ l, i }))
   .sort((a, b) => ORDER.indexOf(a.l.group ?? 'js') - ORDER.indexOf(b.l.group ?? 'js') || a.i - b.i)
   .map((x) => x.l)
