@@ -62,8 +62,8 @@ onmessage = async (e) => {
       py.runPython(d.code, { globals: ns })
       ns.set('__out', out.join('\\n'))
       for (const mod of ['numpy as np', 'pandas as pd']) { try { py.runPython('import ' + mod, { globals: ns }) } catch (e) { /* bibliothèque non chargée */ } }
-      py.runPython('def __raises(f, e=Exception):\\n    try:\\n        f()\\n    except e:\\n        return True\\n    return False', { globals: ns })
-      const results = d.checks.map((c) => !!py.runPython(c, { globals: ns }))
+      py.runPython('def __raises(f, e=Exception):\\n    try:\\n        f()\\n    except e:\\n        return True\\n    return False\\ndef __exc(f):\\n    try:\\n        f()\\n    except Exception as ex:\\n        return ex\\n    return None', { globals: ns })
+      const results = d.checks.map((c) => { ns.set('__c', c); return py.runPython('bool(eval(__c, globals()))', { globals: ns }) === true })
       postMessage({ type: 'done', output: out, error: null, passed: d.checks.length === 0 ? null : results.every(Boolean) })
     } catch (err) {
       const msg = String(err && err.message ? err.message : err).trim().split('\\n').slice(-3).join('\\n')
@@ -93,7 +93,7 @@ function startPython(): Promise<void> {
 
 function reset() { pyWorker?.terminate(); pyWorker = null; pyReady = null; loadedPkgs.clear() }
 
-/** Exécute du Python dans un Worker isolé (Pyodide). Boucle infinie : le Worker est arrêté après 6 s. */
+/** Exécute du Python dans un Worker isolé (Pyodide). Boucle infinie : le Worker est arrêté après 20 s. */
 const loadedPkgs = new Set<string>()
 
 /** Charge numpy, pandas… à la demande (jsDelivr, gratuit) ; une seule fois par session. */
@@ -113,7 +113,7 @@ export async function runPython(code: string, checks: string[], packages: string
   try { await startPython(); await ensurePackages(packages) } catch (e) { return { output: [], error: String((e as Error).message), passed: false } }
   const w = pyWorker!
   return new Promise<RunResult>((resolve) => {
-    const t = setTimeout(() => { reset(); resolve({ output: [], error: 'Timeout (boucle infinie ?)', passed: false }) }, 6000)
+    const t = setTimeout(() => { reset(); resolve({ output: [], error: 'Timeout (boucle infinie ?)', passed: false }) }, 20000)
     w.onmessage = (e) => { if (e.data.type === 'done') { clearTimeout(t); resolve({ output: e.data.output, error: e.data.error, passed: e.data.passed }) } }
     w.onerror = (e) => { clearTimeout(t); reset(); resolve({ output: [], error: e.message, passed: false }) }
     w.postMessage({ type: 'run', code, checks })

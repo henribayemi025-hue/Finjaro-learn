@@ -1,6 +1,9 @@
 import type { Lang } from './i18n'
 import { pyLessons } from './lessonsPy'
 import { dataLessons } from './lessonsData'
+import { dlLessons } from './lessonsDL'
+import { aiLessons } from './lessonsAI'
+import { peLessons } from './lessonsPE'
 
 type T = Record<Lang, string>
 export type Group = 'js' | 'py-bases' | 'py-algo' | 'py-projets' | 'ds-numpy' | 'ds-pandas' | 'ds-ml' | 'dl' | 'dl-reseaux' | 'ai-rag' | 'ai-agents' | 'pe'
@@ -108,7 +111,7 @@ const jsLessons: Lesson[] = [
 ]
 
 const ORDER: Group[] = ['js', 'py-bases', 'py-algo', 'py-projets', 'ds-numpy', 'ds-pandas', 'ds-ml', 'dl', 'dl-reseaux', 'ai-rag', 'ai-agents', 'pe']
-export const lessons: Lesson[] = [...jsLessons.map((l) => ({ ...l, lang: 'js' as const, group: 'js' as const })), ...pyLessons, ...dataLessons]
+export const lessons: Lesson[] = [...jsLessons.map((l) => ({ ...l, lang: 'js' as const, group: 'js' as const })), ...pyLessons, ...dataLessons, ...dlLessons, ...aiLessons, ...peLessons]
   .map((l, i) => ({ l, i }))
   .sort((a, b) => ORDER.indexOf(a.l.group ?? 'js') - ORDER.indexOf(b.l.group ?? 'js') || a.i - b.i)
   .map((x) => x.l)

@@ -172,7 +172,19 @@ export default function App() {
       <div className={`max-w-5xl mx-auto px-4 py-4 grid gap-4 md:grid-cols-[220px_1fr] ${view !== 'lecons' ? 'hidden' : ''}`}>
         <nav aria-label={t.lessons} className="min-w-0 md:sticky md:top-4 md:self-start md:max-h-[calc(100vh-2rem)] md:overflow-y-auto md:pr-1">
           <h2 className="text-xs uppercase tracking-wide text-ink/60 mb-2">{t.lessons}</h2>
-          <ol className="flex md:flex-col gap-2 overflow-x-auto">
+          <select
+            className="md:hidden w-full rounded-md border border-ink/30 bg-paper px-3 py-2 text-sm"
+            aria-label={t.lessons}
+            value={idx}
+            onChange={(e) => go(Number(e.target.value))}
+          >
+            {Object.keys(GROUPS).map((g) => (
+              <optgroup key={g} label={GROUPS[g as keyof typeof GROUPS][lang]}>
+                {lessons.map((l, i) => (l.group ?? 'js') === g ? <option key={l.id} value={i}>{i + 1}. {l.title[lang]}{done.includes(l.id) ? ' ✓' : ''}</option> : null)}
+              </optgroup>
+            ))}
+          </select>
+          <ol className="hidden md:flex md:flex-col gap-2">
             {lessons.map((l, i) => (
               <li key={l.id} className="shrink-0 flex md:block items-center gap-2">
                 {(i === 0 || lessons[i - 1].group !== l.group) && (
