@@ -24,7 +24,7 @@ Tout tourne dans le navigateur (Python via Pyodide ; NumPy et pandas chargés à
 
 | Parcours | Contenu | État |
 |---|---|---|
-| (a) Programmation | JS (4), Python bases (17), algorithmes et structures (13), 2 projets | disponible |
+| (a) Programmation | JS (4), Python bases (14), algorithmes et structures (14), 2 projets (soit 34) | disponible |
 | (b) Data science | NumPy (3), pandas (3), statistiques et apprentissage (6) : normalisation, distances, groupby, nettoyage, jointures, Monte-Carlo, corrélation, régression, k-NN, précision/rappel, train/test | disponible |
 | (c) IA / deep learning | neurone, activations, pertes, descente de gradient, régression linéaire et logistique, propagation avant, rétropropagation (XOR), surapprentissage, Adam, mini-lots, convolution, attention, projet « ta première IA » — tout écrit avec NumPy | disponible |
 | (d) AI engineering | découpage, similarité cosinus, sac de mots, recherche (RAG), prompt RAG, JSON structuré, boucle d'agent avec outils, évaluation, nouvelles tentatives, limiteur de débit | disponible |

@@ -33,3 +33,4 @@ messages directs (create_trigger vers la session concernée).
 | 01/10 | Beau → Learn | « Continue avec le parcours Programmation, n'attends pas ma réponse » : 24 leçons, Pyodide (CDN jsDelivr v0.27.7, chargé à la demande dans un Worker). Test auto des 24 leçons OK (Pyodide servi en local dans le navigateur de test : le navigateur du bac à sable n'atteint pas le CDN). |
 | 01/10 | Learn | Programmation : 34 leçons (10 exercices Python ajoutés), test auto des 34 OK (commit cc1e5ea). |
 | 01/10 | Beau → Learn | Design en 2 thèmes (Finjaro / Noir) ; demande de parcours data science, deep learning, AI engineering. |
+| 01/10 | Learn | 76 leçons (parcours a→e) vérifiées dans le navigateur ; bug corrigé : les vérifications NumPy renvoyaient un objet « truthy » (corrigé par bool(eval)). Commit 9695ab8 + docs. |
