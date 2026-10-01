@@ -22,3 +22,6 @@ Sécurité : fonction `learn_est_membre(espace_id)` (security definer, stable) u
 ## Questions pour Alpha
 - Realtime sur le projet commun : OK d'activer un canal privé `learn:espace:<id>` avec policy sur `realtime.messages` ?
 - Un agent Léo du créateur dans un salon : lecture de `legion_agents` au nom du créateur (RLS) suffisante, ou prévoir une copie de nom/personnalité dans `learn_espaces` ?
+
+## Statut
+Conception approuvée par Alpha (01/10). SQL proposé : `supabase/migrations/20261001140000_learn_espaces.sql` (non appliqué, en attente de relecture). Choix : création/adhésion/invitations/messages d'agent uniquement par RPC ; jeton d'invitation illisible ; solutions des autres visibles seulement après avoir rendu la sienne ; 20 espaces par créateur, 100 membres par espace, 100 messages d'agent par espace et par jour.

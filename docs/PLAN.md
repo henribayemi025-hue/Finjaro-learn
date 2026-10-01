@@ -16,3 +16,17 @@ Ordre de valeur : tuteur de code → fiches → CV → newsletter.
 | 10/10 | J10 | Finitions, vérif 390/1440 px, mise en ligne Cloudflare si branché par Beau. |
 
 Choix J1 : JavaScript (tourne sans rien installer ni payer). Python arrive avec le parcours IA (J3).
+
+## Carte des parcours (demande de Beau, 01/10 : niveau universitaire)
+
+Structure inspirée de la **forme** des cours ouverts publics (progression, exercices notés, projets). Aucun contenu copié, aucune affiliation, aucun « certifié Harvard/MIT » affiché, aucun chiffre inventé.
+
+| Parcours | Contenu | État |
+|---|---|---|
+| (a) Programmation | JS puis Python, algorithmique, structures de données | **en cours — d'abord, complet avant d'ouvrir un autre** |
+| (b) Data science | statistiques, probabilités, pandas, visualisation, ML classique | à venir |
+| (c) IA / deep learning | réseaux de neurones, entraînement, évaluation | à venir |
+| (d) AI engineering | appeler des modèles, RAG, agents, évaluation, mise en production | à venir |
+| (e) Prompt engineering | méthodes, évaluation, sécurité | à venir |
+
+Python dans le navigateur : Pyodide (gratuit), chargé à la demande.
