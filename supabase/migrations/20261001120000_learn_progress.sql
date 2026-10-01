@@ -39,7 +39,7 @@ revoke all on public.learn_tutor_usage from anon, authenticated;
 -- Aucune policy : seule la fonction ci-dessous (security definer) y touche.
 
 -- Incrémente le compteur du jour de l'appelant ; renvoie false si la limite est atteinte.
-create or replace function public.learn_tutor_consume(max_calls int default 60)
+create or replace function public.learn_tutor_consume()
 returns boolean
 language plpgsql
 security definer
@@ -48,6 +48,7 @@ as $$
 declare
   uid uuid := auth.uid();
   n   int;
+  max_calls constant int := 60; -- limite par utilisateur et par jour, définie ici seulement
 begin
   if uid is null then
     return false;
@@ -61,5 +62,5 @@ begin
 end;
 $$;
 
-revoke all on function public.learn_tutor_consume(int) from public, anon;
-grant execute on function public.learn_tutor_consume(int) to authenticated;
+revoke all on function public.learn_tutor_consume() from public, anon;
+grant execute on function public.learn_tutor_consume() to authenticated;

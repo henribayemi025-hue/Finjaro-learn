@@ -2,20 +2,21 @@
 // JWT obligatoire (verify_jwt = true). Clé Gemini lue côté serveur uniquement.
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
-const MAX_CALLS_PER_DAY = 60
 const MAX_FIELD = 4000 // caractères par champ d'entrée
 const MAX_HISTORY = 6
 
-const cors = {
-  'Access-Control-Allow-Origin': '*',
+const ALLOWED_ORIGINS = ['https://learn.finjaro.net', 'http://localhost:5173']
+const corsFor = (req: Request) => ({
+  'Access-Control-Allow-Origin': ALLOWED_ORIGINS.includes(req.headers.get('Origin') ?? '') ? req.headers.get('Origin')! : ALLOWED_ORIGINS[0],
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
-const json = (body: unknown, status = 200) =>
-  new Response(JSON.stringify(body), { status, headers: { ...cors, 'Content-Type': 'application/json' } })
-
+  Vary: 'Origin',
+})
 const clip = (v: unknown) => (typeof v === 'string' ? v.slice(0, MAX_FIELD) : '')
 
 Deno.serve(async (req) => {
+  const cors = corsFor(req)
+  const json = (body: unknown, status = 200) =>
+    new Response(JSON.stringify(body), { status, headers: { ...cors, 'Content-Type': 'application/json' } })
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors })
   if (req.method !== 'POST') return json({ error: 'method' }, 405)
 
@@ -42,7 +43,7 @@ Deno.serve(async (req) => {
   const lang = body.lang === 'en' ? 'en' : 'fr'
   if (!question && !code) return json({ error: 'empty' }, 400)
 
-  const { data: ok, error: rpcErr } = await sb.rpc('learn_tutor_consume', { max_calls: MAX_CALLS_PER_DAY })
+  const { data: ok, error: rpcErr } = await sb.rpc('learn_tutor_consume')
   if (rpcErr) return json({ error: 'quota_check' }, 500)
   if (!ok) return json({ error: 'quota' }, 429)
 
@@ -71,11 +72,14 @@ Deno.serve(async (req) => {
     body: JSON.stringify({
       systemInstruction: { parts: [{ text: system }] },
       contents,
-      generationConfig: { maxOutputTokens: 600, temperature: 0.4 },
+      generationConfig: { maxOutputTokens: 600, temperature: 0.4, thinkingConfig: { thinkingBudget: 0 } },
     }),
-  })
-  if (!r.ok) return json({ error: 'ai' }, 502)
+    signal: AbortSignal.timeout(25_000),
+  }).catch((e) => (e?.name === 'TimeoutError' ? null : undefined))
+  if (r === null) return json({ error: 'timeout' }, 504)
+  if (!r || !r.ok) return json({ error: 'ai' }, 502)
   const data = await r.json()
   const answer = data?.candidates?.[0]?.content?.parts?.map((p: { text?: string }) => p.text ?? '').join('') ?? ''
+  if (!answer.trim()) return json({ error: 'empty_answer' }, 502)
   return json({ answer })
 })

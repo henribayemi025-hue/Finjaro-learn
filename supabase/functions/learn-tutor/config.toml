@@ -1,2 +1,0 @@
-# JWT obligatoire : seuls les utilisateurs connectés peuvent appeler le tuteur.
-verify_jwt = true
