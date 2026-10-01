@@ -19,10 +19,12 @@ Chaque demande de Beau, le jour même. On coche ✅ avec la date, on ne supprime
 | 01/10 | « Continue : ça doit être utile aux data scientists, futurs AI engineers, data analysts : réseaux de neurones, deep learning, créer leurs IA. » + « N'oublie pas le design : fantastique, avec deux couleurs : l'une de Finjaro et l'autre noir. » | Design : 2 thèmes (bouton ☾/☀ : « Finjaro » crème-terracotta et « Noir » noir profond, même terracotta), logo, relief, sidebar fixe, téléphone corrigé. Contenu : parcours Data science, Deep learning (from scratch avec numpy), AI engineering, Prompt engineering en cours (voir PLAN.md). |
 | 01/10 | (suite) parcours Data science, deep learning, AI engineering, prompt engineering | Fait : 76 leçons au total (34 + 12 + 14 + 10 + 6), toutes vérifiées dans le navigateur (départ échoue / solution réussit). Vue d'ensemble des 5 parcours avec barre de progression réelle. |
 | 01/10 | (suite) graphiques et projets | Fait : 83 leçons au total ; graphiques tracés dans la page (courbe, nuage, barres) ; projet rapport de ventes (Data science) et assistant RAG (AI engineering). Tout vérifié dans le navigateur. |
+| 01/10 | **Grande vision** : 100 idées (cours d'excellence, tuteurs IA proactifs, gamification, social, pont emploi, outils, formats d'avenir, ruptures) + une 2e liste (tuteurs, pont Finjaro, parcours enrichis, multijoueur, gamification, futur). | Triées une à une dans `docs/IDEES.md` (fait / prévu / besoin de la base / coûte / dépend d'Alpha / reformulé). Premier lot en cours : débogueur temporel, lecture de code, visualiseur de réseau, code golf, mode socratique, arbre de compétences, succès, bilan, streak, accessibilité. |
 
 ## 1. Ce qu'on attend de Beau
 
 | Date | Quoi |
 |---|---|
+| 01/10 | Décisions à prendre (voir `docs/IDEES.md`) : (1) voix générées payantes ? (2) images/vidéos générées payantes ? (3) clés API offertes aux meilleurs élèves ? (4) défis sponsorisés / tableau de bord recruteur : partenaires et prix ? (5) liens avec la place de marché (portfolio public, missions freelance) : à voir avec Alpha. |
 | 01/10 | Dans Cloudflare : définir `VITE_SUPABASE_URL` et `VITE_SUPABASE_ANON_KEY` (clé publique, voir .env.example) pour que la connexion marche en ligne. |
 | — | Brancher le dépôt sur Cloudflare (adresse learn.finjaro.net) quand une première version tourne : Learn dira quand. |

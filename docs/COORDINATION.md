@@ -35,3 +35,4 @@ messages directs (create_trigger vers la session concernée).
 | 01/10 | Beau → Learn | Design en 2 thèmes (Finjaro / Noir) ; demande de parcours data science, deep learning, AI engineering. |
 | 01/10 | Learn | 76 leçons (parcours a→e) vérifiées dans le navigateur ; bug corrigé : les vérifications NumPy renvoyaient un objet « truthy » (corrigé par bool(eval)). Commit 9695ab8 + docs. |
 | 01/10 | Learn | 83 leçons : +6 visualisation/projet Data science (graphiques SVG dans la page : courbe(), nuage(), barres()), +1 projet RAG. Vérifié navigateur. |
+| 01/10 | Beau → Learn | Liste de 100 idées + 2e liste : triées dans docs/IDEES.md. Écartées/reformulées : estimation de salaire (chiffre inventé), badges « infalsifiables » et toute affiliation à une université, surveillance de la frappe (vie privée). Besoin de la base pour le social : conceptions à venir. |
