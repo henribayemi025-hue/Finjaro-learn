@@ -1,0 +1,6 @@
+{
+  "name": "CodeCraft Studio - Codage Collaboratif & Tuteur IA",
+  "description": "Plateforme moderne de codage collaboratif en direct avec apprentissage interactif, salon d'équipe et assistant IA temps réel pour expliquer et corriger les erreurs.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
