@@ -59,6 +59,13 @@ Deno.serve(async (req) => {
   const lang = body.lang === 'en' ? 'en' : 'fr'
   if (!question && !code) return json({ error: 'empty' }, 400)
 
+  // Mode salon : l'appelant doit être membre de l'espace (vérifié avec SON JWT).
+  const espaceId = typeof body.espace_id === 'string' ? body.espace_id : null
+  if (espaceId) {
+    const { data: member } = await sb.rpc('learn_est_membre', { eid: espaceId })
+    if (!member) return json({ error: 'forbidden' }, 403)
+  }
+
   const { data: ok, error: rpcErr } = await sb.rpc('learn_tutor_consume')
   if (rpcErr) return json({ error: 'quota_check' }, 500)
   if (!ok) return json({ error: 'quota' }, 429)
@@ -98,5 +105,12 @@ Deno.serve(async (req) => {
   const data = await r.json()
   const answer = data?.candidates?.[0]?.content?.parts?.map((p: { text?: string }) => p.text ?? '').join('') ?? ''
   if (!answer.trim()) return json({ error: 'empty_answer' }, 502)
+  if (espaceId) {
+    // Écriture du message d'agent côté serveur (clé de service lue ici seulement, jamais renvoyée).
+    const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
+    const agentLabel = typeof ag.id === 'string' ? ag.id : clip(custom?.name).slice(0, 60) || 'agent'
+    const { data: posted } = await admin.rpc('learn_message_agent', { p_espace: espaceId, p_agent: agentLabel, p_texte: answer })
+    if (!posted) return json({ error: 'quota_espace' }, 429)
+  }
   return json({ answer })
 })

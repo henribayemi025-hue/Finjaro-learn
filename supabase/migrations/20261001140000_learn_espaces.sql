@@ -25,7 +25,7 @@ create index if not exists learn_membres_user_idx on public.learn_membres (user_
 create table if not exists public.learn_invitations (
   id          uuid primary key default gen_random_uuid(),
   espace_id   uuid not null references public.learn_espaces(id) on delete cascade,
-  token       text not null unique default encode(gen_random_bytes(16), 'hex'),
+  token       text not null unique default encode(extensions.gen_random_bytes(16), 'hex'),
   created_by  uuid not null references auth.users(id) on delete cascade,
   expires_at  timestamptz not null default now() + interval '7 days',
   revoked_at  timestamptz
@@ -81,14 +81,21 @@ returns boolean language sql stable security definer set search_path = public as
                  where espace_id = eid and user_id = auth.uid() and role = 'animateur');
 $$;
 
+-- Vrai s'il existe un autre animateur que l'appelant (le dernier animateur ne peut pas partir).
+create or replace function public.learn_autre_animateur(eid uuid)
+returns boolean language sql stable security definer set search_path = public as $$
+  select exists (select 1 from public.learn_membres
+                 where espace_id = eid and role = 'animateur' and user_id <> auth.uid());
+$$;
+
 -- Évite la récursion RLS dans la policy de learn_solutions.
 create or replace function public.learn_a_rendu(did uuid)
 returns boolean language sql stable security definer set search_path = public as $$
   select exists (select 1 from public.learn_solutions where defi_id = did and user_id = auth.uid());
 $$;
 
-revoke all on function public.learn_est_membre(uuid), public.learn_est_animateur(uuid), public.learn_a_rendu(uuid) from public, anon;
-grant execute on function public.learn_est_membre(uuid), public.learn_est_animateur(uuid), public.learn_a_rendu(uuid) to authenticated;
+revoke all on function public.learn_est_membre(uuid), public.learn_est_animateur(uuid), public.learn_a_rendu(uuid), public.learn_autre_animateur(uuid) from public, anon;
+grant execute on function public.learn_est_membre(uuid), public.learn_est_animateur(uuid), public.learn_a_rendu(uuid), public.learn_autre_animateur(uuid) to authenticated;
 
 -- ───────────── RLS ─────────────
 alter table public.learn_espaces     enable row level security;
@@ -109,14 +116,18 @@ create policy learn_espaces_update on public.learn_espaces for update to authent
   using (public.learn_est_animateur(id)) with check (public.learn_est_animateur(id));
 create policy learn_espaces_delete on public.learn_espaces for delete to authenticated
   using (public.learn_est_animateur(id));
-revoke insert on public.learn_espaces from authenticated;
+revoke insert, update on public.learn_espaces from authenticated;
+grant update (nom, type, agent_leo) on public.learn_espaces to authenticated;
 
 -- Membres : on voit les membres de ses espaces ; on se retire soi-même ; un animateur retire quelqu'un.
 -- Ajout uniquement via learn_creer_espace / learn_rejoindre.
 create policy learn_membres_select on public.learn_membres for select to authenticated
   using (public.learn_est_membre(espace_id));
 create policy learn_membres_delete on public.learn_membres for delete to authenticated
-  using (user_id = auth.uid() or public.learn_est_animateur(espace_id));
+  using (
+    (user_id = auth.uid() and (role <> 'animateur' or public.learn_autre_animateur(espace_id)))
+    or (public.learn_est_animateur(espace_id) and user_id <> auth.uid())
+  );
 revoke insert, update on public.learn_membres from authenticated;
 
 -- Invitations : AUCUN accès direct (le jeton ne doit pas être lisible) ; tout passe par les RPC.
@@ -149,6 +160,9 @@ create policy learn_solutions_insert on public.learn_solutions for insert to aut
               and exists (select 1 from public.learn_defis d where d.id = defi_id and d.espace_id = learn_solutions.espace_id));
 create policy learn_solutions_update on public.learn_solutions for update to authenticated
   using (user_id = auth.uid()) with check (user_id = auth.uid());
+revoke update on public.learn_solutions from authenticated;
+grant update (code, passed) on public.learn_solutions to authenticated;
+-- `passed` est déclaré par le client : jamais présenté comme une note officielle.
 
 -- ───────────── RPC ─────────────
 create or replace function public.learn_creer_espace(p_nom text, p_type text default 'amis')
@@ -198,11 +212,11 @@ begin
 end $$;
 
 -- Message d'un agent dans le salon (après l'appel à learn-tutor) ; limite 100 messages d'agent / espace / jour.
+-- Appelée UNIQUEMENT par learn-tutor (service_role) après vérification d'appartenance avec le JWT de l'élève.
 create or replace function public.learn_message_agent(p_espace uuid, p_agent text, p_texte text)
 returns boolean language plpgsql security definer set search_path = public as $$
 declare n int;
 begin
-  if not public.learn_est_membre(p_espace) then raise exception 'interdit'; end if;
   insert into public.learn_agent_usage (espace_id, day, messages)
   values (p_espace, (now() at time zone 'utc')::date, 1)
   on conflict (espace_id, day) do update set messages = public.learn_agent_usage.messages + 1
@@ -214,10 +228,10 @@ end $$;
 
 revoke all on function public.learn_creer_espace(text,text), public.learn_creer_invitation(uuid,int),
   public.learn_revoquer_invitations(uuid), public.learn_rejoindre(text),
-  public.learn_message_agent(uuid,text,text) from public, anon;
+  public.learn_message_agent(uuid,text,text) from public, anon, authenticated;
 grant execute on function public.learn_creer_espace(text,text), public.learn_creer_invitation(uuid,int),
-  public.learn_revoquer_invitations(uuid), public.learn_rejoindre(text),
-  public.learn_message_agent(uuid,text,text) to authenticated;
+  public.learn_revoquer_invitations(uuid), public.learn_rejoindre(text) to authenticated;
+grant execute on function public.learn_message_agent(uuid,text,text) to service_role;
 
 -- ───────────── Realtime privé : canal learn:espace:<uuid> (broadcast + presence) ─────────────
 -- Policies additives sur realtime.messages ; ne concernent que les sujets 'learn:espace:%'.
