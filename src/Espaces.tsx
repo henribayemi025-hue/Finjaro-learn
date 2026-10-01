@@ -32,11 +32,11 @@ export default function Espaces({ lang, session }: { lang: Lang; session: Sessio
     if (!supabase || !session) return
     const q = new URLSearchParams(window.location.search).get('join')
     let token = q
-    try { if (q) sessionStorage.setItem('join', q); else token = sessionStorage.getItem('join') } catch { /* ignoré */ }
+    try { if (q) sessionStorage.setItem('learn:join', q); else token = sessionStorage.getItem('learn:join') } catch { /* ignoré */ }
     ;(async () => {
       if (token) {
         const { data, error } = await supabase!.rpc('learn_rejoindre', { p_token: token })
-        try { sessionStorage.removeItem('join') } catch { /* ignoré */ }
+        try { sessionStorage.removeItem('learn:join') } catch { /* ignoré */ }
         window.history.replaceState({}, '', window.location.pathname)
         setNote(error ? t.joinError : t.joined)
         await load()
@@ -145,7 +145,7 @@ function Salon({ lang, session, espace, onBack }: { lang: Lang; session: Session
 
   const makeInvite = async () => {
     const { data, error } = await supabase!.rpc('learn_creer_invitation', { p_espace: espace.id })
-    setInvite(error ? '' : `${window.location.origin}/?join=${data}`)
+    setInvite(error ? '' : `${window.location.origin}${import.meta.env.BASE_URL}?join=${data}`)
     if (error) setNote(t.inviteError)
   }
 

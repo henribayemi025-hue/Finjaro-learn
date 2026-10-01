@@ -20,17 +20,17 @@ const pre = 'rounded-lg bg-ink text-cream p-3 text-sm overflow-x-auto whitespace
 
 function getLang(): Lang {
   try {
-    const s = localStorage.getItem('lang')
+    const s = localStorage.getItem('learn:lang')
     if (s === 'fr' || s === 'en') return s
   } catch { /* stockage indisponible */ }
   return navigator.language.startsWith('en') ? 'en' : 'fr'
 }
 
 function load(key: string, fallback: string) {
-  try { return localStorage.getItem(key) ?? fallback } catch { return fallback }
+  try { return localStorage.getItem('learn:' + key) ?? fallback } catch { return fallback }
 }
 function save(key: string, v: string) {
-  try { localStorage.setItem(key, v) } catch { /* ignoré */ }
+  try { localStorage.setItem('learn:' + key, v) } catch { /* ignoré */ }
 }
 
 export default function App() {

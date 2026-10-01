@@ -7,4 +7,4 @@ const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined
 export const supabase = url && key ? createClient(url, key) : null
 
 /** Après connexion, on revient sur Learn (et non sur le Site URL finjaro.net). */
-export const redirectTo = window.location.origin + '/'
+export const redirectTo = window.location.origin + import.meta.env.BASE_URL

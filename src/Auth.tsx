@@ -13,7 +13,7 @@ export function AuthBox({ lang, session }: { lang: Lang; session: Session | null
 
   if (session) {
     return (
-      <button className="text-sm underline" onClick={() => supabase!.auth.signOut()} title={session.user.email ?? ''}>
+      <button className="text-sm underline" onClick={() => supabase!.auth.signOut({ scope: 'local' })} title={session.user.email ?? ''}>
         {t.signOut}
       </button>
     )
