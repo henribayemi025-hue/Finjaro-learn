@@ -15,7 +15,7 @@ Chaque demande de Beau, le jour même. On coche ✅ avec la date, on ne supprime
 | 01/10 | « Oui, fais l'écran de modération. » | Fait : bouton « Modération » visible des seuls modérateurs ; signalements regroupés par contenu, Masquer / Laisser visible, onglet Masqués ; pseudos seulement. Vu avec des données simulées (pas de vrai compte). |
 | 01/10 | « Continue avec l'éditeur partagé. » | Fait : « Coder ensemble » dans le salon d'un espace — un pilote écrit, les copilotes voient en direct, « passer la main », exercice choisi par le pilote, lancement du code chez chacun. Essayé à deux navigateurs (serveur temps réel simulé) à 390 et 1440 px. |
 | 01/10 | « Continue avec les défis de groupe. » | Fait : dans un espace, l'animateur lance un défi (même exercice pour tous) ; chacun résout et rend sa solution ; les solutions des autres se découvrent après avoir rendu la sienne ; « réussi » = déclaré, pas une note. Essayé à 2 navigateurs (serveur simulé avec la règle de visibilité) à 390/1440 px. |
-| 01/10 | « Continue avec le parcours Programmation, même si je ne réponds pas : n'attends pas ma réponse. » | Fait : 24 leçons (4 JavaScript + 20 Python : bases, algorithmes et structures, 2 projets), Python dans le navigateur (Pyodide, gratuit). Chaque leçon vérifiée (départ échoue, solution réussit) ; vue d'ensemble repliable sur téléphone. |
+| 01/10 | « Continue avec le parcours Programmation, même si je ne réponds pas : n'attends pas ma réponse. » | Fait : 34 leçons (4 JavaScript + 30 Python : bases, algorithmes et structures, 2 projets), Python dans le navigateur (Pyodide, gratuit). Chaque leçon vérifiée (départ échoue, solution réussit) ; vue d'ensemble repliable sur téléphone. |
 
 ## 1. Ce qu'on attend de Beau
 
