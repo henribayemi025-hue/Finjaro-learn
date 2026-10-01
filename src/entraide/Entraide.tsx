@@ -4,6 +4,7 @@ import { supabase } from '../supabase'
 import { agents } from '../agents'
 import type { Lang } from '../i18n'
 import { eu } from './i18n'
+import Moderation from './Moderation'
 
 interface Q { id: string; auteur_id: string; titre: string; corps: string; code: string | null; parcours: string; tags: string[]; meilleure_reponse_id: string | null; masquee: boolean; created_at: string }
 interface R { id: string; auteur_id: string | null; agent_id: string | null; corps: string; code: string | null; masquee: boolean; created_at: string }
@@ -23,6 +24,8 @@ export default function Entraide({ lang, session }: { lang: Lang; session: Sessi
   const [open, setOpen] = useState<Q | null>(null)
   const [asking, setAsking] = useState(false)
   const [note, setNote] = useState('')
+  const [isMod, setIsMod] = useState(false)
+  const [modView, setModView] = useState(false)
 
   const loadPseudos = useCallback(async (ids: string[]) => {
     const need = ids.filter((i) => i && !(i in pseudos))
@@ -47,12 +50,21 @@ export default function Entraide({ lang, session }: { lang: Lang; session: Sessi
   }, [session, loadPseudos])
 
   useEffect(() => { loadMe(); loadQuestions() }, [loadMe, loadQuestions])
+  // L'écran de modération n'existe que pour les modérateurs (la base tranche).
+  useEffect(() => {
+    if (!supabase || !session) { setIsMod(false); return }
+    supabase.rpc('learn_est_moderateur').then(({ data }) => setIsMod(data === true))
+  }, [session])
 
   if (!supabase) return null
   if (!session) return <p className="rounded-md bg-brass/15 border border-brass p-3 text-sm">{t.login}</p>
 
   // Pseudo obligatoire pour participer
   if (meLoaded && !me?.pseudo) return <PseudoForm lang={lang} userId={session.user.id} onDone={loadMe} />
+
+  if (modView && isMod) {
+    return <div className="space-y-3"><button className="text-sm underline" onClick={() => setModView(false)}>{t.back}</button><Moderation lang={lang} /></div>
+  }
 
   if (open) {
     return <Detail lang={lang} session={session} q={open} pseudos={pseudos} loadPseudos={loadPseudos}
@@ -63,6 +75,7 @@ export default function Entraide({ lang, session }: { lang: Lang; session: Sessi
     <div className="space-y-4">
       <div className="flex items-center gap-2 flex-wrap">
         <h2 className="text-xl font-bold flex-1">{t.title}</h2>
+        {isMod && <button className={ghost} onClick={() => setModView(true)}>{lang === 'fr' ? 'Modération' : 'Moderation'}</button>}
         <button className={btn} onClick={() => setAsking(!asking)}>{t.ask}</button>
       </div>
       {me && (
