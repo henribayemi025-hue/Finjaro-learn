@@ -13,12 +13,13 @@ export default function Curriculum({ lang, done }: { lang: Lang; done: string[] 
     { k: 'dl', groups: ['dl', 'dl-reseaux'] },
     { k: 'eng', groups: ['ai-rag', 'ai-agents'] },
     { k: 'prompt', groups: ['pe'] },
+    { k: 'maths', groups: ['maths'] },
   ] as const
   return (
     <details className="space-y-2" open={open} onToggle={(e) => setOpen((e.target as HTMLDetailsElement).open)}>
       <summary className="text-xs uppercase tracking-wide text-ink/60 cursor-pointer">{t.curriculum} · {done.length}/{lessons.length}</summary>
       <p className="text-xs text-ink/60">{t.curriculumHelp}</p>
-      <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+      <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
         {order.map(({ k, groups }) => {
           const [name, desc] = t.tracks[k]
           const mine = lessons.filter((l) => (groups as readonly string[]).includes(l.group ?? 'js'))

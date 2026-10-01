@@ -17,6 +17,7 @@ export const ac = {
       dl: ['IA et deep learning', 'Neurone, rétropropagation, convolution, attention : crée tes réseaux.'],
       eng: ['AI engineering', 'RAG, sorties structurées, agents, évaluation, robustesse.'],
       prompt: ['Prompt engineering', 'Structurer, exemples, gabarits, injection, comparer.'],
+      maths: ["Maths pour l'IA", 'Vecteurs, matrices, gradient, probabilités, entropie, softmax.'],
     },
   },
   en: {
@@ -35,6 +36,7 @@ export const ac = {
       dl: ['AI and deep learning', 'Neuron, backpropagation, convolution, attention: build your networks.'],
       eng: ['AI engineering', 'RAG, structured outputs, agents, evaluation, robustness.'],
       prompt: ['Prompt engineering', 'Structure, examples, templates, injection, comparing.'],
+      maths: ['Maths for AI', 'Vectors, matrices, gradient, probability, entropy, softmax.'],
     },
   },
 } as const
