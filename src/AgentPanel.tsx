@@ -3,6 +3,7 @@ import { agents } from './agents'
 import { ui, type Lang } from './i18n'
 import { canListen, canSpeak, listen, speak } from './voice'
 import { askTutor } from './tutor'
+import { leoAvatar, listEntreprises, listLeoAgents, type LeoAgent, type LeoEntreprise } from './leo'
 
 export interface LessonCtx { title: string; code: string; output: string }
 
@@ -15,7 +16,31 @@ export default function AgentPanel({ lang, signedIn, ctx }: { lang: Lang; signed
   const [answer, setAnswer] = useState('')
   const [busy, setBusy] = useState(false)
   const [voiceOn, setVoiceOn] = useState(false)
-  const agent = agents.find((a) => a.id === agentId)!
+  const [entreprises, setEntreprises] = useState<LeoEntreprise[] | null>(null)
+  const [leoAgents, setLeoAgents] = useState<LeoAgent[]>([])
+  const [leoNote, setLeoNote] = useState('')
+  const connectLeo = async () => {
+    const e = await listEntreprises()
+    setEntreprises(e)
+    setLeoNote(e.length ? '' : t.leoNone)
+  }
+  const pickEntreprise = async (id: string) => {
+    const a = await listLeoAgents(id)
+    setLeoAgents(a)
+    if (a[0]) setAgentId('leo:' + a[0].id)
+  }
+  const cards = [
+    ...agents.map((a) => ({
+      key: a.id, name: a.name, role: a.role[lang] + (a.ready ? '' : ` · ${t.soon}`), personality: a.personality[lang],
+      face: a.face, initial: a.name[0], ready: a.ready, custom: undefined as undefined | { name: string; personality: string },
+    })),
+    ...leoAgents.map((a) => ({
+      key: 'leo:' + a.id, name: a.nom, role: a.poste ?? 'Léo', personality: a.personnalite ?? '',
+      face: leoAvatar(a.avatar_url), initial: a.emoji || a.nom[0], ready: true,
+      custom: { name: a.nom, personality: a.personnalite ?? '' },
+    })),
+  ]
+  const agent = cards.find((a) => a.key === agentId) ?? cards[0]
 
   const toggleMic = () => {
     if (listening) { stop.current?.(); return }
@@ -26,7 +51,7 @@ export default function AgentPanel({ lang, signedIn, ctx }: { lang: Lang; signed
   const send = async (q = question) => {
     if (!q.trim() || busy) return
     setBusy(true); setAnswer('')
-    const r = await askTutor({ question: q, code: ctx.code, lesson: ctx.title, output: ctx.output, lang, agentId: agentId })
+    const r = await askTutor({ question: q, code: ctx.code, lesson: ctx.title, output: ctx.output, lang, agentId, custom: agent.custom })
     const text = r.answer ?? (r.error === 'quota' ? t.quota : t.aiError)
     setAnswer(text); setBusy(false)
     if (r.answer && voiceOn) speak(r.answer, lang)
@@ -36,32 +61,47 @@ export default function AgentPanel({ lang, signedIn, ctx }: { lang: Lang; signed
     <section className="rounded-xl border-2 border-brass bg-paper p-3 space-y-3" aria-label={t.agents}>
       <h3 className="font-serif font-bold text-lg">{t.agents}</h3>
       <ul className="grid grid-cols-2 lg:grid-cols-4 gap-2">
-        {agents.map((a) => (
-          <li key={a.id}>
+        {cards.map((a) => (
+          <li key={a.key}>
             <button
               disabled={!a.ready}
-              onClick={() => setAgentId(a.id)}
-              aria-pressed={a.id === agentId}
+              onClick={() => setAgentId(a.key)}
+              aria-pressed={a.key === agent.key}
               className={`w-full h-full text-left rounded-lg border p-2 flex gap-2 items-center ${
-                a.id === agentId ? 'border-terracotta bg-terracotta/10' : 'border-brass/50'
+                a.key === agent.key ? 'border-terracotta bg-terracotta/10' : 'border-brass/50'
               } ${a.ready ? '' : 'opacity-50'}`}
             >
               {a.face ? (
                 <img src={a.face} alt="" className="size-10 rounded-full object-cover shrink-0" />
               ) : (
                 <span className="size-10 rounded-full bg-terracotta text-white grid place-items-center font-serif font-bold shrink-0">
-                  {a.name[0]}
+                  {a.initial}
                 </span>
               )}
               <span className="min-w-0">
                 <span className="block font-semibold text-sm">{a.name}</span>
-                <span className="block text-xs text-ink/70">{a.ready ? a.role[lang] : `${a.role[lang]} · ${t.soon}`}</span>
+                <span className="block text-xs text-ink/70">{a.role}</span>
               </span>
             </button>
           </li>
         ))}
       </ul>
-      <p className="text-sm text-ink/70">{agent.personality[lang]}</p>
+      {signedIn && (
+        <div className="flex flex-wrap items-center gap-2 text-sm">
+          {entreprises === null ? (
+            <button onClick={connectLeo} className="rounded-md border border-ink/30 px-3 py-1.5">{t.leoConnect}</button>
+          ) : entreprises.length > 0 ? (
+            <label className="flex items-center gap-2">{t.leoPick}
+              <select defaultValue="" onChange={(e) => e.target.value && pickEntreprise(e.target.value)} className="rounded-md border border-ink/30 bg-white/60 px-2 py-1">
+                <option value="" disabled>—</option>
+                {entreprises.map((e) => <option key={e.id} value={e.id}>{e.nom}</option>)}
+              </select>
+            </label>
+          ) : null}
+          {leoNote && <span className="text-ink/70">{leoNote}</span>}
+        </div>
+      )}
+      <p className="text-sm text-ink/70">{agent.personality}</p>
       <div className="flex gap-2">
         <input
           value={question}
