@@ -15,7 +15,7 @@ export interface Agent {
 export const agents: Agent[] = [
   {
     id: 'js',
-    face: '/visages/01.jpg',
+    face: import.meta.env.BASE_URL + 'visages/01.jpg',
     name: 'Maya',
     role: { fr: 'Prof de JavaScript', en: 'JavaScript teacher' },
     personality: { fr: 'Patiente, concrète, des exemples simples.', en: 'Patient, concrete, simple examples.' },
@@ -23,7 +23,7 @@ export const agents: Agent[] = [
   },
   {
     id: 'ia',
-    face: '/visages/02.jpg',
+    face: import.meta.env.BASE_URL + 'visages/02.jpg',
     name: 'Idris',
     role: { fr: "Prof d'IA et Python", en: 'AI and Python teacher' },
     personality: { fr: 'Curieux, pose des questions pour te faire réfléchir.', en: 'Curious, asks questions to make you think.' },
@@ -31,7 +31,7 @@ export const agents: Agent[] = [
   },
   {
     id: 'cv',
-    face: '/visages/03.jpg',
+    face: import.meta.env.BASE_URL + 'visages/03.jpg',
     name: 'Camille',
     role: { fr: 'Coach CV', en: 'CV coach' },
     personality: { fr: 'Directe et encourageante.', en: 'Direct and encouraging.' },
@@ -39,7 +39,7 @@ export const agents: Agent[] = [
   },
   {
     id: 'fiches',
-    face: '/visages/04.jpg',
+    face: import.meta.env.BASE_URL + 'visages/04.jpg',
     name: 'Noé',
     role: { fr: 'Rédacteur de fiches', en: 'Study-notes writer' },
     personality: { fr: 'Clair, structuré, va à l’essentiel.', en: 'Clear, structured, to the point.' },
@@ -50,7 +50,7 @@ export const agents: Agent[] = [
 /** Agents sur mesure de l'élève, gardés sur son appareil (pas de table : rien d'envoyé nulle part). */
 export interface CustomAgent { id: string; name: string; role: string; personality: string; face: string }
 
-export const FACES = Array.from({ length: 20 }, (_, i) => `/visages/${String(i + 1).padStart(2, '0')}.jpg`)
+export const FACES = Array.from({ length: 20 }, (_, i) => `${import.meta.env.BASE_URL}visages/${String(i + 1).padStart(2, '0')}.jpg`)
 
 export function loadCustomAgents(): CustomAgent[] {
   try { return JSON.parse(localStorage.getItem('customAgents') ?? '[]') } catch { return [] }
