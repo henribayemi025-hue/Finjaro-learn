@@ -3,6 +3,8 @@ import type { Session } from '@supabase/supabase-js'
 import { supabase } from './supabase'
 import { askTutor } from './tutor'
 import { agents } from './agents'
+import CoCode from './CoCode'
+import type { CoEvent } from './coop'
 import { ui, type Lang } from './i18n'
 
 interface Espace { id: string; nom: string; type: string }
@@ -97,6 +99,8 @@ function Salon({ lang, session, espace, onBack }: { lang: Lang; session: Session
   const [note, setNote] = useState('')
   const chan = useRef<ReturnType<NonNullable<typeof supabase>['channel']> | null>(null)
   const bottom = useRef<HTMLDivElement>(null)
+  const coHandler = useRef<((ev: CoEvent) => void) | null>(null)
+  const [myName, setMyName] = useState('')
 
   const fetchMsgs = useCallback(async () => {
     const { data } = await supabase!.from('learn_messages').select('id,user_id,agent_id,texte,created_at')
@@ -106,9 +110,11 @@ function Salon({ lang, session, espace, onBack }: { lang: Lang; session: Session
 
   useEffect(() => {
     fetchMsgs()
+    supabase!.from('learn_profils').select('pseudo').eq('user_id', session.user.id).maybeSingle().then(({ data }) => setMyName((data?.pseudo as string) || (lang === 'fr' ? 'Membre' : 'Member')))
     // Canal Realtime privé (autorisé aux membres par RLS) : diffusion + présence.
     const ch = supabase!.channel(`learn:espace:${espace.id}`, { config: { private: true, presence: { key: session.user.id } } })
     ch.on('broadcast', { event: 'msg' }, () => fetchMsgs())
+      .on('broadcast', { event: 'co' }, ({ payload }) => coHandler.current?.(payload as CoEvent))
       .on('presence', { event: 'sync' }, () => setOnline(Object.keys(ch.presenceState()).length))
       .subscribe((s) => { if (s === 'SUBSCRIBED') ch.track({ at: Date.now() }) })
     chan.current = ch
@@ -117,6 +123,7 @@ function Salon({ lang, session, espace, onBack }: { lang: Lang; session: Session
 
   useEffect(() => { bottom.current?.scrollIntoView?.({ block: 'end' }) }, [msgs])
 
+  const sendCo = (ev: CoEvent) => { void chan.current?.send({ type: 'broadcast', event: 'co', payload: ev }) }
   const ping = () => chan.current?.send({ type: 'broadcast', event: 'msg', payload: {} })
 
   const send = async () => {
@@ -177,6 +184,7 @@ function Salon({ lang, session, espace, onBack }: { lang: Lang; session: Session
           placeholder={t.saloonPlaceholder} aria-label={t.saloonPlaceholder} className={inp + ' flex-1 min-w-0'} />
         <button className={btn} disabled={!text.trim() || busy} onClick={send}>{t.send}</button>
       </div>
+      {myName && <CoCode lang={lang} me={{ id: session.user.id, name: myName }} send={sendCo} handlerRef={coHandler} />}
     </div>
   )
 }

@@ -13,6 +13,7 @@ Chaque demande de Beau, le jour même. On coche ✅ avec la date, on ne supprime
 | 01/10 | « Pourquoi se limiter à plus tard, on peut faire tout ça maintenant » ; maquette CodeCraft ; « une plateforme communautaire d'entraide entre les membres actifs ». | Fait : éditeur + console côte à côte, « Corriger avec l'IA » avec aperçu des différences (accepter/refuser), sons de réussite/erreur ; conception de l'entraide : docs/ENTRAIDE.md (en relecture). Fiches/CV/newsletter : session « Learn — outils ». |
 | 01/10 | « Pourquoi se limiter à plus tard, on peut faire tout ça maintenant » : fiches de révision, CV et lettres, newsletter, tout de suite (session Learn — outils). | Fiches : appliqué + déployé par Alpha (01/10). CV : code + captures prêts (01/10), en attente de déploiement `learn-cv`. Newsletter : code + captures prêts (01/10), en attente de déploiement `learn-news` ; à tester avec la vraie recherche Google. |
 | 01/10 | « Oui, fais l'écran de modération. » | Fait : bouton « Modération » visible des seuls modérateurs ; signalements regroupés par contenu, Masquer / Laisser visible, onglet Masqués ; pseudos seulement. Vu avec des données simulées (pas de vrai compte). |
+| 01/10 | « Continue avec l'éditeur partagé. » | Fait : « Coder ensemble » dans le salon d'un espace — un pilote écrit, les copilotes voient en direct, « passer la main », exercice choisi par le pilote, lancement du code chez chacun. Essayé à deux navigateurs (serveur temps réel simulé) à 390 et 1440 px. |
 
 ## 1. Ce qu'on attend de Beau
 
