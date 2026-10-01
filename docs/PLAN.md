@@ -6,7 +6,9 @@ Ordre de valeur : tuteur de code → fiches → CV → newsletter.
 | Date | Jalon | Livrable |
 |---|---|---|
 | 01/10 | **J1 — Tuteur de code, v0** ✅ | App React+Vite+Tailwind, fr/en. 4 leçons (afficher, variables, conditions, boucles), exercices JS exécutés dans le navigateur (Worker isolé), correction automatique, indice, solution. Sans base ni IA : aucune dépense. |
-| 02/10 | J2 | Tuteur IA : fonction edge `learn-tutor` (GEMINI_API_KEY) qui explique l'erreur et répond aux questions. Connexion (auth commun) + progression `learn_progress`. **Alpha prévenu avant.** |
+| 01/10 | J2 ✅ (partiel) | Connexion compte commun (redirectTo learn), réponses IA actives, progression `learn_progress`, visages. Reste : connexion à ses agents Léo. |
+| 02/10 | J2 (ancien) | Tuteur IA : fonction edge `learn-tutor` (GEMINI_API_KEY) qui explique l'erreur et répond aux questions. Connexion (auth commun) + progression `learn_progress`. **Alpha prévenu avant.** |
+| 02–03/10 | J2b | **Espaces d'étude** (apprendre/coder à plusieurs) : conception dans docs/ESPACES.md ; SQL envoyé à Alpha avant tout ; puis salon, éditeur partagé, défis. |
 | 03–04/10 | J3–J4 | Parcours « IA pour débutant » (Python dans le navigateur, appeler un modèle, prompts) ; 10+ leçons. |
 | 05–06/10 | J5–J6 | Fiches de révision : dépôt texte/PDF/photo → résumé, fiches, quiz (`learn-fiches`). |
 | 07–08/10 | J7–J8 | CV et lettres de motivation (`learn-cv`), export PDF. |

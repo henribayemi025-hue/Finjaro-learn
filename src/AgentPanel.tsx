@@ -1,23 +1,35 @@
 import { useRef, useState } from 'react'
 import { agents } from './agents'
 import { ui, type Lang } from './i18n'
-import { canListen, listen } from './voice'
+import { canListen, canSpeak, listen, speak } from './voice'
+import { askTutor } from './tutor'
 
-/** Réponses du tuteur IA désactivées tant que la base commune n'est pas validée par Beau. */
-const TUTOR_ENABLED = false
+export interface LessonCtx { title: string; code: string; output: string }
 
-export default function AgentPanel({ lang }: { lang: Lang }) {
+export default function AgentPanel({ lang, signedIn, ctx }: { lang: Lang; signedIn: boolean; ctx: LessonCtx }) {
   const t = ui[lang]
   const [agentId, setAgentId] = useState('js')
   const [question, setQuestion] = useState('')
   const [listening, setListening] = useState(false)
   const stop = useRef<(() => void) | null>(null)
+  const [answer, setAnswer] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [voiceOn, setVoiceOn] = useState(false)
   const agent = agents.find((a) => a.id === agentId)!
 
   const toggleMic = () => {
     if (listening) { stop.current?.(); return }
     setListening(true)
-    stop.current = listen(lang, (txt) => setQuestion(txt), () => setListening(false))
+    stop.current = listen(lang, (txt) => { setQuestion(txt); setVoiceOn(true); send(txt) }, () => setListening(false))
+  }
+
+  const send = async (q = question) => {
+    if (!q.trim() || busy) return
+    setBusy(true); setAnswer('')
+    const r = await askTutor({ question: q, code: ctx.code, lesson: ctx.title, output: ctx.output, lang, agentId: agentId })
+    const text = r.answer ?? (r.error === 'quota' ? t.quota : t.aiError)
+    setAnswer(text); setBusy(false)
+    if (r.answer && voiceOn) speak(r.answer, lang)
   }
 
   return (
@@ -67,11 +79,17 @@ export default function AgentPanel({ lang }: { lang: Lang }) {
             🎤 {listening ? t.listening : t.call}
           </button>
         )}
-        <button disabled={!TUTOR_ENABLED || !question} className="rounded-md bg-terracotta text-white px-3 text-sm disabled:opacity-40">
+        <button onClick={() => { setVoiceOn(false); send() }} disabled={!signedIn || busy || !question} className="rounded-md bg-terracotta text-white px-3 text-sm disabled:opacity-40">
           {t.send}
         </button>
       </div>
-      {!TUTOR_ENABLED && <p className="text-sm rounded-md bg-brass/15 border border-brass p-2">{t.aiSoon}</p>}
+      {!signedIn && <p className="text-sm rounded-md bg-brass/15 border border-brass p-2">{t.needLogin}</p>}
+      {(busy || answer) && (
+        <div className="rounded-md bg-white/60 border border-ink/20 p-3 text-sm whitespace-pre-wrap" aria-live="polite">
+          <strong>{agent.name} : </strong>{busy ? t.thinking : answer}
+          {answer && canSpeak && <button className="ml-2 underline" onClick={() => speak(answer, lang)}>🔊</button>}
+        </div>
+      )}
     </section>
   )
 }

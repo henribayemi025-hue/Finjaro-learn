@@ -1,4 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import type { Session } from '@supabase/supabase-js'
+import { AuthBox } from './Auth'
+import { supabase } from './supabase'
 import { ui, type Lang } from './i18n'
 import { lessons } from './lessons'
 import AgentPanel from './AgentPanel'
@@ -23,6 +26,7 @@ function save(key: string, v: string) {
 
 export default function App() {
   const [lang, setLang] = useState<Lang>(getLang)
+  const [session, setSession] = useState<Session | null>(null)
   const [ai, setAi] = useState(() => load('ai', '0') === '1')
   const [idx, setIdx] = useState(0)
   const [done, setDone] = useState<string[]>(() => JSON.parse(load('done', '[]')))
@@ -31,6 +35,22 @@ export default function App() {
   const [res, setRes] = useState<RunResult | null>(null)
   const [showHint, setShowHint] = useState(false)
   const t = ui[lang]
+
+  useEffect(() => {
+    if (!supabase) return
+    supabase.auth.getSession().then(({ data }) => setSession(data.session))
+    const { data } = supabase.auth.onAuthStateChange((_e, s) => setSession(s))
+    return () => data.subscription.unsubscribe()
+  }, [])
+
+  // Progression : rechargée depuis learn_progress à la connexion (fusion avec le local).
+  useEffect(() => {
+    if (!supabase || !session) return
+    supabase.from('learn_progress').select('lesson_id,status').then(({ data }) => {
+      const remote = (data ?? []).filter((r) => r.status === 'done').map((r) => r.lesson_id as string)
+      setDone((d) => { const m = [...new Set([...d, ...remote])]; save('done', JSON.stringify(m)); return m })
+    })
+  }, [session])
 
   const go = (i: number) => {
     setIdx(i)
@@ -47,17 +67,24 @@ export default function App() {
       setDone(d)
       save('done', JSON.stringify(d))
     }
+    if (r.passed && supabase && session) {
+      await supabase.from('learn_progress').upsert(
+        { user_id: session.user.id, lesson_id: lesson.id, status: 'done', code, updated_at: new Date().toISOString() },
+        { onConflict: 'user_id,lesson_id' },
+      )
+    }
   }
 
   return (
     <div className="min-h-screen">
-      <header className="bg-paper border-b-2 border-brass">
+      <header className="relative bg-paper border-b-2 border-brass">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
           <div>
             <h1 className="font-bold text-2xl">Finjaro Learn</h1>
             <p className="text-sm text-ink/60">{t.tagline}</p>
           </div>
           <div className="flex items-center gap-2">
+          <AuthBox lang={lang} session={session} />
           <div role="group" aria-label={t.aiHelp} title={t.aiHelp} className="flex rounded-md border border-ink/30 overflow-hidden text-sm">
             {[false, true].map((v) => (
               <button
@@ -101,7 +128,7 @@ export default function App() {
 
         <main className="space-y-4 min-w-0">
           <h2 className="text-xl font-bold">{lesson.title[lang]}</h2>
-          {ai && <AgentPanel lang={lang} />}
+          {ai && <AgentPanel lang={lang} signedIn={!!session} ctx={{ title: lesson.title[lang], code, output: res?.output.join('\n') ?? '' }} />}
           <section>
             <h3 className="font-semibold mb-1">{t.explain}</h3>
             <p>{lesson.explain[lang]}</p>
