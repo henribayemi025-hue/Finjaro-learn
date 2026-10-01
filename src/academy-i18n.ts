@@ -1,0 +1,38 @@
+import type { Lang } from './i18n'
+
+export const ac = {
+  fr: {
+    hangUp: 'Raccrocher', callTitle: 'Appel avec', listening: 'Je t’écoute…', thinking: 'Je réfléchis…', speaking: 'Je parle…',
+    idle: 'Appuie sur le micro pour parler.', micOn: 'Parler', micOff: 'Arrêter', you: 'Toi', noSpeech: 'La reconnaissance vocale n’est pas disponible sur ce navigateur. Essaie Chrome ou Safari.',
+    needLogin: 'Connecte-toi pour appeler un agent.',
+    custom: 'Créer mon agent', customTitle: 'Mon agent sur mesure', name: 'Prénom', role: 'Spécialité', personality: 'Personnalité',
+    face: 'Visage', save: 'Créer', cancel: 'Annuler', remove: 'Supprimer cet agent', customHelp: 'Cet agent reste sur ton appareil.',
+    curriculum: 'Parcours', curriculumHelp: 'Un parcours à la fois : le premier est complet avant d’ouvrir le suivant.',
+    inProgress: 'En cours', soon: 'À venir', lessonsCount: 'leçons faites',
+    tracks: {
+      prog: ['Programmation', 'JavaScript puis Python, algorithmique, structures de données.'],
+      data: ['Data science', 'Statistiques, probabilités, pandas, visualisation, ML classique.'],
+      dl: ['IA et deep learning', 'Réseaux de neurones, entraînement, évaluation.'],
+      eng: ['AI engineering', 'Appeler des modèles, RAG, agents, évaluation, mise en production.'],
+      prompt: ['Prompt engineering', 'Méthodes, évaluation, sécurité.'],
+    },
+  },
+  en: {
+    hangUp: 'Hang up', callTitle: 'Call with', listening: 'Listening…', thinking: 'Thinking…', speaking: 'Speaking…',
+    idle: 'Press the mic to talk.', micOn: 'Talk', micOff: 'Stop', you: 'You', noSpeech: 'Speech recognition is not available in this browser. Try Chrome or Safari.',
+    needLogin: 'Sign in to call an agent.',
+    custom: 'Create my agent', customTitle: 'My custom agent', name: 'First name', role: 'Specialty', personality: 'Personality',
+    face: 'Face', save: 'Create', cancel: 'Cancel', remove: 'Delete this agent', customHelp: 'This agent stays on your device.',
+    curriculum: 'Tracks', curriculumHelp: 'One track at a time: the first is completed before the next opens.',
+    inProgress: 'In progress', soon: 'Coming', lessonsCount: 'lessons done',
+    tracks: {
+      prog: ['Programming', 'JavaScript then Python, algorithms, data structures.'],
+      data: ['Data science', 'Statistics, probability, pandas, visualization, classic ML.'],
+      dl: ['AI and deep learning', 'Neural networks, training, evaluation.'],
+      eng: ['AI engineering', 'Calling models, RAG, agents, evaluation, production.'],
+      prompt: ['Prompt engineering', 'Methods, evaluation, safety.'],
+    },
+  },
+} as const
+
+export const acu = (l: Lang) => ac[l]

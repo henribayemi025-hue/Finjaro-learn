@@ -46,3 +46,15 @@ export const agents: Agent[] = [
     ready: false,
   },
 ]
+
+/** Agents sur mesure de l'élève, gardés sur son appareil (pas de table : rien d'envoyé nulle part). */
+export interface CustomAgent { id: string; name: string; role: string; personality: string; face: string }
+
+export const FACES = Array.from({ length: 20 }, (_, i) => `/visages/${String(i + 1).padStart(2, '0')}.jpg`)
+
+export function loadCustomAgents(): CustomAgent[] {
+  try { return JSON.parse(localStorage.getItem('customAgents') ?? '[]') } catch { return [] }
+}
+export function saveCustomAgents(a: CustomAgent[]) {
+  try { localStorage.setItem('customAgents', JSON.stringify(a.slice(0, 10))) } catch { /* ignoré */ }
+}

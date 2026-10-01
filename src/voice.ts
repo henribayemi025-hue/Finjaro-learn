@@ -23,3 +23,16 @@ export function speak(text: string, lang: string) {
   u.lang = lang === 'en' ? 'en-US' : 'fr-FR'
   speechSynthesis.speak(u)
 }
+
+/** Lit le texte puis appelle onEnd (fin de lecture, erreur ou interruption). */
+export function speakThen(text: string, lang: string, onEnd: () => void) {
+  if (!canSpeak) { onEnd(); return }
+  speechSynthesis.cancel()
+  const u = new SpeechSynthesisUtterance(text)
+  u.lang = lang === 'en' ? 'en-US' : 'fr-FR'
+  u.onend = onEnd
+  u.onerror = onEnd
+  speechSynthesis.speak(u)
+}
+
+export const stopSpeaking = () => { if (canSpeak) speechSynthesis.cancel() }

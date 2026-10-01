@@ -1,7 +1,11 @@
-import { useRef, useState } from 'react'
-import { agents } from './agents'
+import { useState } from 'react'
+import { agents, loadCustomAgents, saveCustomAgents, type CustomAgent } from './agents'
+import AgentFace from './AgentFace'
+import VoiceModal from './VoiceModal'
+import CustomAgentModal from './CustomAgentModal'
+import { acu } from './academy-i18n'
 import { ui, type Lang } from './i18n'
-import { canListen, canSpeak, listen, speak } from './voice'
+import { canSpeak, speak } from './voice'
 import { askTutor } from './tutor'
 import { leoAvatar, listEntreprises, listLeoAgents, type LeoAgent, type LeoEntreprise } from './leo'
 
@@ -11,11 +15,12 @@ export default function AgentPanel({ lang, signedIn, ctx }: { lang: Lang; signed
   const t = ui[lang]
   const [agentId, setAgentId] = useState('js')
   const [question, setQuestion] = useState('')
-  const [listening, setListening] = useState(false)
-  const stop = useRef<(() => void) | null>(null)
+  const a = acu(lang)
+  const [calling, setCalling] = useState(false)
+  const [creating, setCreating] = useState(false)
+  const [customs, setCustoms] = useState<CustomAgent[]>(loadCustomAgents)
   const [answer, setAnswer] = useState('')
   const [busy, setBusy] = useState(false)
-  const [voiceOn, setVoiceOn] = useState(false)
   const [entreprises, setEntreprises] = useState<LeoEntreprise[] | null>(null)
   const [leoAgents, setLeoAgents] = useState<LeoAgent[]>([])
   const [leoNote, setLeoNote] = useState('')
@@ -34,6 +39,10 @@ export default function AgentPanel({ lang, signedIn, ctx }: { lang: Lang; signed
       key: a.id, name: a.name, role: a.role[lang] + (a.ready ? '' : ` · ${t.soon}`), personality: a.personality[lang],
       face: a.face, initial: a.name[0], ready: a.ready, custom: undefined as undefined | { name: string; personality: string },
     })),
+    ...customs.map((c) => ({
+      key: 'custom:' + c.id, name: c.name, role: c.role, personality: c.personality,
+      face: c.face, initial: c.name[0], ready: true, custom: { name: c.name, personality: c.personality },
+    })),
     ...leoAgents.map((a) => ({
       key: 'leo:' + a.id, name: a.nom, role: a.poste ?? 'Léo', personality: a.personnalite ?? '',
       face: leoAvatar(a.avatar_url), initial: a.emoji || a.nom[0], ready: true,
@@ -42,19 +51,12 @@ export default function AgentPanel({ lang, signedIn, ctx }: { lang: Lang; signed
   ]
   const agent = cards.find((a) => a.key === agentId) ?? cards[0]
 
-  const toggleMic = () => {
-    if (listening) { stop.current?.(); return }
-    setListening(true)
-    stop.current = listen(lang, (txt) => { setQuestion(txt); setVoiceOn(true); send(txt) }, () => setListening(false))
-  }
-
   const send = async (q = question) => {
     if (!q.trim() || busy) return
     setBusy(true); setAnswer('')
     const r = await askTutor({ question: q, code: ctx.code, lesson: ctx.title, output: ctx.output, lang, agentId, custom: agent.custom })
     const text = r.answer ?? (r.error === 'quota' ? t.quota : t.aiError)
     setAnswer(text); setBusy(false)
-    if (r.answer && voiceOn) speak(r.answer, lang)
   }
 
   return (
@@ -71,13 +73,7 @@ export default function AgentPanel({ lang, signedIn, ctx }: { lang: Lang; signed
                 a.key === agent.key ? 'border-terracotta bg-terracotta/10' : 'border-brass/50'
               } ${a.ready ? '' : 'opacity-50'}`}
             >
-              {a.face ? (
-                <img src={a.face} alt="" className="size-10 rounded-full object-cover shrink-0" />
-              ) : (
-                <span className="size-10 rounded-full bg-terracotta text-white grid place-items-center font-serif font-bold shrink-0">
-                  {a.initial}
-                </span>
-              )}
+              <span className="shrink-0"><AgentFace src={a.face} initial={a.initial} size="sm" speaking={false} /></span>
               <span className="min-w-0">
                 <span className="block font-semibold text-sm">{a.name}</span>
                 <span className="block text-xs text-ink/70">{a.role}</span>
@@ -101,6 +97,12 @@ export default function AgentPanel({ lang, signedIn, ctx }: { lang: Lang; signed
           {leoNote && <span className="text-ink/70">{leoNote}</span>}
         </div>
       )}
+      <div className="flex flex-wrap items-center gap-2 text-sm">
+        <button onClick={() => setCreating(true)} className="rounded-md border border-ink/30 px-3 py-1.5">+ {a.custom}</button>
+        {agent.key.startsWith('custom:') && (
+          <button className="underline text-xs" onClick={() => { const next = customs.filter((c) => 'custom:' + c.id !== agent.key); setCustoms(next); saveCustomAgents(next); setAgentId('js') }}>{a.remove}</button>
+        )}
+      </div>
       <p className="text-sm text-ink/70">{agent.personality}</p>
       <div className="flex gap-2">
         <input
@@ -110,16 +112,10 @@ export default function AgentPanel({ lang, signedIn, ctx }: { lang: Lang; signed
           className="flex-1 min-w-0 rounded-lg border border-ink/30 bg-white/60 px-3 py-2 text-sm"
           aria-label={t.ask}
         />
-        {canListen && (
-          <button
-            onClick={toggleMic}
-            aria-pressed={listening}
-            className={`rounded-md px-3 text-sm border ${listening ? 'bg-terracotta text-white border-terracotta' : 'border-ink/30'}`}
-          >
-            🎤 {listening ? t.listening : t.call}
-          </button>
-        )}
-        <button onClick={() => { setVoiceOn(false); send() }} disabled={!signedIn || busy || !question} className="rounded-md bg-terracotta text-white px-3 text-sm disabled:opacity-40">
+        <button onClick={() => setCalling(true)} disabled={!signedIn} className="rounded-md px-3 text-sm border border-ink/30 disabled:opacity-40">
+          🎤 {t.call}
+        </button>
+        <button onClick={() => send()} disabled={!signedIn || busy || !question} className="rounded-md bg-terracotta text-white px-3 text-sm disabled:opacity-40">
           {t.send}
         </button>
       </div>
@@ -129,6 +125,14 @@ export default function AgentPanel({ lang, signedIn, ctx }: { lang: Lang; signed
           <strong>{agent.name} : </strong>{busy ? t.thinking : answer}
           {answer && canSpeak && <button className="ml-2 underline" onClick={() => speak(answer, lang)}>🔊</button>}
         </div>
+      )}
+      {calling && (
+        <VoiceModal lang={lang} agent={{ key: agent.key.includes(':') ? 'js' : agent.key, name: agent.name, face: agent.face, initial: agent.initial, custom: agent.custom }}
+          lesson={ctx.title} code={ctx.code} onClose={() => setCalling(false)} />
+      )}
+      {creating && (
+        <CustomAgentModal lang={lang} onClose={() => setCreating(false)}
+          onSave={(c) => { const next = [...customs, c]; setCustoms(next); saveCustomAgents(next); setAgentId('custom:' + c.id); setCreating(false) }} />
       )}
     </section>
   )
