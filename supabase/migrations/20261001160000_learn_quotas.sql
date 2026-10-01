@@ -25,10 +25,15 @@ declare
   uid uuid := auth.uid();
   n   int;
   max_calls int;
+  total int;
 begin
   if uid is null then return false; end if;
-  max_calls := case p_kind when 'exos' then 20 when 'voix' then 40 when 'entretien' then 10 else 0 end;
+  max_calls := case p_kind when 'exos' then 20 when 'voix' then 0  -- 40 seulement après le oui explicite de Beau when 'entretien' then 10 else 0 end;
   if max_calls = 0 then return false; end if;
+  -- Plafond GLOBAL du jour pour tout Learn (texte) : protège le crédit d'un emballement.
+  select coalesce(sum(calls), 0) into total from public.learn_quotas
+   where day = (now() at time zone 'utc')::date and kind in ('exos', 'entretien');
+  if p_kind in ('exos', 'entretien') and total >= 2000 then return false; end if;
   insert into public.learn_quotas (user_id, day, kind, calls)
   values (uid, (now() at time zone 'utc')::date, p_kind, 1)
   on conflict (user_id, day, kind)
