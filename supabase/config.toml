@@ -9,3 +9,8 @@ verify_jwt = true
 
 [functions.learn-news]
 verify_jwt = true
+[functions.learn-exos]
+verify_jwt = true
+
+[functions.learn-voix]
+verify_jwt = true

@@ -5,7 +5,7 @@ import VoiceModal from './VoiceModal'
 import CustomAgentModal from './CustomAgentModal'
 import { acu } from './academy-i18n'
 import { ui, type Lang } from './i18n'
-import { canSpeak, speak } from './voice'
+import { canSpeak, speakSmart, voixIAActive, setVoixIA } from './voice'
 import { askTutor } from './tutor'
 import { leoAvatar, listEntreprises, listLeoAgents, type LeoAgent, type LeoEntreprise } from './leo'
 
@@ -18,6 +18,7 @@ export default function AgentPanel({ lang, signedIn, ctx }: { lang: Lang; signed
   const a = acu(lang)
   const [calling, setCalling] = useState(false)
   const [socratique, setSocratique] = useState(() => { try { return localStorage.getItem('learn:socratique') === '1' } catch { return false } })
+  const [voixIA, setVoixIAState] = useState(voixIAActive)
   const [creating, setCreating] = useState(false)
   const [customs, setCustoms] = useState<CustomAgent[]>(loadCustomAgents)
   const [answer, setAnswer] = useState('')
@@ -109,6 +110,11 @@ export default function AgentPanel({ lang, signedIn, ctx }: { lang: Lang; signed
           onChange={(e) => { setSocratique(e.target.checked); try { localStorage.setItem('learn:socratique', e.target.checked ? '1' : '0') } catch { /* ignoré */ } }} />
         <span><strong>{a.socratic}</strong> — {a.socraticHelp}</span>
       </label>
+      <label className="flex items-center gap-2 text-sm cursor-pointer">
+        <input type="checkbox" checked={voixIA} className="accent-[var(--color-terracotta)] size-4"
+          onChange={(e) => { setVoixIAState(e.target.checked); setVoixIA(e.target.checked) }} />
+        <span><strong>{a.voiceAI}</strong> — {a.voiceAIHelp}</span>
+      </label>
       <p className="text-sm text-ink/70">{agent.personality}</p>
       <div className="flex gap-2">
         <input
@@ -129,7 +135,7 @@ export default function AgentPanel({ lang, signedIn, ctx }: { lang: Lang; signed
       {(busy || answer) && (
         <div className="rounded-md bg-white/60 border border-ink/20 p-3 text-sm whitespace-pre-wrap" aria-live="polite">
           <strong>{agent.name} : </strong>{busy ? t.thinking : answer}
-          {answer && canSpeak && <button className="ml-2 underline" onClick={() => speak(answer, lang)}>🔊</button>}
+          {answer && canSpeak && <button className="ml-2 underline" onClick={() => speakSmart(answer, lang, () => {}, agent.key === 'ia' ? 'Puck' : 'Kore')}>🔊</button>}
         </div>
       )}
       {calling && (

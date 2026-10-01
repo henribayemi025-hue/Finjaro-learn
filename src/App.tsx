@@ -20,6 +20,10 @@ import StepDebugger from './StepDebugger'
 import Predict from './Predict'
 import Burst from './Burst'
 import Access from './Access'
+import ExoGenereModal from './ExoGenere'
+import { genereExo, type ExoGenere } from './exos'
+import { agents } from './agents'
+import AgentFace from './AgentFace'
 import { runLesson, type RunResult } from './runner'
 
 const pre = 'rounded-lg bg-code text-code-fg p-3 text-sm overflow-x-auto whitespace-pre-wrap font-mono'
@@ -70,6 +74,11 @@ export default function App() {
   const [res, setRes] = useState<RunResult | null>(null)
   const [sound, setSound] = useState(() => load('sound', '1') === '1')
   const [fix, setFix] = useState<FixProposal | null>(null)
+  const [fails, setFails] = useState(0)
+  const [stuckHint, setStuckHint] = useState(false)
+  const [exo, setExo] = useState<ExoGenere | null>(null)
+  const [exoBusy, setExoBusy] = useState(false)
+  const [exoNote, setExoNote] = useState('')
   const [burst, setBurst] = useState(0)
   const [golf, setGolf] = useState<{ n: number; best: number } | null>(null)
   const [debug, setDebug] = useState(false)
@@ -98,6 +107,9 @@ export default function App() {
     setIdx(i)
     setCode(load('code:' + lessons[i].id, lessons[i].starter))
     setRes(null)
+    setFails(0)
+    setStuckHint(false)
+    setExoNote('')
     setGolf(null)
     setDebug(false)
     setShowHint(false)
@@ -123,6 +135,7 @@ export default function App() {
     const r = await runLesson(lesson, code)
     setRes(r)
     if (sound && r.passed !== null) (r.passed ? playSuccess : playError)()
+    if (r.passed === false) setFails((f) => f + 1)
     if (r.passed) {
       setBurst((b) => b + 1)
       if (lesson.lang === 'py') {
@@ -135,6 +148,17 @@ export default function App() {
       }
       await markPassed(code)
     }
+  }
+
+  // Après 3 échecs, l'agent propose de lui-même un indice, puis un exercice sur mesure (si connecté et IA activée).
+  const stuck = fails >= 3 && !res?.passed
+  const helper = agents.find((a) => a.id === (lesson.lang === 'py' && lesson.group !== 'py-bases' && lesson.group !== 'py-algo' && lesson.group !== 'py-projets' ? 'ia' : 'js')) ?? agents[0]
+  const makeExo = async () => {
+    setExoBusy(true); setExoNote('')
+    const r = await genereExo({ lecon: lesson.title[lang] + ' — ' + lesson.task[lang], sujet: lesson.title[lang], erreurs: res?.error ?? res?.output.join(' ') ?? '', lang, packages: lesson.packages })
+    setExoBusy(false)
+    if (r.exo) setExo(r.exo)
+    else setExoNote(r.error === 'quota' ? t.quota : r.error === 'invalide' ? t.exoInvalid : t.aiError)
   }
 
   const proposeFix = async () => {
@@ -296,6 +320,22 @@ export default function App() {
                 {sound ? '🔊' : '🔇'}
               </button>
             </div>
+            {stuck && !lesson.predict && (
+              <div className="rounded-xl border-2 border-terracotta/60 bg-terracotta/10 p-3 flex gap-3 items-start" role="status">
+                <AgentFace src={helper.face} initial={helper.name[0]} size="sm" />
+                <div className="space-y-2 min-w-0">
+                  <p className="text-sm"><strong>{helper.name} :</strong> {t.stuck}</p>
+                  <div className="flex gap-2 flex-wrap">
+                    <button className="rounded-md border border-ink/30 px-3 py-1.5 text-sm" onClick={() => { setShowHint(true); setStuckHint(true) }}>{t.hint}</button>
+                    {ai && session && lesson.lang === 'py' && (
+                      <button disabled={exoBusy} className="rounded-md bg-terracotta text-white px-3 py-1.5 text-sm disabled:opacity-40" onClick={makeExo}>{exoBusy ? t.thinking : '✨ ' + t.exoAsk}</button>
+                    )}
+                  </div>
+                  {exoNote && <p className="text-sm text-terracotta-dark">{exoNote}</p>}
+                  {stuckHint && <p className="sr-only">hint</p>}
+                </div>
+              </div>
+            )}
             {fixNote && <p className="text-sm text-terracotta-dark" role="status">{fixNote}</p>}
             {showHint && <p className="rounded-md bg-brass/15 border border-brass p-3 text-sm">💡 {lesson.hint[lang]}</p>}
             </div>
@@ -319,6 +359,7 @@ export default function App() {
             </div>
             </div>
           </section>}
+          {exo && <ExoGenereModal lang={lang} exo={exo} packages={lesson.packages} onClose={() => setExo(null)} />}
           {debug && lesson.lang === 'py' && <StepDebugger lang={lang} code={code} packages={lesson.packages} onClose={() => setDebug(false)} />}
           {fix && (
             <DiffModal lang={lang} original={code} fix={fix} onClose={() => setFix(null)}

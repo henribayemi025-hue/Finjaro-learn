@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import AgentFace from './AgentFace'
 import { askTutor } from './tutor'
-import { canListen, listen, speakThen, stopSpeaking } from './voice'
+import { canListen, listen, speakSmart, stopSpeaking } from './voice'
 import { acu } from './academy-i18n'
 import { ui, type Lang } from './i18n'
 
@@ -32,7 +32,7 @@ export default function VoiceModal({ lang, agent, lesson, code, onClose }: {
       if (!alive.current) return
       if (!r.answer) { setErr(r.error === 'quota' ? u.quota : u.aiError); setState('idle'); return }
       setReply(r.answer); setState('speaking')
-      speakThen(r.answer, lang, () => { if (alive.current) turn() })
+      speakSmart(r.answer, lang, () => { if (alive.current) turn() }, agent.key === 'ia' ? 'Puck' : 'Kore')
     })
   }, [lang, agent, lesson, code, u.quota, u.aiError])
 

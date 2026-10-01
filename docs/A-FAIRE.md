@@ -21,11 +21,13 @@ Chaque demande de Beau, le jour même. On coche ✅ avec la date, on ne supprime
 | 01/10 | (suite) graphiques et projets | Fait : 83 leçons au total ; graphiques tracés dans la page (courbe, nuage, barres) ; projet rapport de ventes (Data science) et assistant RAG (AI engineering). Tout vérifié dans le navigateur. |
 | 01/10 | **Grande vision** : 100 idées (cours d'excellence, tuteurs IA proactifs, gamification, social, pont emploi, outils, formats d'avenir, ruptures) + une 2e liste (tuteurs, pont Finjaro, parcours enrichis, multijoueur, gamification, futur). | Triées une à une dans `docs/IDEES.md` (fait / prévu / besoin de la base / coûte / dépend d'Alpha / reformulé). Premier lot en cours : débogueur temporel, lecture de code, visualiseur de réseau, code golf, mode socratique, arbre de compétences, succès, bilan, streak, accessibilité. |
 | 01/10 | (suite de la grande vision, lot 1) | Fait : onglet **Progression** (arbre de compétences, bilan, série, 13 succès, titre), **débogueur temporel** Python, **13 exercices de lecture de code**, **visualiseur de réseau de neurones** (+ leçon), **code golf** (meilleur score sur l'appareil), **mode socratique**, particules de réussite, **accessibilité** (police lisible, contraste, grand texte). Vérifié 390/1440. |
+| 01/10 | « Demande à Alpha, il a déjà les clés Gemini dans Supabase, tu connectes juste. » | Fait côté code (rien appliqué) : fonctions `learn-exos` (exercice sur mesure, vérifié dans le navigateur avant affichage) et `learn-voix` (voix Gemini, **éteinte** tant que tu n'as pas dit oui), quotas par personne et par jour (`learn_quotas`), bouton « un exercice pour m'entraîner » et indice proposé par l'agent après 3 échecs. Alpha relit le SQL puis déploie ; il confirme aussi les modèles autorisés sur la clé. |
 
 ## 1. Ce qu'on attend de Beau
 
 | Date | Quoi |
 |---|---|
+| 01/10 | Dire « oui, active la voix IA » (coût éventuel sur la clé Gemini) pour que `learn-voix` soit ouverte (Alpha met LEARN_VOIX_ENABLED=1). |
 | 01/10 | Décisions à prendre (voir `docs/IDEES.md`) : (1) voix générées payantes ? (2) images/vidéos générées payantes ? (3) clés API offertes aux meilleurs élèves ? (4) défis sponsorisés / tableau de bord recruteur : partenaires et prix ? (5) liens avec la place de marché (portfolio public, missions freelance) : à voir avec Alpha. |
 | 01/10 | Dans Cloudflare : définir `VITE_SUPABASE_URL` et `VITE_SUPABASE_ANON_KEY` (clé publique, voir .env.example) pour que la connexion marche en ligne. |
 | — | Brancher le dépôt sur Cloudflare (adresse learn.finjaro.net) quand une première version tourne : Learn dira quand. |
