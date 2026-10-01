@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import Espaces from './Espaces'
 import Curriculum from './Curriculum'
+import Progress, { recordDay } from './Progress'
 import Outils from './outils/Outils'
 import Entraide from './entraide/Entraide'
 import { eu as entraideUi } from './entraide/i18n'
@@ -15,6 +16,7 @@ import DiffModal from './DiffModal'
 import { askFix, type FixProposal } from './tutor'
 import { playError, playSuccess } from './sounds'
 import Chart from './Chart'
+import StepDebugger from './StepDebugger'
 import { runLesson, type RunResult } from './runner'
 
 const pre = 'rounded-lg bg-code text-code-fg p-3 text-sm overflow-x-auto whitespace-pre-wrap font-mono'
@@ -53,7 +55,7 @@ function save(key: string, v: string) {
 export default function App() {
   const [lang, setLang] = useState<Lang>(getLang)
   const [session, setSession] = useState<Session | null>(null)
-  const [view, setView] = useState<'lecons' | 'espaces' | 'outils' | 'entraide'>(() => (new URLSearchParams(window.location.search).has('join') ? 'espaces' : 'lecons'))
+  const [view, setView] = useState<'lecons' | 'progression' | 'espaces' | 'outils' | 'entraide'>(() => (new URLSearchParams(window.location.search).has('join') ? 'espaces' : 'lecons'))
   const [theme, setTheme] = useState<'finjaro' | 'noir'>(() => (load('theme', 'finjaro') === 'noir' ? 'noir' : 'finjaro'))
   useEffect(() => { document.documentElement.dataset.theme = theme }, [theme])
   const [ai, setAi] = useState(() => load('ai', '0') === '1')
@@ -64,6 +66,7 @@ export default function App() {
   const [res, setRes] = useState<RunResult | null>(null)
   const [sound, setSound] = useState(() => load('sound', '1') === '1')
   const [fix, setFix] = useState<FixProposal | null>(null)
+  const [debug, setDebug] = useState(false)
   const [fixBusy, setFixBusy] = useState(false)
   const [fixNote, setFixNote] = useState('')
   const [showHint, setShowHint] = useState(false)
@@ -89,6 +92,7 @@ export default function App() {
     setIdx(i)
     setCode(load('code:' + lessons[i].id, lessons[i].starter))
     setRes(null)
+    setDebug(false)
     setShowHint(false)
   }
 
@@ -96,6 +100,7 @@ export default function App() {
     const r = await runLesson(lesson, code)
     setRes(r)
     if (sound && r.passed !== null) (r.passed ? playSuccess : playError)()
+    if (r.passed) recordDay()
     if (r.passed && !done.includes(lesson.id)) {
       const d = [...done, lesson.id]
       setDone(d)
@@ -159,15 +164,16 @@ export default function App() {
         </div>
       </header>
 
-      <div className="max-w-5xl mx-auto px-4 pt-3 flex gap-2" role="tablist">
-        {(['lecons', 'espaces', 'outils', 'entraide'] as const).map((v) => (
+      <div className="max-w-5xl mx-auto px-4 pt-3 flex gap-2 overflow-x-auto" role="tablist">
+        {(['lecons', 'progression', 'espaces', 'outils', 'entraide'] as const).map((v) => (
           <button key={v} role="tab" aria-selected={view === v} onClick={() => setView(v)}
-            className={`px-4 py-1.5 rounded-md text-sm border ${view === v ? 'bg-ink text-cream border-ink' : 'border-ink/30'}`}>
-            {v === 'lecons' ? t.lessonsTab : v === 'espaces' ? t.spaces : v === 'entraide' ? entraideUi(lang).tab : outilsUi[lang].tab}
+            className={`shrink-0 px-4 py-1.5 rounded-md text-sm border ${view === v ? 'bg-ink text-cream border-ink' : 'border-ink/30'}`}>
+            {v === 'lecons' ? t.lessonsTab : v === 'progression' ? t.progressTab : v === 'espaces' ? t.spaces : v === 'entraide' ? entraideUi(lang).tab : outilsUi[lang].tab}
           </button>
         ))}
       </div>
       {view === 'outils' && <div className="max-w-5xl mx-auto px-4 py-4"><Outils lang={lang} session={session} /></div>}
+      {view === 'progression' && <div className="max-w-5xl mx-auto px-4 py-4"><Progress lang={lang} done={done} onOpen={(id) => { go(lessons.findIndex((l) => l.id === id)); setView('lecons') }} /></div>}
       {view === 'entraide' && <div className="max-w-5xl mx-auto px-4 py-4"><Entraide lang={lang} session={session} /></div>}
       {view === 'espaces' && <div className="max-w-5xl mx-auto px-4 py-4"><Espaces lang={lang} session={session} /></div>}
       {view === 'lecons' && <div className="max-w-5xl mx-auto px-4 pt-3"><Curriculum lang={lang} done={done} /></div>}
@@ -246,6 +252,9 @@ export default function App() {
               >
                 {t.solution}
               </button>
+              {lesson.lang === 'py' && (
+                <button onClick={() => setDebug(!debug)} aria-pressed={debug} className="border border-ink/30 rounded-md px-4 py-2 text-sm">🕰 {t.debug}</button>
+              )}
               {ai && session && (
                 <button onClick={proposeFix} disabled={fixBusy || !code.trim()} className="border border-terracotta text-terracotta-dark rounded-md px-4 py-2 text-sm disabled:opacity-40">
                   {fixBusy ? t.thinking : '✨ ' + t.aiFix}
@@ -277,6 +286,7 @@ export default function App() {
             </div>
             </div>
           </section>
+          {debug && lesson.lang === 'py' && <StepDebugger lang={lang} code={code} packages={lesson.packages} onClose={() => setDebug(false)} />}
           {fix && (
             <DiffModal lang={lang} original={code} fix={fix} onClose={() => setFix(null)}
               onAccept={() => { setCode(fix.fixed_code); save('code:' + lesson.id, fix.fixed_code); setFix(null); setRes(null) }} />

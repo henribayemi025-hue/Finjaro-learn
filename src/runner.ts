@@ -64,8 +64,47 @@ const PY_HELPERS = [
   '    __figs.append({"type": "barres", "titre": titre, "x": [str(e) for e in etiquettes], "y": _liste(valeurs)})',
 ].join('\n')
 
+// Débogueur temporel : on enregistre, ligne après ligne, les variables simples du code de l'élève.
+const PY_TRACE = [
+  'import sys, json',
+  '__steps = []',
+  'def __fmt(v):',
+  '    t = type(v).__name__',
+  '    if t in ("int", "float", "str", "bool", "NoneType", "list", "tuple", "dict", "set", "ndarray"):',
+  '        r = repr(v)',
+  '        return r if len(r) <= 80 else r[:77] + "..."',
+  '    return None',
+  'def __tracer(frame, event, arg):',
+  '    if frame.f_code.co_filename != "<eleve>":',
+  '        return None',
+  '    if event in ("line", "return"):',
+  '        loc = {}',
+  '        for k, v in frame.f_locals.items():',
+  '            if k.startswith("_"):',
+  '                continue',
+  '            f = __fmt(v)',
+  '            if f is not None:',
+  '                loc[k] = f',
+  '        __steps.append({"ligne": frame.f_lineno, "evt": event, "fn": frame.f_code.co_name, "vars": loc})',
+  '        if len(__steps) > 600:',
+  '            raise RuntimeError("Trop d\'étapes (600 max) : réduis la taille de l\'exemple.")',
+  '    return __tracer',
+  '__erreur = None',
+  'try:',
+  '    __c = compile(__code, "<eleve>", "exec")',
+  '    sys.settrace(__tracer)',
+  '    try:',
+  '        exec(__c, globals())',
+  '    finally:',
+  '        sys.settrace(None)',
+  'except BaseException as __e:',
+  '    __erreur = type(__e).__name__ + ": " + str(__e)',
+  '__resultat = json.dumps({"steps": __steps, "erreur": __erreur})',
+].join('\n')
+
 const pyWorkerSrc = `
 const HELPERS = ${JSON.stringify(PY_HELPERS)}
+const TRACE = ${JSON.stringify(PY_TRACE)}
 const figures = (py, ns, from, to) => { try { return JSON.parse(py.runPython('import json\\njson.dumps(__figs[' + (from || 0) + ':' + (to === undefined ? '' : to) + '])', { globals: ns })) } catch (e) { return [] } }
 const nfigs = (py, ns) => { try { return py.runPython('len(__figs)', { globals: ns }) } catch (e) { return 0 } }
 let py = null
@@ -76,6 +115,22 @@ onmessage = async (e) => {
       importScripts('${PYODIDE}pyodide.js')
       py = await loadPyodide({ indexURL: '${PYODIDE}' })
       postMessage({ type: 'ready' })
+      return
+    }
+    if (d.type === 'trace') {
+      const out = []
+      py.setStdout({ batched: (s) => out.push(s) })
+      py.setStderr({ batched: (s) => out.push(s) })
+      const ns = py.globals.get('dict')()
+      try {
+        ns.set('__code', d.code)
+        py.runPython(HELPERS, { globals: ns })
+        py.runPython(TRACE, { globals: ns })
+        const r = JSON.parse(ns.get('__resultat'))
+        postMessage({ type: 'traced', output: out, steps: r.steps, error: r.erreur })
+      } catch (err) {
+        postMessage({ type: 'traced', output: out, steps: [], error: String(err && err.message ? err.message : err).trim().split('\\n').slice(-2).join(' ') })
+      } finally { ns.destroy() }
       return
     }
     if (d.type === 'load') { await py.loadPackage(d.packages); postMessage({ type: 'loaded' }); return }
@@ -158,4 +213,19 @@ export async function runPython(code: string, checks: string[], packages: string
 /** Lance le code d'une leçon dans le bon langage. */
 export function runLesson(lesson: { lang?: 'js' | 'py'; checks: string[]; packages?: string[] }, code: string): Promise<RunResult> {
   return lesson.lang === 'py' ? runPython(code, lesson.checks, lesson.packages) : runCode(code, lesson.checks)
+}
+
+export interface TraceStep { ligne: number; evt: string; fn: string; vars: Record<string, string> }
+export interface TraceResult { steps: TraceStep[]; output: string[]; error: string | null }
+
+/** Exécute le code Python en enregistrant chaque ligne (max 600 étapes) pour le rejouer pas à pas. */
+export async function tracePython(code: string, packages: string[] = []): Promise<TraceResult> {
+  try { await startPython(); await ensurePackages(packages) } catch (e) { return { steps: [], output: [], error: String((e as Error).message) } }
+  const w = pyWorker!
+  return new Promise<TraceResult>((resolve) => {
+    const t = setTimeout(() => { reset(); resolve({ steps: [], output: [], error: 'Timeout (boucle infinie ?)' }) }, 20000)
+    w.onmessage = (e) => { if (e.data.type === 'traced') { clearTimeout(t); resolve({ steps: e.data.steps, output: e.data.output, error: e.data.error }) } }
+    w.onerror = (e) => { clearTimeout(t); reset(); resolve({ steps: [], output: [], error: e.message }) }
+    w.postMessage({ type: 'trace', code })
+  })
 }
