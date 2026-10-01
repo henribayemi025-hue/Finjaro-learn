@@ -78,6 +78,8 @@ Finjaro Accounting, la Console et Léo. **Un seul `auth.users`.**
   téléphone, dicte souvent à la voix (lire l'intention, pas la lettre).
   **Trois lignes, pas trois écrans** : le résultat d'abord, le détail dans le
   dépôt.
+- **Learn** : toi, la session qui construit Finjaro Learn (session
+  `session_01KUV2Kc8dHXWQLfgiLA7ce5`).
 - **Alpha** : la session Claude de la place de marché (session
   `session_015PBwRnLtCjPX8zj12rkDdQ`). Coordonne la base commune.
 - **Claudinette** : la session Claude de Finjaro Accounting (session
