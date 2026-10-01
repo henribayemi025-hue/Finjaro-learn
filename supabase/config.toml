@@ -1,2 +1,5 @@
 [functions.learn-tutor]
 verify_jwt = true
+
+[functions.learn-fiches]
+verify_jwt = true
