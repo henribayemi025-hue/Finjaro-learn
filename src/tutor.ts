@@ -7,6 +7,7 @@ export interface TutorCtx {
   output: string
   lang: string
   agentId: string
+  espaceId?: string
   custom?: { name: string; personality: string }
 }
 
@@ -16,6 +17,7 @@ export async function askTutor(c: TutorCtx): Promise<{ answer?: string; error?: 
   const { data, error } = await supabase.functions.invoke('learn-tutor', {
     body: {
       question: c.question, code: c.code, lesson: c.lesson, output: c.output, lang: c.lang,
+      espace_id: c.espaceId,
       agent: c.custom ? { custom: c.custom } : { id: c.agentId },
     },
   })
