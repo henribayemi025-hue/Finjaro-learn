@@ -1,3 +1,15 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap");
 @import "tailwindcss";
 
-body { @apply bg-slate-50 text-slate-900 antialiased; }
+@theme {
+  --color-cream: #f7f0e1;
+  --color-paper: #fdf8ec;
+  --color-ink: #171b26;
+  --color-terracotta: #c25e38;
+  --color-terracotta-dark: #a24a29;
+  --color-brass: #b8924a;
+  --font-serif: "Fraunces", Georgia, serif;
+}
+
+body { @apply bg-cream text-ink antialiased; }
+h1, h2 { font-family: var(--font-serif); }
