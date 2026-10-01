@@ -14,6 +14,7 @@ Chaque demande de Beau, le jour même. On coche ✅ avec la date, on ne supprime
 | 01/10 | « Pourquoi se limiter à plus tard, on peut faire tout ça maintenant » : fiches de révision, CV et lettres, newsletter, tout de suite (session Learn — outils). | Fiches : appliqué + déployé par Alpha (01/10). CV : code + captures prêts (01/10), en attente de déploiement `learn-cv`. Newsletter : code + captures prêts (01/10), en attente de déploiement `learn-news` ; à tester avec la vraie recherche Google. |
 | 01/10 | « Oui, fais l'écran de modération. » | Fait : bouton « Modération » visible des seuls modérateurs ; signalements regroupés par contenu, Masquer / Laisser visible, onglet Masqués ; pseudos seulement. Vu avec des données simulées (pas de vrai compte). |
 | 01/10 | « Continue avec l'éditeur partagé. » | Fait : « Coder ensemble » dans le salon d'un espace — un pilote écrit, les copilotes voient en direct, « passer la main », exercice choisi par le pilote, lancement du code chez chacun. Essayé à deux navigateurs (serveur temps réel simulé) à 390 et 1440 px. |
+| 01/10 | « Continue avec les défis de groupe. » | Fait : dans un espace, l'animateur lance un défi (même exercice pour tous) ; chacun résout et rend sa solution ; les solutions des autres se découvrent après avoir rendu la sienne ; « réussi » = déclaré, pas une note. Essayé à 2 navigateurs (serveur simulé avec la règle de visibilité) à 390/1440 px. |
 
 ## 1. Ce qu'on attend de Beau
 

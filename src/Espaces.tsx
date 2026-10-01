@@ -4,6 +4,7 @@ import { supabase } from './supabase'
 import { askTutor } from './tutor'
 import { agents } from './agents'
 import CoCode from './CoCode'
+import Defis from './Defis'
 import type { CoEvent } from './coop'
 import { ui, type Lang } from './i18n'
 
@@ -184,6 +185,7 @@ function Salon({ lang, session, espace, onBack }: { lang: Lang; session: Session
           placeholder={t.saloonPlaceholder} aria-label={t.saloonPlaceholder} className={inp + ' flex-1 min-w-0'} />
         <button className={btn} disabled={!text.trim() || busy} onClick={send}>{t.send}</button>
       </div>
+      <Defis lang={lang} userId={session.user.id} espaceId={espace.id} />
       {myName && <CoCode lang={lang} me={{ id: session.user.id, name: myName }} send={sendCo} handlerRef={coHandler} />}
     </div>
   )
