@@ -1,0 +1,7 @@
+{
+  "name": "Léo Academy - Code & IA",
+  "description": "Apprenez à coder et maîtrisez l'IA leçon par leçon avec des agents interactifs (Maya & Idris), salons d'étude collectifs, mode sans IA gratuit et parcours inspirés du MIT et Harvard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
