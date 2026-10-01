@@ -86,6 +86,18 @@ export const dlLessons: Lesson[] = [
     checks: ["abs(np.ravel(forward(np.array([2.0, 1.0]), np.array([[1.0, -1.0], [0.5, 0.5]]), np.zeros(2), np.array([[1.0, 1.0]]), np.array([-2.0])))[0] - 0.6224593) < 1e-6", "abs(np.ravel(forward(np.array([0.0, 0.0]), np.eye(2), np.zeros(2), np.array([[1.0, 1.0]]), np.zeros(1)))[0] - 0.5) < 1e-9", "np.ravel(forward(np.array([-5.0]), np.array([[1.0]]), np.zeros(1), np.array([[10.0]]), np.zeros(1)))[0] == 0.5"],
   },
   {
+    id: "dl-visu", lang: 'py', group: "dl-reseaux",
+    packages: ["numpy"],
+    title: { fr: "Voir ton réseau penser", en: "Watching your network think" },
+    explain: { fr: "Un réseau de neurones n'est pas une boîte noire quand on peut regarder ses activations. Dans Finjaro Learn, reseau(tailles, activations, titre) dessine ton réseau : une colonne par couche, et chaque neurone est d'autant plus coloré que son activation est forte. Change l'entrée et regarde les neurones de la couche cachée s'allumer ou s'éteindre : c'est ainsi qu'on comprend ce que chaque neurone « détecte ».", en: "A neural network is not a black box when you can look at its activations. In Finjaro Learn, reseau(tailles, activations, titre) draws your network: one column per layer, and each neuron is more colored the stronger its activation. Change the input and watch hidden neurons light up or fade: that is how you understand what each neuron “detects”." },
+    example: "reseau([2, 3, 1], [[1.0, 0.0], [0.5, 0.0, 0.9], [0.7]], 'Mon réseau')",
+    task: { fr: "Écris visualise(x, W1, b1, W2, b2) : calcule la couche cachée (ReLU) et la sortie (sigmoïde), appelle reseau([taille entrée, taille cachée, taille sortie], [x, cachée, sortie], « Ton réseau ») puis renvoie la valeur de sortie (un nombre).", en: "Write visualise(x, W1, b1, W2, b2): compute the hidden layer (ReLU) and the output (sigmoid), call reseau([input size, hidden size, output size], [x, hidden, output], “Ton réseau”) then return the output value (a number)." },
+    starter: "import numpy as np\n\ndef visualise(x, W1, b1, W2, b2):\n    pass\n",
+    hint: { fr: "h = np.maximum(0, W1 @ x + b1) ; out = 1/(1+np.exp(-(W2 @ h + b2))) ; reseau([len(x), len(h), len(out)], [x, h, out], 'Ton réseau')", en: "h = np.maximum(0, W1 @ x + b1); out = 1/(1+np.exp(-(W2 @ h + b2))); reseau([len(x), len(h), len(out)], [x, h, out], 'Ton réseau')" },
+    solution: "import numpy as np\n\ndef visualise(x, W1, b1, W2, b2):\n    x = np.array(x, dtype=float)\n    h = np.maximum(0, W1 @ x + b1)\n    out = 1 / (1 + np.exp(-(W2 @ h + b2)))\n    reseau([len(x), len(h), len(out)], [x, h, out], 'Ton réseau')\n    return float(out[0])",
+    checks: ["abs(visualise(np.array([2.0, 1.0]), np.array([[1.0, -1.0], [0.5, 0.5]]), np.zeros(2), np.array([[1.0, 1.0]]), np.array([-2.0])) - 0.6224593) < 1e-6", "(visualise(np.array([2.0, 1.0]), np.array([[1.0, -1.0], [0.5, 0.5]]), np.zeros(2), np.array([[1.0, 1.0]]), np.array([-2.0])), __figs[-1]['type'], __figs[-1]['x'])[1:] == ('reseau', [2, 2, 1])", "(visualise(np.array([2.0, 1.0]), np.array([[1.0, -1.0], [0.5, 0.5]]), np.zeros(2), np.array([[1.0, 1.0]]), np.array([-2.0])), len(__figs[-1]['y']))[-1] == 5", "(visualise(np.array([0.0, 0.0, 0.0]), np.ones((4, 3)), np.zeros(4), np.ones((1, 4)), np.zeros(1)), __figs[-1]['x'])[-1] == [3, 4, 1]"],
+  },
+  {
     id: "dl-xor", lang: 'py', group: "dl-reseaux",
     packages: ["numpy"],
     title: { fr: "Rétropropagation : apprendre le XOR", en: "Backpropagation: learning XOR" },

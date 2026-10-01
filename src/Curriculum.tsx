@@ -8,7 +8,7 @@ export default function Curriculum({ lang, done }: { lang: Lang; done: string[] 
   const t = acu(lang)
   const [open, setOpen] = useState(() => window.innerWidth >= 768)
   const order = [
-    { k: 'prog', groups: ['js', 'py-bases', 'py-algo', 'py-projets'] },
+    { k: 'prog', groups: ['js', 'py-bases', 'py-algo', 'py-lecture', 'py-projets'] },
     { k: 'data', groups: ['ds-numpy', 'ds-pandas', 'ds-ml', 'ds-viz'] },
     { k: 'dl', groups: ['dl', 'dl-reseaux'] },
     { k: 'eng', groups: ['ai-rag', 'ai-agents'] },

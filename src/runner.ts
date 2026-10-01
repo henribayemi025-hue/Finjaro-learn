@@ -1,6 +1,6 @@
 /** Figure tracée par l'élève avec courbe(), nuage() ou barres() (affichée en SVG par la page). */
 export interface Figure {
-  type: 'courbe' | 'nuage' | 'barres'
+  type: 'courbe' | 'nuage' | 'barres' | 'reseau'
   titre: string
   x: (number | string)[]
   y: number[]
@@ -62,6 +62,11 @@ const PY_HELPERS = [
   '    __figs.append({"type": "nuage", "titre": titre, "x": _liste(x), "y": _liste(y)})',
   'def barres(etiquettes, valeurs, titre=""):',
   '    __figs.append({"type": "barres", "titre": titre, "x": [str(e) for e in etiquettes], "y": _liste(valeurs)})',
+  'def reseau(tailles, activations=None, titre=""):',
+  '    flat = []',
+  '    for couche in (activations or []):',
+  '        flat += _liste(couche)',
+  '    __figs.append({"type": "reseau", "titre": titre, "x": [int(t) for t in tailles], "y": flat})',
 ].join('\n')
 
 // Débogueur temporel : on enregistre, ligne après ligne, les variables simples du code de l'élève.

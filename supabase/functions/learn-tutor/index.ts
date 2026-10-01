@@ -99,6 +99,13 @@ Deno.serve(async (req) => {
         ? ' TASK: fix the learner\'s code so it satisfies the lesson goal. Reply as JSON {explanation, fixed_code}: explanation = 2-4 simple sentences saying what was wrong; fixed_code = the full corrected code, changing as little as possible.'
         : ' TÂCHE : corrige le code de l\'élève pour qu\'il atteigne l\'objectif de la leçon. Réponds en JSON {explanation, fixed_code} : explanation = 2 à 4 phrases simples sur ce qui n\'allait pas ; fixed_code = le code corrigé complet, en changeant le moins possible.')
     : ''
+  // Mode socratique : l'agent guide par des questions et ne donne jamais la réponse ni le code complet.
+  const socratique = body.style === 'socratique' && !fixMode
+  if (socratique) {
+    system += lang === 'en'
+      ? ' SOCRATIC MODE: never give the answer or the corrected code. Ask one or two short guiding questions, point to the line or idea to examine, and let the learner find it.'
+      : ' MODE SOCRATIQUE : ne donne jamais la réponse ni le code corrigé. Pose une ou deux questions courtes qui guident, indique la ligne ou l\'idée à examiner, et laisse l\'élève trouver.'
+  }
   system += fixHint
   const history = Array.isArray(body.history) ? body.history.slice(-MAX_HISTORY) : []
   const contents = [

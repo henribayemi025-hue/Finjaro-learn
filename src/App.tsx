@@ -17,6 +17,9 @@ import { askFix, type FixProposal } from './tutor'
 import { playError, playSuccess } from './sounds'
 import Chart from './Chart'
 import StepDebugger from './StepDebugger'
+import Predict from './Predict'
+import Burst from './Burst'
+import Access from './Access'
 import { runLesson, type RunResult } from './runner'
 
 const pre = 'rounded-lg bg-code text-code-fg p-3 text-sm overflow-x-auto whitespace-pre-wrap font-mono'
@@ -25,6 +28,7 @@ const GROUPS = {
   js: { fr: 'JavaScript', en: 'JavaScript' },
   'py-bases': { fr: 'Python · bases', en: 'Python · basics' },
   'py-algo': { fr: 'Python · algorithmes et structures', en: 'Python · algorithms and structures' },
+  'py-lecture': { fr: 'Python · lire du code', en: 'Python · reading code' },
   'py-projets': { fr: 'Python · projets', en: 'Python · projects' },
   'ds-numpy': { fr: 'Data science · NumPy', en: 'Data science · NumPy' },
   'ds-pandas': { fr: 'Data science · pandas', en: 'Data science · pandas' },
@@ -66,6 +70,8 @@ export default function App() {
   const [res, setRes] = useState<RunResult | null>(null)
   const [sound, setSound] = useState(() => load('sound', '1') === '1')
   const [fix, setFix] = useState<FixProposal | null>(null)
+  const [burst, setBurst] = useState(0)
+  const [golf, setGolf] = useState<{ n: number; best: number } | null>(null)
   const [debug, setDebug] = useState(false)
   const [fixBusy, setFixBusy] = useState(false)
   const [fixNote, setFixNote] = useState('')
@@ -92,25 +98,42 @@ export default function App() {
     setIdx(i)
     setCode(load('code:' + lessons[i].id, lessons[i].starter))
     setRes(null)
+    setGolf(null)
     setDebug(false)
     setShowHint(false)
+  }
+
+  /** Leçon réussie : jour actif, progression locale, progression en base si connecté. */
+  const markPassed = async (codeText: string) => {
+    recordDay()
+    if (!done.includes(lesson.id)) {
+      const d = [...done, lesson.id]
+      setDone(d)
+      save('done', JSON.stringify(d))
+    }
+    if (supabase && session) {
+      await supabase.from('learn_progress').upsert(
+        { user_id: session.user.id, lesson_id: lesson.id, status: 'done', code: codeText, updated_at: new Date().toISOString() },
+        { onConflict: 'user_id,lesson_id' },
+      )
+    }
   }
 
   const run = async () => {
     const r = await runLesson(lesson, code)
     setRes(r)
     if (sound && r.passed !== null) (r.passed ? playSuccess : playError)()
-    if (r.passed) recordDay()
-    if (r.passed && !done.includes(lesson.id)) {
-      const d = [...done, lesson.id]
-      setDone(d)
-      save('done', JSON.stringify(d))
-    }
-    if (r.passed && supabase && session) {
-      await supabase.from('learn_progress').upsert(
-        { user_id: session.user.id, lesson_id: lesson.id, status: 'done', code, updated_at: new Date().toISOString() },
-        { onConflict: 'user_id,lesson_id' },
-      )
+    if (r.passed) {
+      setBurst((b) => b + 1)
+      if (lesson.lang === 'py') {
+        // Code golf : nombre de caractères du code (sans commentaires ni lignes vides), meilleur score gardé sur l'appareil.
+        const n = code.split('\n').map((l) => l.replace(/#.*$/, '').trimEnd()).filter((l) => l.trim()).join('\n').length
+        const prev = Number(load('golf:' + lesson.id, '0')) || 0
+        const best = prev && prev < n ? prev : n
+        save('golf:' + lesson.id, String(best))
+        setGolf({ n, best })
+      }
+      await markPassed(code)
     }
   }
 
@@ -124,6 +147,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen">
+      <a href="#contenu" className="skip-link">{t.skip}</a>
       <header className="relative bg-paper border-b-2 border-brass">
         <div className="max-w-5xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
           <div className="flex items-center gap-3 min-w-0 flex-1 basis-56">
@@ -135,6 +159,7 @@ export default function App() {
           </div>
           <div className="flex items-center gap-2 flex-wrap">
           <AuthBox lang={lang} session={session} />
+          <Access lang={lang} />
           <button
             onClick={() => { const n = theme === 'noir' ? 'finjaro' : 'noir'; setTheme(n); save('theme', n) }}
             aria-label={t.theme} title={t.theme}
@@ -172,11 +197,12 @@ export default function App() {
           </button>
         ))}
       </div>
-      {view === 'outils' && <div className="max-w-5xl mx-auto px-4 py-4"><Outils lang={lang} session={session} /></div>}
-      {view === 'progression' && <div className="max-w-5xl mx-auto px-4 py-4"><Progress lang={lang} done={done} onOpen={(id) => { go(lessons.findIndex((l) => l.id === id)); setView('lecons') }} /></div>}
-      {view === 'entraide' && <div className="max-w-5xl mx-auto px-4 py-4"><Entraide lang={lang} session={session} /></div>}
-      {view === 'espaces' && <div className="max-w-5xl mx-auto px-4 py-4"><Espaces lang={lang} session={session} /></div>}
+      {view === 'outils' && <div id="contenu" tabIndex={-1} className="max-w-5xl mx-auto px-4 py-4 outline-none"><Outils lang={lang} session={session} /></div>}
+      {view === 'progression' && <div id="contenu" tabIndex={-1} className="max-w-5xl mx-auto px-4 py-4 outline-none"><Progress lang={lang} done={done} onOpen={(id) => { go(lessons.findIndex((l) => l.id === id)); setView('lecons') }} /></div>}
+      {view === 'entraide' && <div id="contenu" tabIndex={-1} className="max-w-5xl mx-auto px-4 py-4 outline-none"><Entraide lang={lang} session={session} /></div>}
+      {view === 'espaces' && <div id="contenu" tabIndex={-1} className="max-w-5xl mx-auto px-4 py-4 outline-none"><Espaces lang={lang} session={session} /></div>}
       {view === 'lecons' && <div className="max-w-5xl mx-auto px-4 pt-3"><Curriculum lang={lang} done={done} /></div>}
+      {burst > 0 && <Burst key={burst} />}
       <div className={`max-w-5xl mx-auto px-4 py-4 grid gap-4 md:grid-cols-[220px_1fr] ${view !== 'lecons' ? 'hidden' : ''}`}>
         <nav aria-label={t.lessons} className="min-w-0 md:sticky md:top-4 md:self-start md:max-h-[calc(100vh-2rem)] md:overflow-y-auto md:pr-1">
           <h2 className="text-xs uppercase tracking-wide text-ink/60 mb-2">{t.lessons}</h2>
@@ -213,18 +239,24 @@ export default function App() {
           </ol>
         </nav>
 
-        <main className="space-y-4 min-w-0">
+        <main id="contenu" tabIndex={-1} className="space-y-4 min-w-0 outline-none">
           <h2 className="text-xl font-bold">{lesson.title[lang]} <span className="text-xs font-sans font-normal text-ink/50">{lesson.lang === 'py' ? 'Python' : 'JavaScript'}</span></h2>
           {ai && <AgentPanel lang={lang} signedIn={!!session} ctx={{ title: (lesson.lang === 'py' ? '[Python] ' : '[JavaScript] ') + lesson.title[lang], code, output: res?.output.join('\n') ?? '' }} />}
           <section>
             <h3 className="font-semibold mb-1">{t.explain}</h3>
             <p>{lesson.explain[lang]}</p>
           </section>
-          <section>
-            <h3 className="font-semibold mb-1">{t.example}</h3>
-            <pre className={pre}>{lesson.example}</pre>
-          </section>
-          <section className="space-y-2">
+          {lesson.example && (
+            <section>
+              <h3 className="font-semibold mb-1">{t.example}</h3>
+              <pre className={pre}>{lesson.example}</pre>
+            </section>
+          )}
+          {lesson.predict && (
+            <Predict key={lesson.id} lesson={lesson} lang={lang} hasNext={idx < lessons.length - 1}
+              onCorrect={() => { if (sound) playSuccess(); void markPassed(lesson.predict!.answer) }} onNext={() => go(idx + 1)} />
+          )}
+          {!lesson.predict && <section className="space-y-2">
             <h3 className="font-semibold">{t.exercise}</h3>
             <p className="font-medium text-terracotta-dark">{lesson.task[lang]}</p>
             <div className="grid gap-3 lg:grid-cols-2 items-start">
@@ -275,6 +307,7 @@ export default function App() {
                 {res.figures?.map((f, i) => <Chart key={i} fig={f} />)}
                 {res.error && <p className="text-terracotta-dark text-sm">{t.error} {res.error}</p>}
                 {res.passed === true && <p className="text-ink font-medium">✅ {t.ok}</p>}
+                {res.passed === true && golf && <p className="text-xs text-ink/70">⛳ {t.golf} : {golf.n} {t.chars} · {t.bestGolf} : {golf.best}</p>}
                 {res.passed === false && !res.error && <p className="text-terracotta-dark">{t.ko}</p>}
                 {res.passed && idx < lessons.length - 1 && (
                   <button onClick={() => go(idx + 1)} className="bg-ink text-cream rounded-md px-4 py-2 text-sm font-medium">
@@ -285,7 +318,7 @@ export default function App() {
             )}
             </div>
             </div>
-          </section>
+          </section>}
           {debug && lesson.lang === 'py' && <StepDebugger lang={lang} code={code} packages={lesson.packages} onClose={() => setDebug(false)} />}
           {fix && (
             <DiffModal lang={lang} original={code} fix={fix} onClose={() => setFix(null)}

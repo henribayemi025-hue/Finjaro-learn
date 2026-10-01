@@ -8,6 +8,7 @@ export interface TutorCtx {
   lang: string
   agentId: string
   espaceId?: string
+  socratique?: boolean
   custom?: { name: string; personality: string }
 }
 
@@ -18,6 +19,7 @@ export async function askTutor(c: TutorCtx): Promise<{ answer?: string; error?: 
     body: {
       question: c.question, code: c.code, lesson: c.lesson, output: c.output, lang: c.lang,
       espace_id: c.espaceId,
+      style: c.socratique ? 'socratique' : 'direct',
       agent: c.custom ? { custom: c.custom } : { id: c.agentId },
     },
   })

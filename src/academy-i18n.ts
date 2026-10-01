@@ -2,6 +2,7 @@ import type { Lang } from './i18n'
 
 export const ac = {
   fr: {
+    socratic: 'Mode socratique', socraticHelp: 'l’agent ne donne pas la réponse : il te pose des questions pour te guider',
     hangUp: 'Raccrocher', callTitle: 'Appel avec', listening: 'Je t’écoute…', thinking: 'Je réfléchis…', speaking: 'Je parle…',
     idle: 'Appuie sur le micro pour parler.', micOn: 'Parler', micOff: 'Arrêter', you: 'Toi', noSpeech: 'La reconnaissance vocale n’est pas disponible sur ce navigateur. Essaie Chrome ou Safari.',
     needLogin: 'Connecte-toi pour appeler un agent.',
@@ -18,6 +19,7 @@ export const ac = {
     },
   },
   en: {
+    socratic: 'Socratic mode', socraticHelp: 'the agent never gives the answer: it asks questions to guide you',
     hangUp: 'Hang up', callTitle: 'Call with', listening: 'Listening…', thinking: 'Thinking…', speaking: 'Speaking…',
     idle: 'Press the mic to talk.', micOn: 'Talk', micOff: 'Stop', you: 'You', noSpeech: 'Speech recognition is not available in this browser. Try Chrome or Safari.',
     needLogin: 'Sign in to call an agent.',

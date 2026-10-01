@@ -17,6 +17,7 @@ export default function AgentPanel({ lang, signedIn, ctx }: { lang: Lang; signed
   const [question, setQuestion] = useState('')
   const a = acu(lang)
   const [calling, setCalling] = useState(false)
+  const [socratique, setSocratique] = useState(() => { try { return localStorage.getItem('learn:socratique') === '1' } catch { return false } })
   const [creating, setCreating] = useState(false)
   const [customs, setCustoms] = useState<CustomAgent[]>(loadCustomAgents)
   const [answer, setAnswer] = useState('')
@@ -54,7 +55,7 @@ export default function AgentPanel({ lang, signedIn, ctx }: { lang: Lang; signed
   const send = async (q = question) => {
     if (!q.trim() || busy) return
     setBusy(true); setAnswer('')
-    const r = await askTutor({ question: q, code: ctx.code, lesson: ctx.title, output: ctx.output, lang, agentId, custom: agent.custom })
+    const r = await askTutor({ question: q, code: ctx.code, lesson: ctx.title, output: ctx.output, lang, agentId, custom: agent.custom, socratique })
     const text = r.answer ?? (r.error === 'quota' ? t.quota : t.aiError)
     setAnswer(text); setBusy(false)
   }
@@ -103,6 +104,11 @@ export default function AgentPanel({ lang, signedIn, ctx }: { lang: Lang; signed
           <button className="underline text-xs" onClick={() => { const next = customs.filter((c) => 'custom:' + c.id !== agent.key); setCustoms(next); saveCustomAgents(next); setAgentId('js') }}>{a.remove}</button>
         )}
       </div>
+      <label className="flex items-center gap-2 text-sm cursor-pointer">
+        <input type="checkbox" checked={socratique} className="accent-[var(--color-terracotta)] size-4"
+          onChange={(e) => { setSocratique(e.target.checked); try { localStorage.setItem('learn:socratique', e.target.checked ? '1' : '0') } catch { /* ignoré */ } }} />
+        <span><strong>{a.socratic}</strong> — {a.socraticHelp}</span>
+      </label>
       <p className="text-sm text-ink/70">{agent.personality}</p>
       <div className="flex gap-2">
         <input

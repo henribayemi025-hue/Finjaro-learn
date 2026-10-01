@@ -1,5 +1,6 @@
 import type { Lang } from './i18n'
 import { pyLessons } from './lessonsPy'
+import { readLessons } from './lessonsRead'
 import { dataLessons } from './lessonsData'
 import { dlLessons } from './lessonsDL'
 import { aiLessons } from './lessonsAI'
@@ -7,7 +8,7 @@ import { vizLessons } from './lessonsViz'
 import { peLessons } from './lessonsPE'
 
 type T = Record<Lang, string>
-export type Group = 'js' | 'py-bases' | 'py-algo' | 'py-projets' | 'ds-numpy' | 'ds-pandas' | 'ds-ml' | 'ds-viz' | 'dl' | 'dl-reseaux' | 'ai-rag' | 'ai-agents' | 'pe'
+export type Group = 'js' | 'py-bases' | 'py-algo' | 'py-lecture' | 'py-projets' | 'ds-numpy' | 'ds-pandas' | 'ds-ml' | 'ds-viz' | 'dl' | 'dl-reseaux' | 'ai-rag' | 'ai-agents' | 'pe'
 
 export interface Lesson {
   id: string
@@ -24,6 +25,8 @@ export interface Lesson {
   lang?: 'js' | 'py'
   /** Section du parcours Programmation dans la liste des leçons. */
   group?: Group
+  /** Exercice de lecture : prédire la sortie d'un code sans l'exécuter. */
+  predict?: { code: string; answer: string; why: T }
   /** Bibliothèques Python à charger (numpy, pandas…). */
   packages?: string[]
 }
@@ -111,8 +114,8 @@ const jsLessons: Lesson[] = [
   },
 ]
 
-const ORDER: Group[] = ['js', 'py-bases', 'py-algo', 'py-projets', 'ds-numpy', 'ds-pandas', 'ds-ml', 'ds-viz', 'dl', 'dl-reseaux', 'ai-rag', 'ai-agents', 'pe']
-export const lessons: Lesson[] = [...jsLessons.map((l) => ({ ...l, lang: 'js' as const, group: 'js' as const })), ...pyLessons, ...dataLessons, ...vizLessons, ...dlLessons, ...aiLessons, ...peLessons]
+const ORDER: Group[] = ['js', 'py-bases', 'py-algo', 'py-lecture', 'py-projets', 'ds-numpy', 'ds-pandas', 'ds-ml', 'ds-viz', 'dl', 'dl-reseaux', 'ai-rag', 'ai-agents', 'pe']
+export const lessons: Lesson[] = [...jsLessons.map((l) => ({ ...l, lang: 'js' as const, group: 'js' as const })), ...pyLessons, ...readLessons, ...dataLessons, ...vizLessons, ...dlLessons, ...aiLessons, ...peLessons]
   .map((l, i) => ({ l, i }))
   .sort((a, b) => ORDER.indexOf(a.l.group ?? 'js') - ORDER.indexOf(b.l.group ?? 'js') || a.i - b.i)
   .map((x) => x.l)

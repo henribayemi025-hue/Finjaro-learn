@@ -6,6 +6,7 @@ const nice = (v: number) => (Math.abs(v) >= 1000 ? v.toFixed(0) : Math.abs(v) >=
 
 /** Graphique SVG minimal (courbe, nuage de points, barres), aux couleurs du thème actif. */
 export default function Chart({ fig }: { fig: Figure }) {
+  if (fig.type === 'reseau') return <Network fig={fig} />
   const ys = fig.y.length ? fig.y : [0]
   const numeric = fig.type !== 'barres'
   const xs = numeric ? (fig.x as number[]) : fig.y.map((_, i) => i)
@@ -47,6 +48,36 @@ export default function Chart({ fig }: { fig: Figure }) {
             )}
           </>
         )}
+      </svg>
+    </figure>
+  )
+}
+
+/** Réseau de neurones : une colonne par couche ; l'opacité d'un neurone = son activation (0 à 1). */
+function Network({ fig }: { fig: Figure }) {
+  const sizes = fig.x as number[]
+  const acts = fig.y
+  const W = 480, H = 280, padX = 50
+  const cx = (l: number) => padX + (l * (W - 2 * padX)) / Math.max(1, sizes.length - 1)
+  const cy = (n: number, i: number) => 40 + ((i + 0.5) * (H - 80)) / n
+  const offsets = sizes.map((_, l) => sizes.slice(0, l).reduce((a, b) => a + b, 0))
+  return (
+    <figure className="rounded-lg border border-brass/50 bg-paper p-2">
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={fig.titre || 'réseau'} className="w-full h-auto">
+        <text x={W / 2} y={16} textAnchor="middle" fontSize="14" fill="currentColor" fontFamily="Fraunces, Georgia, serif">{fig.titre}</text>
+        {sizes.slice(0, -1).map((n, l) => Array.from({ length: n }).map((_, i) => Array.from({ length: sizes[l + 1] }).map((__, j) => (
+          <line key={`${l}-${i}-${j}`} x1={cx(l)} y1={cy(n, i)} x2={cx(l + 1)} y2={cy(sizes[l + 1], j)} stroke="currentColor" strokeOpacity=".15" />
+        ))))}
+        {sizes.map((n, l) => Array.from({ length: n }).map((_, i) => {
+          const a = acts[offsets[l] + i]
+          const v = a === undefined ? 0.15 : Math.max(0.08, Math.min(1, Math.abs(a)))
+          return (
+            <g key={`${l}-${i}`}>
+              <circle cx={cx(l)} cy={cy(n, i)} r="13" fill="var(--color-terracotta)" fillOpacity={v} stroke="currentColor" strokeOpacity=".5" />
+              {a !== undefined && <text x={cx(l)} y={cy(n, i) + 4} textAnchor="middle" fontSize="10" fill="currentColor">{Math.abs(a) >= 10 ? a.toFixed(0) : a.toFixed(2)}</text>}
+            </g>
+          )
+        }))}
       </svg>
     </figure>
   )
