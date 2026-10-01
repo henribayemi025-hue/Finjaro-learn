@@ -6,7 +6,7 @@ const MAX_TEXT = 30000 // caractères de cours
 const MAX_FILE_B64 = 6_000_000 // ~4,5 Mo de fichier
 const FILE_TYPES = ['application/pdf', 'image/png', 'image/jpeg', 'image/webp']
 
-const ALLOWED_ORIGINS = ['https://learn.finjaro.net', 'http://localhost:5173']
+const ALLOWED_ORIGINS = ['https://learn.finjaro.net', 'https://finjaro.net', 'https://staging-finjaro.finjaro.workers.dev', 'http://localhost:5173']
 const corsFor = (req: Request) => ({
   'Access-Control-Allow-Origin': ALLOWED_ORIGINS.includes(req.headers.get('Origin') ?? '') ? req.headers.get('Origin')! : ALLOWED_ORIGINS[0],
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
