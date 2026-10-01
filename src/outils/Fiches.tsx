@@ -37,6 +37,20 @@ export default function Fiches({ lang }: { lang: Lang }) {
   const [open, setOpen] = useState<number[]>([])
   const [picked, setPicked] = useState<Record<number, number>>({})
   const [checked, setChecked] = useState(false)
+  const [study, setStudy] = useState(false)
+  const [deck, setDeck] = useState<number[]>([])
+  const [pos, setPos] = useState(0)
+  const [flipped, setFlipped] = useState(false)
+  const [known, setKnown] = useState<number[]>([])
+  const [again, setAgain] = useState<number[]>([])
+
+  const startRound = (ids: number[]) => { setDeck(ids); setPos(0); setFlipped(false); setKnown([]); setAgain([]) }
+  const mark = (good: boolean) => {
+    const id = deck[pos]
+    if (good) setKnown([...known, id]); else setAgain([...again, id])
+    setFlipped(false)
+    setPos(pos + 1)
+  }
 
   const pick = (f: File | null) => {
     setErr('')
@@ -59,6 +73,8 @@ export default function Fiches({ lang }: { lang: Lang }) {
       }
       setRes(data)
       setOpen([])
+      setStudy(false)
+      startRound(data.cards.map((_, i) => i))
       setPicked({})
       setChecked(false)
     } finally {
@@ -106,21 +122,63 @@ export default function Fiches({ lang }: { lang: Lang }) {
           </div>
           {res.cards.length > 0 && (
             <div>
-              <h3 className="text-xs uppercase tracking-wide text-ink/60 mb-1">{t.cards}</h3>
-              <ul className="grid gap-2 md:grid-cols-2">
-                {res.cards.map((c, i) => {
-                  const shown = open.includes(i)
-                  return (
-                    <li key={i} className="bg-paper border border-brass/50 rounded-lg p-3 text-sm">
-                      <p className="font-semibold">{c.q}</p>
-                      {shown && <p className="mt-1 border-t border-brass/40 pt-1">{c.a}</p>}
-                      <button className="mt-2 text-xs text-terracotta-dark underline print:hidden" onClick={() => setOpen(shown ? open.filter((x) => x !== i) : [...open, i])}>
-                        {shown ? t.hide : t.show}
+              <div className="flex items-center justify-between mb-1 print:hidden">
+                <h3 className="text-xs uppercase tracking-wide text-ink/60">{t.cards}</h3>
+                <div role="group" className="flex rounded-md border border-ink/30 overflow-hidden text-sm">
+                  {[false, true].map((v) => (
+                    <button key={String(v)} aria-pressed={study === v} onClick={() => setStudy(v)}
+                      className={`px-3 py-1 ${study === v ? 'bg-ink text-cream' : ''}`}>{v ? t.study : t.list}</button>
+                  ))}
+                </div>
+              </div>
+              {study ? (
+                <div className="print:hidden max-w-xl">
+                  {pos < deck.length ? (
+                    <>
+                      <p className="text-xs text-ink/60 mb-1">{t.cardOf} {pos + 1} {t.of} {deck.length} · {known.length} {t.masteredN} · {again.length} {t.reviewN}</p>
+                      <div className="h-1.5 rounded bg-ink/10 mb-2"><div className="h-1.5 rounded bg-brass" style={{ width: `${(pos / deck.length) * 100}%` }} /></div>
+                      <button onClick={() => setFlipped(!flipped)} aria-label={t.flip}
+                        className="w-full min-h-48 text-left bg-paper border-2 border-brass/60 rounded-xl p-5 flex flex-col justify-center gap-2">
+                        <span className="font-semibold text-lg">{res.cards[deck[pos]].q}</span>
+                        {flipped
+                          ? <span className="border-t border-brass/40 pt-2">{res.cards[deck[pos]].a}</span>
+                          : <span className="text-xs text-ink/50">{t.think}</span>}
                       </button>
-                    </li>
-                  )
-                })}
-              </ul>
+                      <div className="mt-3 flex gap-2">
+                        {!flipped
+                          ? <button className={btn} onClick={() => setFlipped(true)}>{t.flip}</button>
+                          : <>
+                              <button className="rounded-md px-4 py-2 text-sm border border-terracotta text-terracotta-dark" onClick={() => mark(false)}>{t.toReview}</button>
+                              <button className={btn} onClick={() => mark(true)}>{t.mastered}</button>
+                            </>}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="bg-paper border border-brass/50 rounded-xl p-5 space-y-3">
+                      <p className="font-semibold">{t.done} : {known.length} {t.masteredN}, {again.length} {t.reviewN}</p>
+                      <div className="flex flex-wrap gap-2">
+                        {again.length > 0 && <button className={btn} onClick={() => startRound(again)}>{t.onlyReview}</button>}
+                        <button className="rounded-md px-4 py-2 text-sm border border-ink/30" onClick={() => startRound(res.cards.map((_, i) => i))}>{t.restart}</button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <ul className="grid gap-2 md:grid-cols-2">
+                  {res.cards.map((c, i) => {
+                    const shown = open.includes(i)
+                    return (
+                      <li key={i} className="bg-paper border border-brass/50 rounded-lg p-3 text-sm">
+                        <p className="font-semibold">{c.q}</p>
+                        {shown && <p className="mt-1 border-t border-brass/40 pt-1">{c.a}</p>}
+                        <button className="mt-2 text-xs text-terracotta-dark underline print:hidden" onClick={() => setOpen(shown ? open.filter((x) => x !== i) : [...open, i])}>
+                          {shown ? t.hide : t.show}
+                        </button>
+                      </li>
+                    )
+                  })}
+                </ul>
+              )}
             </div>
           )}
           {res.quiz.length > 0 && (

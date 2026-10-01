@@ -29,6 +29,7 @@ export const o = {
     errTimeout: 'Trop long. Essaie avec un cours plus court.',
     errAuth: 'Session expirée : reconnecte-toi.',
     print: 'Imprimer / PDF',
+    list: 'Liste', study: 'Réviser', flip: 'Retourner la carte', mastered: 'Maîtrisée', toReview: 'À revoir', cardOf: 'Carte', of: 'sur', done: 'Tour terminé', restart: 'Refaire un tour', onlyReview: 'Refaire les cartes à revoir', masteredN: 'maîtrisées', reviewN: 'à revoir', think: 'Cherche la réponse dans ta tête avant de retourner la carte.',
     sourceNote: 'Généré par IA à partir de ton cours uniquement. Relis avant de réviser.',
   },
   en: {
@@ -59,6 +60,7 @@ export const o = {
     errTimeout: 'Too long. Try a shorter course.',
     errAuth: 'Session expired: sign in again.',
     print: 'Print / PDF',
+    list: 'List', study: 'Study', flip: 'Flip the card', mastered: 'Got it', toReview: 'Review again', cardOf: 'Card', of: 'of', done: 'Round complete', restart: 'Start a new round', onlyReview: 'Redo cards to review', masteredN: 'mastered', reviewN: 'to review', think: 'Try to answer in your head before flipping the card.',
     sourceNote: 'AI-generated from your course only. Proofread before revising.',
   },
 } satisfies Record<Lang, Record<string, string>>
