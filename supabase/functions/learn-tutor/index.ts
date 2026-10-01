@@ -56,7 +56,9 @@ Deno.serve(async (req) => {
       : custom
         ? `Tu es ${clip(custom.name).slice(0, 60)}. Personnalité : ${clip(custom.personality).slice(0, 500)}.`
         : ''
+  const fixMode = body.mode === 'fix'
   const lang = body.lang === 'en' ? 'en' : 'fr'
+  if (fixMode && !code) return json({ error: 'empty' }, 400)
   if (!question && !code) return json({ error: 'empty' }, 400)
 
   // Mode salon : l'appelant doit être membre de l'espace (vérifié avec SON JWT).
@@ -73,12 +75,18 @@ Deno.serve(async (req) => {
   const key = Deno.env.get('GEMINI_API_KEY')
   if (!key) return json({ error: 'unavailable' }, 503)
 
-  const system =
+  let system =
     persona + ' ' +
     (lang === 'en'
       ? 'You are a patient coding tutor for a complete beginner learning JavaScript. Answer in English, short and simple (max 8 lines). Explain, give a tiny example, never dump the full solution unless asked twice.'
       : 'Tu es un tuteur de code patient pour un débutant complet qui apprend JavaScript. Réponds en français, court et simple (8 lignes max). Explique, donne un petit exemple, ne donne pas toute la solution sauf si on te la demande deux fois.')
 
+  const fixHint = fixMode
+    ? (lang === 'en'
+        ? ' TASK: fix the learner\'s code so it satisfies the lesson goal. Reply as JSON {explanation, fixed_code}: explanation = 2-4 simple sentences saying what was wrong; fixed_code = the full corrected code, changing as little as possible.'
+        : ' TÂCHE : corrige le code de l\'élève pour qu\'il atteigne l\'objectif de la leçon. Réponds en JSON {explanation, fixed_code} : explanation = 2 à 4 phrases simples sur ce qui n\'allait pas ; fixed_code = le code corrigé complet, en changeant le moins possible.')
+    : ''
+  system += fixHint
   const history = Array.isArray(body.history) ? body.history.slice(-MAX_HISTORY) : []
   const contents = [
     ...history
@@ -96,7 +104,19 @@ Deno.serve(async (req) => {
     body: JSON.stringify({
       systemInstruction: { parts: [{ text: system }] },
       contents,
-      generationConfig: { maxOutputTokens: 600, temperature: 0.4, thinkingConfig: { thinkingBudget: 0 } },
+      generationConfig: fixMode
+        ? {
+            maxOutputTokens: 2000,
+            temperature: 0.2,
+            thinkingConfig: { thinkingBudget: 0 },
+            responseMimeType: 'application/json',
+            responseSchema: {
+              type: 'OBJECT',
+              properties: { explanation: { type: 'STRING' }, fixed_code: { type: 'STRING' } },
+              required: ['explanation', 'fixed_code'],
+            },
+          }
+        : { maxOutputTokens: 600, temperature: 0.4, thinkingConfig: { thinkingBudget: 0 } },
     }),
     signal: AbortSignal.timeout(25_000),
   }).catch((e) => (e?.name === 'TimeoutError' ? null : undefined))
@@ -105,6 +125,16 @@ Deno.serve(async (req) => {
   const data = await r.json()
   const answer = data?.candidates?.[0]?.content?.parts?.map((p: { text?: string }) => p.text ?? '').join('') ?? ''
   if (!answer.trim()) return json({ error: 'empty_answer' }, 502)
+  if (fixMode) {
+    // Correction proposée : l'élève la voit en différences et l'accepte ou la refuse côté client.
+    try {
+      const parsed = JSON.parse(answer)
+      if (typeof parsed.fixed_code !== 'string' || typeof parsed.explanation !== 'string') throw new Error('shape')
+      return json({ explanation: parsed.explanation.slice(0, 1500), fixed_code: parsed.fixed_code.slice(0, 8000) })
+    } catch {
+      return json({ error: 'bad_fix' }, 502)
+    }
+  }
   if (espaceId) {
     // Écriture du message d'agent côté serveur (clé de service lue ici seulement, jamais renvoyée).
     const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)

@@ -6,6 +6,9 @@ import { supabase } from './supabase'
 import { ui, type Lang } from './i18n'
 import { lessons } from './lessons'
 import AgentPanel from './AgentPanel'
+import DiffModal from './DiffModal'
+import { askFix, type FixProposal } from './tutor'
+import { playError, playSuccess } from './sounds'
 import { runCode, type RunResult } from './runner'
 
 const pre = 'rounded-lg bg-ink text-cream p-3 text-sm overflow-x-auto whitespace-pre-wrap font-mono'
@@ -35,6 +38,10 @@ export default function App() {
   const lesson = lessons[idx]
   const [code, setCode] = useState(() => load('code:' + lesson.id, lesson.starter))
   const [res, setRes] = useState<RunResult | null>(null)
+  const [sound, setSound] = useState(() => load('sound', '1') === '1')
+  const [fix, setFix] = useState<FixProposal | null>(null)
+  const [fixBusy, setFixBusy] = useState(false)
+  const [fixNote, setFixNote] = useState('')
   const [showHint, setShowHint] = useState(false)
   const t = ui[lang]
 
@@ -64,6 +71,7 @@ export default function App() {
   const run = async () => {
     const r = await runCode(code, lesson.checks)
     setRes(r)
+    if (sound && r.passed !== null) (r.passed ? playSuccess : playError)()
     if (r.passed && !done.includes(lesson.id)) {
       const d = [...done, lesson.id]
       setDone(d)
@@ -75,6 +83,14 @@ export default function App() {
         { onConflict: 'user_id,lesson_id' },
       )
     }
+  }
+
+  const proposeFix = async () => {
+    setFixBusy(true); setFixNote('')
+    const r = await askFix({ code, lesson: lesson.title[lang] + ' — ' + lesson.task[lang], output: (res?.output.join('\n') ?? '') + (res?.error ? '\n' + res.error : ''), lang })
+    setFixBusy(false)
+    if (r.fix) setFix(r.fix)
+    else setFixNote(r.error === 'quota' ? t.quota : t.aiError)
   }
 
   return (
@@ -151,6 +167,8 @@ export default function App() {
           <section className="space-y-2">
             <h3 className="font-semibold">{t.exercise}</h3>
             <p className="font-medium text-terracotta-dark">{lesson.task[lang]}</p>
+            <div className="grid gap-3 lg:grid-cols-2 items-start">
+            <div className="space-y-2 min-w-0">
             <textarea
               value={code}
               onChange={(e) => { setCode(e.target.value); save('code:' + lesson.id, e.target.value) }}
@@ -174,8 +192,19 @@ export default function App() {
               >
                 {t.solution}
               </button>
+              {ai && session && (
+                <button onClick={proposeFix} disabled={fixBusy || !code.trim()} className="border border-terracotta text-terracotta-dark rounded-md px-4 py-2 text-sm disabled:opacity-40">
+                  {fixBusy ? t.thinking : '✨ ' + t.aiFix}
+                </button>
+              )}
+              <button onClick={() => { setSound(!sound); save('sound', sound ? '0' : '1') }} aria-pressed={sound} className="border border-ink/30 rounded-md px-3 py-2 text-sm" title={t.sound}>
+                {sound ? '🔊' : '🔇'}
+              </button>
             </div>
+            {fixNote && <p className="text-sm text-terracotta-dark" role="status">{fixNote}</p>}
             {showHint && <p className="rounded-md bg-brass/15 border border-brass p-3 text-sm">💡 {lesson.hint[lang]}</p>}
+            </div>
+            <div className="min-w-0">
             {res && (
               <div className="space-y-2" aria-live="polite">
                 <h4 className="text-sm font-semibold">{t.output}</h4>
@@ -190,7 +219,13 @@ export default function App() {
                 )}
               </div>
             )}
+            </div>
+            </div>
           </section>
+          {fix && (
+            <DiffModal lang={lang} original={code} fix={fix} onClose={() => setFix(null)}
+              onAccept={() => { setCode(fix.fixed_code); save('code:' + lesson.id, fix.fixed_code); setFix(null); setRes(null) }} />
+          )}
         </main>
       </div>
     </div>
