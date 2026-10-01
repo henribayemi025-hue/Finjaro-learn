@@ -6,3 +6,6 @@ verify_jwt = true
 
 [functions.learn-cv]
 verify_jwt = true
+
+[functions.learn-news]
+verify_jwt = true

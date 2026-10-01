@@ -36,3 +36,24 @@ export const c = {
     sExp: 'Experience', sEdu: 'Education', sSkills: 'Skills', sLangs: 'Languages',
   },
 } satisfies Record<Lang, Record<string, string>>
+
+export const n = {
+  fr: {
+    tab: 'Actualités',
+    intro: 'Les nouveautés de l’IA et de Finjaro. Chaque élément cite sa source ; ce qui n’a pas de source n’est pas affiché.',
+    topics: { general: 'IA en général', learn: 'IA pour apprendre et coder', research: 'Recherche' } as Record<string, string>,
+    load: 'Charger les nouveautés de l’IA', loading: 'Recherche en cours…',
+    aiH: 'Nouveautés de l’IA', finH: 'Nouveautés Finjaro', sources: 'Sources',
+    empty: 'Aucune actualité suffisamment sourcée trouvée. Réessaie plus tard.',
+    note: 'Résumé automatique à partir d’une recherche web. Ouvre les sources pour vérifier.',
+  },
+  en: {
+    tab: 'News',
+    intro: 'What’s new in AI and at Finjaro. Every item cites its source; anything without a source is not shown.',
+    topics: { general: 'AI in general', learn: 'AI for learning & coding', research: 'Research' } as Record<string, string>,
+    load: 'Load AI news', loading: 'Searching…',
+    aiH: 'AI news', finH: 'Finjaro news', sources: 'Sources',
+    empty: 'No sufficiently sourced news found. Try again later.',
+    note: 'Automatic summary from a web search. Open the sources to check.',
+  },
+} satisfies Record<Lang, Record<string, unknown>>
