@@ -1,7 +1,16 @@
+/** Figure tracée par l'élève avec courbe(), nuage() ou barres() (affichée en SVG par la page). */
+export interface Figure {
+  type: 'courbe' | 'nuage' | 'barres'
+  titre: string
+  x: (number | string)[]
+  y: number[]
+}
+
 export interface RunResult {
   output: string[]
   error: string | null
   passed: boolean | null
+  figures?: Figure[]
 }
 
 const workerSrc = `
@@ -42,7 +51,22 @@ export function runCode(code: string, checks: string[]): Promise<RunResult> {
 // ───────── Python (Pyodide, chargé à la demande depuis le CDN jsDelivr : gratuit, aucune clé) ─────────
 const PYODIDE = 'https://cdn.jsdelivr.net/pyodide/v0.27.7/full/'
 
+// Fonctions de tracé fournies à l'élève : elles ne font que mémoriser les données ; la page dessine.
+const PY_HELPERS = [
+  '__figs = []',
+  'def _liste(v):',
+  '    return [float(a) for a in v]',
+  'def courbe(x, y, titre=""):',
+  '    __figs.append({"type": "courbe", "titre": titre, "x": _liste(x), "y": _liste(y)})',
+  'def nuage(x, y, titre=""):',
+  '    __figs.append({"type": "nuage", "titre": titre, "x": _liste(x), "y": _liste(y)})',
+  'def barres(etiquettes, valeurs, titre=""):',
+  '    __figs.append({"type": "barres", "titre": titre, "x": [str(e) for e in etiquettes], "y": _liste(valeurs)})',
+].join('\n')
+
 const pyWorkerSrc = `
+const HELPERS = ${JSON.stringify(PY_HELPERS)}
+const figures = (py, ns) => { try { return JSON.parse(py.runPython('import json\\njson.dumps(__figs)', { globals: ns })) } catch (e) { return [] } }
 let py = null
 onmessage = async (e) => {
   const d = e.data
@@ -59,15 +83,16 @@ onmessage = async (e) => {
     py.setStderr({ batched: (s) => out.push(s) })
     const ns = py.globals.get('dict')()
     try {
+      py.runPython(HELPERS, { globals: ns })
       py.runPython(d.code, { globals: ns })
       ns.set('__out', out.join('\\n'))
       for (const mod of ['numpy as np', 'pandas as pd']) { try { py.runPython('import ' + mod, { globals: ns }) } catch (e) { /* bibliothèque non chargée */ } }
       py.runPython('def __raises(f, e=Exception):\\n    try:\\n        f()\\n    except e:\\n        return True\\n    return False\\ndef __exc(f):\\n    try:\\n        f()\\n    except Exception as ex:\\n        return ex\\n    return None', { globals: ns })
       const results = d.checks.map((c) => { ns.set('__c', c); return py.runPython('bool(eval(__c, globals()))', { globals: ns }) === true })
-      postMessage({ type: 'done', output: out, error: null, passed: d.checks.length === 0 ? null : results.every(Boolean) })
+      postMessage({ type: 'done', output: out, error: null, passed: d.checks.length === 0 ? null : results.every(Boolean), figures: figures(py, ns) })
     } catch (err) {
       const msg = String(err && err.message ? err.message : err).trim().split('\\n').slice(-3).join('\\n')
-      postMessage({ type: 'done', output: out, error: msg, passed: false })
+      postMessage({ type: 'done', output: out, error: msg, passed: false, figures: figures(py, ns) })
     } finally { ns.destroy() }
   } catch (err) {
     postMessage({ type: 'fatal', error: String(err && err.message ? err.message : err) })
@@ -114,7 +139,7 @@ export async function runPython(code: string, checks: string[], packages: string
   const w = pyWorker!
   return new Promise<RunResult>((resolve) => {
     const t = setTimeout(() => { reset(); resolve({ output: [], error: 'Timeout (boucle infinie ?)', passed: false }) }, 20000)
-    w.onmessage = (e) => { if (e.data.type === 'done') { clearTimeout(t); resolve({ output: e.data.output, error: e.data.error, passed: e.data.passed }) } }
+    w.onmessage = (e) => { if (e.data.type === 'done') { clearTimeout(t); resolve({ output: e.data.output, error: e.data.error, passed: e.data.passed, figures: e.data.figures }) } }
     w.onerror = (e) => { clearTimeout(t); reset(); resolve({ output: [], error: e.message, passed: false }) }
     w.postMessage({ type: 'run', code, checks })
   })

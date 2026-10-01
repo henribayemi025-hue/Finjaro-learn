@@ -14,6 +14,7 @@ import AgentPanel from './AgentPanel'
 import DiffModal from './DiffModal'
 import { askFix, type FixProposal } from './tutor'
 import { playError, playSuccess } from './sounds'
+import Chart from './Chart'
 import { runLesson, type RunResult } from './runner'
 
 const pre = 'rounded-lg bg-code text-code-fg p-3 text-sm overflow-x-auto whitespace-pre-wrap font-mono'
@@ -26,6 +27,7 @@ const GROUPS = {
   'ds-numpy': { fr: 'Data science · NumPy', en: 'Data science · NumPy' },
   'ds-pandas': { fr: 'Data science · pandas', en: 'Data science · pandas' },
   'ds-ml': { fr: 'Data science · statistiques et apprentissage', en: 'Data science · statistics and learning' },
+  'ds-viz': { fr: 'Data science · graphiques et projet', en: 'Data science · charts and project' },
   dl: { fr: 'Deep learning · les bases', en: 'Deep learning · the basics' },
   'dl-reseaux': { fr: 'Deep learning · réseaux de neurones', en: 'Deep learning · neural networks' },
   'ai-rag': { fr: 'AI engineering · recherche et RAG', en: 'AI engineering · retrieval and RAG' },
@@ -261,6 +263,7 @@ export default function App() {
               <div className="space-y-2" aria-live="polite">
                 <h4 className="text-sm font-semibold">{t.output}</h4>
                 <pre className={pre}>{res.output.length ? res.output.join('\n') : t.noOutput}</pre>
+                {res.figures?.map((f, i) => <Chart key={i} fig={f} />)}
                 {res.error && <p className="text-terracotta-dark text-sm">{t.error} {res.error}</p>}
                 {res.passed === true && <p className="text-ink font-medium">✅ {t.ok}</p>}
                 {res.passed === false && !res.error && <p className="text-terracotta-dark">{t.ko}</p>}
