@@ -1,0 +1,7 @@
+/* Impression / export PDF : seul le bloc .print-area est imprimé. */
+@media print {
+  body * { visibility: hidden; }
+  .print-area, .print-area * { visibility: visible; }
+  .print-area { position: absolute; left: 0; top: 0; width: 100%; background: #fff; color: #000; border: 0; }
+  @page { margin: 14mm; }
+}

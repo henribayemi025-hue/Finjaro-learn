@@ -3,3 +3,6 @@ verify_jwt = true
 
 [functions.learn-fiches]
 verify_jwt = true
+
+[functions.learn-cv]
+verify_jwt = true

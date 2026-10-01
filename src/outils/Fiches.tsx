@@ -95,7 +95,7 @@ export default function Fiches({ lang }: { lang: Lang }) {
       {err && <p role="alert" className="text-sm text-terracotta-dark">{err}</p>}
 
       {res && (
-        <div className="space-y-5 print:text-black">
+        <div className="print-area space-y-5">
           <div className="flex items-center justify-between gap-2">
             <h2 className="text-xl font-bold">{res.title}</h2>
             <button className="text-sm border border-ink/30 rounded-md px-3 py-1.5 print:hidden" onClick={() => window.print()}>{t.print}</button>
