@@ -44,9 +44,9 @@ Deno.serve(async (req) => {
   } catch {
     return json({ error: 'bad_json' }, 400)
   }
-  const question = clip(body.question)
-  const code = clip(body.code)
-  const lesson = clip(body.lesson)
+  let question = clip(body.question)
+  let code = clip(body.code)
+  let lesson = clip(body.lesson)
   const output = clip(body.output)
   const ag = (body.agent ?? {}) as Record<string, unknown>
   const custom = ag.custom as Record<string, unknown> | undefined
@@ -59,6 +59,19 @@ Deno.serve(async (req) => {
   const fixMode = body.mode === 'fix'
   const lang = body.lang === 'en' ? 'en' : 'fr'
   if (fixMode && !code) return json({ error: 'empty' }, 400)
+
+  // (la vérification « non vide » suit la lecture de la question en mode entraide)
+  // Mode entraide : la question est relue en base avec le JWT de l'appelant (RLS) ; le client n'envoie que son id.
+  const entraideId = body.mode === 'entraide' && typeof body.question_id === 'string' ? body.question_id : null
+  if (body.mode === 'entraide') {
+    if (!entraideId || typeof ag.id !== 'string' || !AGENTS[ag.id]) return json({ error: 'bad_request' }, 400)
+    const { data: q } = await sb.from('learn_entraide_questions').select('titre,corps,code').eq('id', entraideId).maybeSingle()
+    if (!q) return json({ error: 'not_found' }, 404)
+    question = `${q.titre}\n${q.corps}`.slice(0, MAX_FIELD)
+    code = String(q.code ?? '').slice(0, MAX_FIELD)
+    lesson = 'entraide'
+  }
+
   if (!question && !code) return json({ error: 'empty' }, 400)
 
   // Mode salon : l'appelant doit être membre de l'espace (vérifié avec SON JWT).
@@ -134,6 +147,11 @@ Deno.serve(async (req) => {
     } catch {
       return json({ error: 'bad_fix' }, 502)
     }
+  }
+  if (entraideId) {
+    const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
+    const { data: posted } = await admin.rpc('learn_entraide_reponse_agent', { p_question: entraideId, p_agent: ag.id, p_corps: answer })
+    if (!posted) return json({ error: 'quota_question' }, 429)
   }
   if (espaceId) {
     // Écriture du message d'agent côté serveur (clé de service lue ici seulement, jamais renvoyée).
