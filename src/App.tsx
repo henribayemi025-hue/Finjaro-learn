@@ -16,7 +16,7 @@ import { askFix, type FixProposal } from './tutor'
 import { playError, playSuccess } from './sounds'
 import { runLesson, type RunResult } from './runner'
 
-const pre = 'rounded-lg bg-ink text-cream p-3 text-sm overflow-x-auto whitespace-pre-wrap font-mono'
+const pre = 'rounded-lg bg-code text-code-fg p-3 text-sm overflow-x-auto whitespace-pre-wrap font-mono'
 
 const GROUPS = {
   js: { fr: 'JavaScript', en: 'JavaScript' },
@@ -44,6 +44,8 @@ export default function App() {
   const [lang, setLang] = useState<Lang>(getLang)
   const [session, setSession] = useState<Session | null>(null)
   const [view, setView] = useState<'lecons' | 'espaces' | 'outils' | 'entraide'>(() => (new URLSearchParams(window.location.search).has('join') ? 'espaces' : 'lecons'))
+  const [theme, setTheme] = useState<'finjaro' | 'noir'>(() => (load('theme', 'finjaro') === 'noir' ? 'noir' : 'finjaro'))
+  useEffect(() => { document.documentElement.dataset.theme = theme }, [theme])
   const [ai, setAi] = useState(() => load('ai', '0') === '1')
   const [idx, setIdx] = useState(0)
   const [done, setDone] = useState<string[]>(() => JSON.parse(load('done', '[]')))
@@ -108,13 +110,23 @@ export default function App() {
   return (
     <div className="min-h-screen">
       <header className="relative bg-paper border-b-2 border-brass">
-        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-          <div>
-            <h1 className="font-bold text-2xl">Finjaro Learn</h1>
-            <p className="text-sm text-ink/60">{t.tagline}</p>
+        <div className="max-w-5xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+          <div className="flex items-center gap-3 min-w-0 flex-1 basis-56">
+            <span aria-hidden="true" className="size-10 shrink-0 rounded-xl bg-terracotta text-white grid place-items-center font-serif font-bold text-xl shadow-md">F</span>
+            <div className="min-w-0">
+              <h1 className="font-bold text-2xl leading-tight">Finjaro Learn</h1>
+              <p className="text-sm text-ink/60 hidden sm:block">{t.tagline}</p>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
           <AuthBox lang={lang} session={session} />
+          <button
+            onClick={() => { const n = theme === 'noir' ? 'finjaro' : 'noir'; setTheme(n); save('theme', n) }}
+            aria-label={t.theme} title={t.theme}
+            className="text-sm border border-ink/30 rounded-md px-2.5 py-1.5"
+          >
+            {theme === 'noir' ? '☀' : '☾'}<span className="hidden sm:inline"> {theme === 'noir' ? 'Finjaro' : 'Noir'}</span>
+          </button>
           <div role="group" aria-label={t.aiHelp} title={t.aiHelp} className="flex rounded-md border border-ink/30 overflow-hidden text-sm">
             {[false, true].map((v) => (
               <button
@@ -150,13 +162,13 @@ export default function App() {
       {view === 'espaces' && <div className="max-w-5xl mx-auto px-4 py-4"><Espaces lang={lang} session={session} /></div>}
       {view === 'lecons' && <div className="max-w-5xl mx-auto px-4 pt-3"><Curriculum lang={lang} done={done} /></div>}
       <div className={`max-w-5xl mx-auto px-4 py-4 grid gap-4 md:grid-cols-[220px_1fr] ${view !== 'lecons' ? 'hidden' : ''}`}>
-        <nav aria-label={t.lessons} className="min-w-0">
+        <nav aria-label={t.lessons} className="min-w-0 md:sticky md:top-4 md:self-start md:max-h-[calc(100vh-2rem)] md:overflow-y-auto md:pr-1">
           <h2 className="text-xs uppercase tracking-wide text-ink/60 mb-2">{t.lessons}</h2>
           <ol className="flex md:flex-col gap-2 overflow-x-auto">
             {lessons.map((l, i) => (
               <li key={l.id} className="shrink-0 flex md:block items-center gap-2">
                 {(i === 0 || lessons[i - 1].group !== l.group) && (
-                  <span className="text-[11px] uppercase tracking-wide text-ink/50 md:block md:mt-2 md:mb-1 whitespace-nowrap">
+                  <span className="text-[11px] uppercase tracking-wide text-ink/50 md:block md:mt-2 md:mb-1 whitespace-nowrap md:whitespace-normal">
                     {GROUPS[l.group ?? 'js'][lang]}
                   </span>
                 )}
@@ -233,7 +245,7 @@ export default function App() {
                 {res.passed === true && <p className="text-ink font-medium">✅ {t.ok}</p>}
                 {res.passed === false && !res.error && <p className="text-terracotta-dark">{t.ko}</p>}
                 {res.passed && idx < lessons.length - 1 && (
-                  <button onClick={() => go(idx + 1)} className="bg-ink text-white rounded-md px-4 py-2 text-sm font-medium">
+                  <button onClick={() => go(idx + 1)} className="bg-ink text-cream rounded-md px-4 py-2 text-sm font-medium">
                     {t.next} →
                   </button>
                 )}

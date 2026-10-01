@@ -82,7 +82,7 @@ export default function CoCode({ lang, me, send, handlerRef }: {
           {res && (
             <div aria-live="polite" className="space-y-1">
               <h4 className="text-sm font-semibold">{t.output}</h4>
-              <pre className="rounded-lg bg-ink text-cream p-3 text-sm overflow-x-auto whitespace-pre-wrap font-mono">{res.output.length ? res.output.join('\n') : u.noOutput}</pre>
+              <pre className="rounded-lg bg-code text-code-fg p-3 text-sm overflow-x-auto whitespace-pre-wrap font-mono">{res.output.length ? res.output.join('\n') : u.noOutput}</pre>
               {res.error && <p className="text-sm text-terracotta-dark">{u.error} {res.error}</p>}
               {res.passed === true && <p className="font-medium">✅ {t.ok}</p>}
               {res.passed === false && !res.error && <p className="text-terracotta-dark">{t.ko}</p>}

@@ -13,7 +13,7 @@ interface Stats { pseudo: string | null; reponses_donnees: number; reponses_rete
 const inp = 'w-full rounded-md border border-ink/30 bg-white/60 px-2 py-1.5 text-sm'
 const btn = 'rounded-md bg-terracotta text-white px-3 py-1.5 text-sm disabled:opacity-40'
 const ghost = 'rounded-md border border-ink/30 px-3 py-1.5 text-sm'
-const pre = 'rounded-lg bg-ink text-cream p-3 text-sm overflow-x-auto whitespace-pre-wrap font-mono'
+const pre = 'rounded-lg bg-code text-code-fg p-3 text-sm overflow-x-auto whitespace-pre-wrap font-mono'
 
 export default function Entraide({ lang, session }: { lang: Lang; session: Session | null }) {
   const t = eu(lang)

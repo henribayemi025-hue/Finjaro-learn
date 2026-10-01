@@ -13,7 +13,7 @@ export default function DiffModal({ lang, original, fix, onAccept, onClose }: {
         <h3 className="font-serif font-bold text-lg">{t.fixTitle}</h3>
         <p className="text-sm whitespace-pre-wrap">{fix.explanation}</p>
         <p className="text-xs text-ink/60">{t.fixHelp}</p>
-        <pre className="rounded-lg bg-ink text-cream p-3 text-sm overflow-x-auto font-mono">
+        <pre className="rounded-lg bg-code text-code-fg p-3 text-sm overflow-x-auto font-mono">
           {lines.map((l, i) => (
             <div key={i} className={l.kind === 'add' ? 'bg-green-900/50' : l.kind === 'del' ? 'bg-red-900/50 line-through opacity-80' : ''}>
               {l.kind === 'add' ? '+ ' : l.kind === 'del' ? '- ' : '  '}{l.text}

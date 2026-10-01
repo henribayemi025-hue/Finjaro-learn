@@ -28,7 +28,7 @@ interface Sol { user_id: string; code: string; passed: boolean }
 
 const btn = 'rounded-md bg-terracotta text-white px-3 py-1.5 text-sm disabled:opacity-40'
 const ghost = 'rounded-md border border-ink/30 px-3 py-1.5 text-sm'
-const pre = 'rounded-lg bg-ink text-cream p-3 text-sm overflow-x-auto whitespace-pre-wrap font-mono'
+const pre = 'rounded-lg bg-code text-code-fg p-3 text-sm overflow-x-auto whitespace-pre-wrap font-mono'
 
 export default function Defis({ lang, userId, espaceId }: { lang: Lang; userId: string; espaceId: string }) {
   const t = T[lang]

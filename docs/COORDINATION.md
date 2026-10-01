@@ -32,3 +32,4 @@ messages directs (create_trigger vers la session concernée).
 | 01/10 | Beau → Learn | « Continue avec les défis de groupe » : src/Defis.tsx (tables learn_defis/learn_solutions déjà appliquées, aucune migration nouvelle). Compteur = nombre de solutions rendues visibles par la RLS ; comptes de test non filtrés (espace privé du groupe, pas un chiffre public). |
 | 01/10 | Beau → Learn | « Continue avec le parcours Programmation, n'attends pas ma réponse » : 24 leçons, Pyodide (CDN jsDelivr v0.27.7, chargé à la demande dans un Worker). Test auto des 24 leçons OK (Pyodide servi en local dans le navigateur de test : le navigateur du bac à sable n'atteint pas le CDN). |
 | 01/10 | Learn | Programmation : 34 leçons (10 exercices Python ajoutés), test auto des 34 OK (commit cc1e5ea). |
+| 01/10 | Beau → Learn | Design en 2 thèmes (Finjaro / Noir) ; demande de parcours data science, deep learning, AI engineering. |
