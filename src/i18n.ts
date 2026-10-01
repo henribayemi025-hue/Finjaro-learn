@@ -1,0 +1,38 @@
+export type Lang = 'fr' | 'en'
+
+export const ui = {
+  fr: {
+    tagline: "Apprends à coder et l'IA, pas à pas.",
+    lessons: 'Leçons',
+    explain: 'Explication',
+    example: 'Exemple',
+    exercise: 'À toi de jouer',
+    run: 'Lancer',
+    hint: 'Un indice',
+    solution: 'Voir la solution',
+    next: 'Leçon suivante',
+    output: 'Résultat',
+    ok: 'Bravo, ça marche !',
+    ko: 'Pas encore. Relis la consigne et essaie encore.',
+    error: 'Erreur dans ton code :',
+    done: 'faite',
+    noOutput: '(rien affiché)',
+  },
+  en: {
+    tagline: 'Learn to code and AI, step by step.',
+    lessons: 'Lessons',
+    explain: 'Explanation',
+    example: 'Example',
+    exercise: 'Your turn',
+    run: 'Run',
+    hint: 'A hint',
+    solution: 'Show solution',
+    next: 'Next lesson',
+    output: 'Output',
+    ok: 'Well done, it works!',
+    ko: 'Not yet. Re-read the task and try again.',
+    error: 'Error in your code:',
+    done: 'done',
+    noOutput: '(nothing printed)',
+  },
+} as const
