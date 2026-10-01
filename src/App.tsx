@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import Espaces from './Espaces'
 import Outils from './outils/Outils'
+import Entraide from './entraide/Entraide'
+import { eu as entraideUi } from './entraide/i18n'
 import { o as outilsUi } from './outils/i18n'
 import { AuthBox } from './Auth'
 import { supabase } from './supabase'
@@ -33,7 +35,7 @@ function save(key: string, v: string) {
 export default function App() {
   const [lang, setLang] = useState<Lang>(getLang)
   const [session, setSession] = useState<Session | null>(null)
-  const [view, setView] = useState<'lecons' | 'espaces' | 'outils'>(() => (new URLSearchParams(window.location.search).has('join') ? 'espaces' : 'lecons'))
+  const [view, setView] = useState<'lecons' | 'espaces' | 'outils' | 'entraide'>(() => (new URLSearchParams(window.location.search).has('join') ? 'espaces' : 'lecons'))
   const [ai, setAi] = useState(() => load('ai', '0') === '1')
   const [idx, setIdx] = useState(0)
   const [done, setDone] = useState<string[]>(() => JSON.parse(load('done', '[]')))
@@ -128,14 +130,15 @@ export default function App() {
       </header>
 
       <div className="max-w-5xl mx-auto px-4 pt-3 flex gap-2" role="tablist">
-        {(['lecons', 'espaces', 'outils'] as const).map((v) => (
+        {(['lecons', 'espaces', 'outils', 'entraide'] as const).map((v) => (
           <button key={v} role="tab" aria-selected={view === v} onClick={() => setView(v)}
             className={`px-4 py-1.5 rounded-md text-sm border ${view === v ? 'bg-ink text-cream border-ink' : 'border-ink/30'}`}>
-            {v === 'lecons' ? t.lessonsTab : v === 'espaces' ? t.spaces : outilsUi[lang].tab}
+            {v === 'lecons' ? t.lessonsTab : v === 'espaces' ? t.spaces : v === 'entraide' ? entraideUi(lang).tab : outilsUi[lang].tab}
           </button>
         ))}
       </div>
       {view === 'outils' && <div className="max-w-5xl mx-auto px-4 py-4"><Outils lang={lang} session={session} /></div>}
+      {view === 'entraide' && <div className="max-w-5xl mx-auto px-4 py-4"><Entraide lang={lang} session={session} /></div>}
       {view === 'espaces' && <div className="max-w-5xl mx-auto px-4 py-4"><Espaces lang={lang} session={session} /></div>}
       <div className={`max-w-5xl mx-auto px-4 py-4 grid gap-4 md:grid-cols-[220px_1fr] ${view !== 'lecons' ? 'hidden' : ''}`}>
         <nav aria-label={t.lessons}>
