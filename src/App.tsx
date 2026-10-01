@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ui, type Lang } from './i18n'
 import { lessons } from './lessons'
+import AgentPanel from './AgentPanel'
 import { runCode, type RunResult } from './runner'
 
 const pre = 'rounded-lg bg-ink text-cream p-3 text-sm overflow-x-auto whitespace-pre-wrap font-mono'
@@ -22,6 +23,7 @@ function save(key: string, v: string) {
 
 export default function App() {
   const [lang, setLang] = useState<Lang>(getLang)
+  const [ai, setAi] = useState(() => load('ai', '0') === '1')
   const [idx, setIdx] = useState(0)
   const [done, setDone] = useState<string[]>(() => JSON.parse(load('done', '[]')))
   const lesson = lessons[idx]
@@ -55,12 +57,26 @@ export default function App() {
             <h1 className="font-bold text-2xl">Finjaro Learn</h1>
             <p className="text-sm text-ink/60">{t.tagline}</p>
           </div>
+          <div className="flex items-center gap-2">
+          <div role="group" aria-label={t.aiHelp} title={t.aiHelp} className="flex rounded-md border border-ink/30 overflow-hidden text-sm">
+            {[false, true].map((v) => (
+              <button
+                key={String(v)}
+                aria-pressed={ai === v}
+                onClick={() => { setAi(v); save('ai', v ? '1' : '0') }}
+                className={`px-3 py-1.5 ${ai === v ? 'bg-terracotta text-white' : ''}`}
+              >
+                {v ? t.aiOn : t.aiOff}
+              </button>
+            ))}
+          </div>
           <button
             className="text-sm border border-ink/30 rounded-md px-3 py-1.5"
             onClick={() => { const l = lang === 'fr' ? 'en' : 'fr'; setLang(l); save('lang', l) }}
           >
             {lang === 'fr' ? 'EN' : 'FR'}
           </button>
+          </div>
         </div>
       </header>
 
@@ -85,6 +101,7 @@ export default function App() {
 
         <main className="space-y-4 min-w-0">
           <h2 className="text-xl font-bold">{lesson.title[lang]}</h2>
+          {ai && <AgentPanel lang={lang} />}
           <section>
             <h3 className="font-semibold mb-1">{t.explain}</h3>
             <p>{lesson.explain[lang]}</p>

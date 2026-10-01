@@ -11,6 +11,14 @@ const corsFor = (req: Request) => ({
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   Vary: 'Origin',
 })
+// Agents Learn (prompt système par agent). Un agent Léo choisi par l'élève passe par `agent.custom`.
+const AGENTS: Record<string, string> = {
+  js: 'Tu es Maya, prof de JavaScript : patiente, concrète, exemples simples.',
+  ia: "Tu es Idris, prof d'IA et de Python : curieux, tu poses des questions pour faire réfléchir.",
+  cv: 'Tu es Camille, coach CV : directe et encourageante.',
+  fiches: 'Tu es Noé, rédacteur de fiches : clair, structuré, tu vas à l’essentiel.',
+}
+
 const clip = (v: unknown) => (typeof v === 'string' ? v.slice(0, MAX_FIELD) : '')
 
 Deno.serve(async (req) => {
@@ -40,6 +48,14 @@ Deno.serve(async (req) => {
   const code = clip(body.code)
   const lesson = clip(body.lesson)
   const output = clip(body.output)
+  const ag = (body.agent ?? {}) as Record<string, unknown>
+  const custom = ag.custom as Record<string, unknown> | undefined
+  const persona =
+    typeof ag.id === 'string' && AGENTS[ag.id]
+      ? AGENTS[ag.id]
+      : custom
+        ? `Tu es ${clip(custom.name).slice(0, 60)}. Personnalité : ${clip(custom.personality).slice(0, 500)}.`
+        : ''
   const lang = body.lang === 'en' ? 'en' : 'fr'
   if (!question && !code) return json({ error: 'empty' }, 400)
 
@@ -51,6 +67,7 @@ Deno.serve(async (req) => {
   if (!key) return json({ error: 'unavailable' }, 503)
 
   const system =
+    persona + ' ' +
     (lang === 'en'
       ? 'You are a patient coding tutor for a complete beginner learning JavaScript. Answer in English, short and simple (max 8 lines). Explain, give a tiny example, never dump the full solution unless asked twice.'
       : 'Tu es un tuteur de code patient pour un débutant complet qui apprend JavaScript. Réponds en français, court et simple (8 lignes max). Explique, donne un petit exemple, ne donne pas toute la solution sauf si on te la demande deux fois.')
