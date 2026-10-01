@@ -1,4 +1,5 @@
 import type { Lang } from './i18n'
+import { pyLessons } from './lessonsPy'
 
 type T = Record<Lang, string>
 
@@ -13,9 +14,13 @@ export interface Lesson {
   solution: string
   /** Expressions évaluées après le code de l'élève ; toutes doivent être vraies. */
   checks: string[]
+  /** Langage de l'exercice (JavaScript par défaut). */
+  lang?: 'js' | 'py'
+  /** Section du parcours Programmation dans la liste des leçons. */
+  group?: 'js' | 'py-bases' | 'py-algo'
 }
 
-export const lessons: Lesson[] = [
+const jsLessons: Lesson[] = [
   {
     id: 'afficher',
     title: { fr: 'Afficher un message', en: 'Print a message' },
@@ -97,3 +102,5 @@ export const lessons: Lesson[] = [
     checks: ['somme(3) === 6', 'somme(10) === 55', 'somme(0) === 0'],
   },
 ]
+
+export const lessons: Lesson[] = [...jsLessons.map((l) => ({ ...l, lang: 'js' as const, group: 'js' as const })), ...pyLessons]

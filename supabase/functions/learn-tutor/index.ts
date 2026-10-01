@@ -91,8 +91,8 @@ Deno.serve(async (req) => {
   let system =
     persona + ' ' +
     (lang === 'en'
-      ? 'You are a patient coding tutor for a complete beginner learning JavaScript. Answer in English, short and simple (max 8 lines). Explain, give a tiny example, never dump the full solution unless asked twice.'
-      : 'Tu es un tuteur de code patient pour un débutant complet qui apprend JavaScript. Réponds en français, court et simple (8 lignes max). Explique, donne un petit exemple, ne donne pas toute la solution sauf si on te la demande deux fois.')
+      ? 'You are a patient coding tutor for a complete beginner learning programming (JavaScript or Python, as stated in the lesson context). Answer in English, short and simple (max 8 lines). Explain, give a tiny example, never dump the full solution unless asked twice.'
+      : 'Tu es un tuteur de code patient pour un débutant complet qui apprend la programmation (JavaScript ou Python, selon la leçon). Réponds en français, court et simple (8 lignes max). Explique, donne un petit exemple, ne donne pas toute la solution sauf si on te la demande deux fois.')
 
   const fixHint = fixMode
     ? (lang === 'en'

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from './supabase'
 import { lessons } from './lessons'
-import { runCode } from './runner'
+import { runLesson } from './runner'
 import type { Lang } from './i18n'
 
 const T = {
@@ -117,7 +117,7 @@ function Defi({ lang, userId, espaceId, defi, onBack }: { lang: Lang; userId: st
   useEffect(() => { load() }, [load])
 
   const run = async () => {
-    const r = await runCode(code, lesson.checks)
+    const r = await runLesson(lesson, code)
     setPassed(r.passed === true); setOut(r.error ? `${r.error}` : r.output.join('\n'))
     return r.passed === true
   }

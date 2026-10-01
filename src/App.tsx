@@ -14,9 +14,15 @@ import AgentPanel from './AgentPanel'
 import DiffModal from './DiffModal'
 import { askFix, type FixProposal } from './tutor'
 import { playError, playSuccess } from './sounds'
-import { runCode, type RunResult } from './runner'
+import { runLesson, type RunResult } from './runner'
 
 const pre = 'rounded-lg bg-ink text-cream p-3 text-sm overflow-x-auto whitespace-pre-wrap font-mono'
+
+const GROUPS = {
+  js: { fr: 'JavaScript', en: 'JavaScript' },
+  'py-bases': { fr: 'Python · bases', en: 'Python · basics' },
+  'py-algo': { fr: 'Python · algorithmes et structures', en: 'Python · algorithms and structures' },
+} as const
 
 function getLang(): Lang {
   try {
@@ -74,7 +80,7 @@ export default function App() {
   }
 
   const run = async () => {
-    const r = await runCode(code, lesson.checks)
+    const r = await runLesson(lesson, code)
     setRes(r)
     if (sound && r.passed !== null) (r.passed ? playSuccess : playError)()
     if (r.passed && !done.includes(lesson.id)) {
@@ -147,7 +153,12 @@ export default function App() {
           <h2 className="text-xs uppercase tracking-wide text-ink/60 mb-2">{t.lessons}</h2>
           <ol className="flex md:flex-col gap-2 overflow-x-auto">
             {lessons.map((l, i) => (
-              <li key={l.id} className="shrink-0">
+              <li key={l.id} className="shrink-0 flex md:block items-center gap-2">
+                {(i === 0 || lessons[i - 1].group !== l.group) && (
+                  <span className="text-[11px] uppercase tracking-wide text-ink/50 md:block md:mt-2 md:mb-1 whitespace-nowrap">
+                    {GROUPS[l.group ?? 'js'][lang]}
+                  </span>
+                )}
                 <button
                   onClick={() => go(i)}
                   className={`w-full text-left rounded-md px-3 py-2 text-sm border ${
@@ -162,8 +173,8 @@ export default function App() {
         </nav>
 
         <main className="space-y-4 min-w-0">
-          <h2 className="text-xl font-bold">{lesson.title[lang]}</h2>
-          {ai && <AgentPanel lang={lang} signedIn={!!session} ctx={{ title: lesson.title[lang], code, output: res?.output.join('\n') ?? '' }} />}
+          <h2 className="text-xl font-bold">{lesson.title[lang]} <span className="text-xs font-sans font-normal text-ink/50">{lesson.lang === 'py' ? 'Python' : 'JavaScript'}</span></h2>
+          {ai && <AgentPanel lang={lang} signedIn={!!session} ctx={{ title: (lesson.lang === 'py' ? '[Python] ' : '[JavaScript] ') + lesson.title[lang], code, output: res?.output.join('\n') ?? '' }} />}
           <section>
             <h3 className="font-semibold mb-1">{t.explain}</h3>
             <p>{lesson.explain[lang]}</p>

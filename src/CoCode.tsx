@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react'
 import { apply, prune, initial, HELLO_EVERY, type CoEvent, type CoState } from './coop'
 import { lessons } from './lessons'
-import { runCode, type RunResult } from './runner'
+import { runLesson, type RunResult } from './runner'
 import { ui, type Lang } from './i18n'
 
 const T = {
@@ -78,7 +78,7 @@ export default function CoCode({ lang, me, send, handlerRef }: {
         <textarea value={s.code} readOnly={!iAmPilot} onChange={(e) => onType(e.target.value)} rows={8} spellCheck={false}
           aria-label={t.title} className={`w-full rounded-lg border p-3 font-mono text-sm ${iAmPilot ? 'border-terracotta bg-white/70' : 'border-ink/30 bg-paper'}`} />
         <div className="space-y-2 min-w-0">
-          <button className="bg-terracotta text-white rounded-md px-4 py-2 text-sm" onClick={async () => setRes(await runCode(s.code, lesson.checks))}>{t.run}</button>
+          <button className="bg-terracotta text-white rounded-md px-4 py-2 text-sm" onClick={async () => setRes(await runLesson(lesson, s.code))}>{t.run}</button>
           {res && (
             <div aria-live="polite" className="space-y-1">
               <h4 className="text-sm font-semibold">{t.output}</h4>

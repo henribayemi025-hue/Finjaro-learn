@@ -23,7 +23,7 @@ Structure inspirée de la **forme** des cours ouverts publics (progression, exer
 
 | Parcours | Contenu | État |
 |---|---|---|
-| (a) Programmation | JS puis Python, algorithmique, structures de données | **en cours — d'abord, complet avant d'ouvrir un autre** |
+| (a) Programmation | JS (4 leçons) puis Python : bases (7 leçons), algorithmes et structures (7 leçons : récursivité, recherche dichotomique, tri, piles, ensembles et coût, mémoïsation, classes) | **en cours — d'abord, complet avant d'ouvrir un autre** ; reste : projets de fin de parcours, notation par tests cachés, plus d'exercices par notion |
 | (b) Data science | statistiques, probabilités, pandas, visualisation, ML classique | à venir |
 | (c) IA / deep learning | réseaux de neurones, entraînement, évaluation | à venir |
 | (d) AI engineering | appeler des modèles, RAG, agents, évaluation, mise en production | à venir |

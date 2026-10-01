@@ -38,3 +38,71 @@ export function runCode(code: string, checks: string[]): Promise<RunResult> {
     w.postMessage({ code, checks })
   })
 }
+
+// ───────── Python (Pyodide, chargé à la demande depuis le CDN jsDelivr : gratuit, aucune clé) ─────────
+const PYODIDE = 'https://cdn.jsdelivr.net/pyodide/v0.27.7/full/'
+
+const pyWorkerSrc = `
+let py = null
+onmessage = async (e) => {
+  const d = e.data
+  try {
+    if (d.type === 'init') {
+      importScripts('${PYODIDE}pyodide.js')
+      py = await loadPyodide({ indexURL: '${PYODIDE}' })
+      postMessage({ type: 'ready' })
+      return
+    }
+    const out = []
+    py.setStdout({ batched: (s) => out.push(s) })
+    py.setStderr({ batched: (s) => out.push(s) })
+    const ns = py.globals.get('dict')()
+    try {
+      py.runPython(d.code, { globals: ns })
+      ns.set('__out', out.join('\\n'))
+      const results = d.checks.map((c) => !!py.runPython(c, { globals: ns }))
+      postMessage({ type: 'done', output: out, error: null, passed: d.checks.length === 0 ? null : results.every(Boolean) })
+    } catch (err) {
+      const msg = String(err && err.message ? err.message : err).trim().split('\\n').slice(-3).join('\\n')
+      postMessage({ type: 'done', output: out, error: msg, passed: false })
+    } finally { ns.destroy() }
+  } catch (err) {
+    postMessage({ type: 'fatal', error: String(err && err.message ? err.message : err) })
+  }
+}`
+
+let pyWorker: Worker | null = null
+let pyReady: Promise<void> | null = null
+
+function startPython(): Promise<void> {
+  if (pyReady) return pyReady
+  const url = URL.createObjectURL(new Blob([pyWorkerSrc], { type: 'text/javascript' }))
+  const w = new Worker(url)
+  pyWorker = w
+  pyReady = new Promise<void>((resolve, reject) => {
+    const t = setTimeout(() => { reset(); reject(new Error('Python : chargement trop long (réseau ?)')) }, 90000)
+    w.onmessage = (e) => { if (e.data.type === 'ready') { clearTimeout(t); resolve() } else if (e.data.type === 'fatal') { clearTimeout(t); reset(); reject(new Error(e.data.error)) } }
+    w.onerror = (e) => { clearTimeout(t); reset(); reject(new Error(e.message)) }
+    w.postMessage({ type: 'init' })
+  })
+  return pyReady
+}
+
+function reset() { pyWorker?.terminate(); pyWorker = null; pyReady = null }
+
+/** Exécute du Python dans un Worker isolé (Pyodide). Boucle infinie : le Worker est arrêté après 6 s. */
+export async function runPython(code: string, checks: string[]): Promise<RunResult> {
+  try { await startPython() } catch (e) { return { output: [], error: String((e as Error).message), passed: false } }
+  const w = pyWorker!
+  return new Promise<RunResult>((resolve) => {
+    const t = setTimeout(() => { reset(); resolve({ output: [], error: 'Timeout (boucle infinie ?)', passed: false }) }, 6000)
+    w.onmessage = (e) => { if (e.data.type === 'done') { clearTimeout(t); resolve({ output: e.data.output, error: e.data.error, passed: e.data.passed }) } }
+    w.onerror = (e) => { clearTimeout(t); reset(); resolve({ output: [], error: e.message, passed: false }) }
+    w.postMessage({ type: 'run', code, checks })
+  })
+}
+
+/** Lance le code d'une leçon dans le bon langage. */
+export function runLesson(lesson: { lang?: 'js' | 'py'; checks: string[] }, code: string): Promise<RunResult> {
+  return lesson.lang === 'py' ? runPython(code, lesson.checks) : runCode(code, lesson.checks)
+}
