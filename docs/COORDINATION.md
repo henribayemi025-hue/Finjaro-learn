@@ -34,3 +34,4 @@ messages directs (create_trigger vers la session concernée).
 | 01/10 | Learn | Programmation : 34 leçons (10 exercices Python ajoutés), test auto des 34 OK (commit cc1e5ea). |
 | 01/10 | Beau → Learn | Design en 2 thèmes (Finjaro / Noir) ; demande de parcours data science, deep learning, AI engineering. |
 | 01/10 | Learn | 76 leçons (parcours a→e) vérifiées dans le navigateur ; bug corrigé : les vérifications NumPy renvoyaient un objet « truthy » (corrigé par bool(eval)). Commit 9695ab8 + docs. |
+| 01/10 | Learn | 83 leçons : +6 visualisation/projet Data science (graphiques SVG dans la page : courbe(), nuage(), barres()), +1 projet RAG. Vérifié navigateur. |

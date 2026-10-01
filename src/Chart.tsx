@@ -1,6 +1,6 @@
 import type { Figure } from './runner'
 
-const W = 480, H = 280, L = 44, R = 12, T = 28, B = 36
+const W = 480, H = 280, L = 48, R = 14, T = 30, B = 38
 
 const nice = (v: number) => (Math.abs(v) >= 1000 ? v.toFixed(0) : Math.abs(v) >= 10 ? v.toFixed(1) : v.toFixed(2)).replace(/\.?0+$/, '')
 
@@ -22,24 +22,24 @@ export default function Chart({ fig }: { fig: Figure }) {
   return (
     <figure className="rounded-lg border border-brass/50 bg-paper p-2">
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={fig.titre || fig.type} className="w-full h-auto">
-        <text x={W / 2} y={16} textAnchor="middle" fontSize="13" fill="currentColor" fontFamily="Fraunces, Georgia, serif">{fig.titre}</text>
+        <text x={W / 2} y={16} textAnchor="middle" fontSize="14" fill="currentColor" fontFamily="Fraunces, Georgia, serif">{fig.titre}</text>
         <line x1={L} y1={H - B} x2={W - R} y2={H - B} stroke="currentColor" strokeOpacity=".4" />
         <line x1={L} y1={T} x2={L} y2={H - B} stroke="currentColor" strokeOpacity=".4" />
-        <text x={L - 6} y={sy(ymax) + 4} textAnchor="end" fontSize="10" fill="currentColor">{nice(ymax)}</text>
-        <text x={L - 6} y={sy(ymin) + 4} textAnchor="end" fontSize="10" fill="currentColor">{nice(ymin)}</text>
+        <text x={L - 6} y={sy(ymax) + 4} textAnchor="end" fontSize="12" fill="currentColor">{nice(ymax)}</text>
+        <text x={L - 6} y={sy(ymin) + 4} textAnchor="end" fontSize="12" fill="currentColor">{nice(ymin)}</text>
         {fig.type === 'barres' ? (
           <>
             {fig.y.map((v, i) => (
               <g key={i}>
                 <rect x={bx(i) - barW / 2} y={Math.min(sy(v), sy(0))} width={barW} height={Math.abs(sy(v) - sy(0))} fill="var(--color-terracotta)" rx="2" />
-                <text x={bx(i)} y={H - B + 13} textAnchor="middle" fontSize="9" fill="currentColor">{String(fig.x[i]).slice(0, 8)}</text>
+                <text x={bx(i)} y={H - B + 13} textAnchor="middle" fontSize="11" fill="currentColor">{String(fig.x[i]).slice(0, 8)}</text>
               </g>
             ))}
           </>
         ) : (
           <>
-            <text x={L} y={H - B + 14} textAnchor="start" fontSize="10" fill="currentColor">{nice(x0)}</text>
-            <text x={W - R} y={H - B + 14} textAnchor="end" fontSize="10" fill="currentColor">{nice(x1)}</text>
+            <text x={L} y={H - B + 14} textAnchor="start" fontSize="12" fill="currentColor">{nice(x0)}</text>
+            <text x={W - R} y={H - B + 14} textAnchor="end" fontSize="12" fill="currentColor">{nice(x1)}</text>
             {fig.type === 'courbe' ? (
               <polyline fill="none" stroke="var(--color-terracotta)" strokeWidth="2" strokeLinejoin="round" points={xs.map((v, i) => `${sx(v)},${sy(fig.y[i])}`).join(' ')} />
             ) : (

@@ -66,7 +66,8 @@ const PY_HELPERS = [
 
 const pyWorkerSrc = `
 const HELPERS = ${JSON.stringify(PY_HELPERS)}
-const figures = (py, ns) => { try { return JSON.parse(py.runPython('import json\\njson.dumps(__figs)', { globals: ns })) } catch (e) { return [] } }
+const figures = (py, ns, from, to) => { try { return JSON.parse(py.runPython('import json\\njson.dumps(__figs[' + (from || 0) + ':' + (to === undefined ? '' : to) + '])', { globals: ns })) } catch (e) { return [] } }
+const nfigs = (py, ns) => { try { return py.runPython('len(__figs)', { globals: ns }) } catch (e) { return 0 } }
 let py = null
 onmessage = async (e) => {
   const d = e.data
@@ -85,11 +86,20 @@ onmessage = async (e) => {
     try {
       py.runPython(HELPERS, { globals: ns })
       py.runPython(d.code, { globals: ns })
+      // Figures tracées par le code de l'élève lui-même ; sinon, celles du premier test qui en produit.
+      let shown = figures(py, ns)
       ns.set('__out', out.join('\\n'))
       for (const mod of ['numpy as np', 'pandas as pd']) { try { py.runPython('import ' + mod, { globals: ns }) } catch (e) { /* bibliothèque non chargée */ } }
       py.runPython('def __raises(f, e=Exception):\\n    try:\\n        f()\\n    except e:\\n        return True\\n    return False\\ndef __exc(f):\\n    try:\\n        f()\\n    except Exception as ex:\\n        return ex\\n    return None', { globals: ns })
-      const results = d.checks.map((c) => { ns.set('__c', c); return py.runPython('bool(eval(__c, globals()))', { globals: ns }) === true })
-      postMessage({ type: 'done', output: out, error: null, passed: d.checks.length === 0 ? null : results.every(Boolean), figures: figures(py, ns) })
+      const results = d.checks.map((c) => {
+        const before = nfigs(py, ns)
+        ns.set('__c', c)
+        const ok = py.runPython('bool(eval(__c, globals()))', { globals: ns }) === true
+        const after = nfigs(py, ns)
+        if (!shown.length && after > before) shown = figures(py, ns, before, after)
+        return ok
+      })
+      postMessage({ type: 'done', output: out, error: null, passed: d.checks.length === 0 ? null : results.every(Boolean), figures: shown })
     } catch (err) {
       const msg = String(err && err.message ? err.message : err).trim().split('\\n').slice(-3).join('\\n')
       postMessage({ type: 'done', output: out, error: msg, passed: false, figures: figures(py, ns) })

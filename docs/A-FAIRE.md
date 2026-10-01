@@ -18,6 +18,7 @@ Chaque demande de Beau, le jour même. On coche ✅ avec la date, on ne supprime
 | 01/10 | « Continue avec le parcours Programmation, même si je ne réponds pas : n'attends pas ma réponse. » | Fait : 34 leçons (4 JavaScript + 30 Python : bases, algorithmes et structures, 2 projets), Python dans le navigateur (Pyodide, gratuit). Chaque leçon vérifiée (départ échoue, solution réussit) ; vue d'ensemble repliable sur téléphone. |
 | 01/10 | « Continue : ça doit être utile aux data scientists, futurs AI engineers, data analysts : réseaux de neurones, deep learning, créer leurs IA. » + « N'oublie pas le design : fantastique, avec deux couleurs : l'une de Finjaro et l'autre noir. » | Design : 2 thèmes (bouton ☾/☀ : « Finjaro » crème-terracotta et « Noir » noir profond, même terracotta), logo, relief, sidebar fixe, téléphone corrigé. Contenu : parcours Data science, Deep learning (from scratch avec numpy), AI engineering, Prompt engineering en cours (voir PLAN.md). |
 | 01/10 | (suite) parcours Data science, deep learning, AI engineering, prompt engineering | Fait : 76 leçons au total (34 + 12 + 14 + 10 + 6), toutes vérifiées dans le navigateur (départ échoue / solution réussit). Vue d'ensemble des 5 parcours avec barre de progression réelle. |
+| 01/10 | (suite) graphiques et projets | Fait : 83 leçons au total ; graphiques tracés dans la page (courbe, nuage, barres) ; projet rapport de ventes (Data science) et assistant RAG (AI engineering). Tout vérifié dans le navigateur. |
 
 ## 1. Ce qu'on attend de Beau
 
