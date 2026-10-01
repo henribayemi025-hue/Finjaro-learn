@@ -17,7 +17,7 @@ export interface Lesson {
   /** Langage de l'exercice (JavaScript par défaut). */
   lang?: 'js' | 'py'
   /** Section du parcours Programmation dans la liste des leçons. */
-  group?: 'js' | 'py-bases' | 'py-algo'
+  group?: 'js' | 'py-bases' | 'py-algo' | 'py-projets'
 }
 
 const jsLessons: Lesson[] = [
@@ -103,4 +103,8 @@ const jsLessons: Lesson[] = [
   },
 ]
 
+const ORDER = ['js', 'py-bases', 'py-algo', 'py-projets']
 export const lessons: Lesson[] = [...jsLessons.map((l) => ({ ...l, lang: 'js' as const, group: 'js' as const })), ...pyLessons]
+  .map((l, i) => ({ l, i }))
+  .sort((a, b) => ORDER.indexOf(a.l.group ?? 'js') - ORDER.indexOf(b.l.group ?? 'js') || a.i - b.i)
+  .map((x) => x.l)

@@ -22,6 +22,7 @@ const GROUPS = {
   js: { fr: 'JavaScript', en: 'JavaScript' },
   'py-bases': { fr: 'Python · bases', en: 'Python · basics' },
   'py-algo': { fr: 'Python · algorithmes et structures', en: 'Python · algorithms and structures' },
+  'py-projets': { fr: 'Python · projets', en: 'Python · projects' },
 } as const
 
 function getLang(): Lang {

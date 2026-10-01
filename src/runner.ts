@@ -60,6 +60,7 @@ onmessage = async (e) => {
     try {
       py.runPython(d.code, { globals: ns })
       ns.set('__out', out.join('\\n'))
+      py.runPython('def __raises(f, e=Exception):\\n    try:\\n        f()\\n    except e:\\n        return True\\n    return False', { globals: ns })
       const results = d.checks.map((c) => !!py.runPython(c, { globals: ns }))
       postMessage({ type: 'done', output: out, error: null, passed: d.checks.length === 0 ? null : results.every(Boolean) })
     } catch (err) {
