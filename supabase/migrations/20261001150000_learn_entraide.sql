@@ -109,8 +109,10 @@ revoke all on public.learn_entraide_moderateurs, public.learn_entraide_usage fro
 -- Questions et réponses : lecture des contenus non masqués (ou les siens, ou modérateur) ; écriture par RPC seulement.
 create policy learn_entraide_q_select on public.learn_entraide_questions for select to authenticated
   using (not masquee or auteur_id = auth.uid() or public.learn_est_moderateur());
+-- Une réponse n'est visible que si sa question l'est (la règle de la question s'applique dans la sous-requête).
 create policy learn_entraide_r_select on public.learn_entraide_reponses for select to authenticated
-  using (not masquee or auteur_id = auth.uid() or public.learn_est_moderateur());
+  using ((not masquee or auteur_id = auth.uid() or public.learn_est_moderateur())
+         and exists (select 1 from public.learn_entraide_questions q where q.id = question_id));
 revoke insert, update, delete on public.learn_entraide_questions, public.learn_entraide_reponses from authenticated;
 
 -- Signalements : visibles des modérateurs seulement ; création par RPC.
@@ -125,6 +127,9 @@ declare uid uuid := auth.uid(); n int; qid uuid;
 begin
   if uid is null then raise exception 'auth'; end if;
   if not public.learn_a_pseudo() then raise exception 'pseudo'; end if;
+  if exists (select 1 from unnest(coalesce(p_tags, '{}')) t where length(t) not between 1 and 30) then
+    raise exception 'étiquette invalide';
+  end if;
   insert into public.learn_entraide_usage (user_id, day, questions) values (uid, (now() at time zone 'utc')::date, 1)
     on conflict (user_id, day) do update set questions = public.learn_entraide_usage.questions + 1
     returning questions into n;
