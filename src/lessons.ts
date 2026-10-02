@@ -9,13 +9,18 @@ import { peLessons } from './lessonsPE'
 import { mathsLessons } from './lessonsMaths'
 import { cryptoLessons } from './lessonsCrypto'
 import { archiLessons } from './lessonsArchi'
+import { projetsLessons } from './lessonsProjets'
+import { outilsLessons } from './lessonsOutils'
+import { cLessons } from './lessonsC'
+import { cppLessons } from './lessonsCpp'
+import { roboLessons } from './lessonsRobo'
 import { algoLessons } from './lessonsAlgo'
 import { quantLessons } from './lessonsQuant'
 import { nlpLessons } from './lessonsNLP'
 import { compilLessons } from './lessonsCompil'
 
 type T = Record<Lang, string>
-export type Group = 'js' | 'py-bases' | 'py-algo' | 'py-lecture' | 'py-projets' | 'ds-numpy' | 'ds-pandas' | 'ds-ml' | 'ds-viz' | 'dl' | 'dl-reseaux' | 'ai-rag' | 'ai-agents' | 'pe' | 'maths' | 'crypto' | 'archi' | 'algo' | 'quant' | 'nlp' | 'compil'
+export type Group = 'js' | 'py-bases' | 'py-algo' | 'py-lecture' | 'py-projets' | 'ds-numpy' | 'ds-pandas' | 'ds-ml' | 'ds-viz' | 'dl' | 'dl-reseaux' | 'ai-rag' | 'ai-agents' | 'pe' | 'maths' | 'crypto' | 'archi' | 'pg-calc' | 'pg-robot' | 'pg-faq' | 'ia-api' | 'git' | 'c' | 'cpp' | 'robo' | 'algo' | 'quant' | 'nlp' | 'compil'
 
 export interface Lesson {
   id: string
@@ -34,6 +39,8 @@ export interface Lesson {
   group?: Group
   /** Exercice de lecture : prédire la sortie d'un code sans l'exécuter. */
   predict?: { code: string; answer: string; why: T }
+  /** Langage affiché quand il diffère de lang (leçons de lecture en C ou C++). */
+  langue?: 'c' | 'cpp'
   /** Bibliothèques Python à charger (numpy, pandas…). */
   packages?: string[]
 }
@@ -121,8 +128,8 @@ const jsLessons: Lesson[] = [
   },
 ]
 
-const ORDER: Group[] = ['js', 'py-bases', 'py-algo', 'py-lecture', 'py-projets', 'ds-numpy', 'ds-pandas', 'ds-ml', 'ds-viz', 'dl', 'dl-reseaux', 'ai-rag', 'ai-agents', 'pe', 'maths', 'crypto', 'archi', 'algo', 'quant', 'nlp', 'compil']
-export const lessons: Lesson[] = [...jsLessons.map((l) => ({ ...l, lang: 'js' as const, group: 'js' as const })), ...pyLessons, ...readLessons, ...dataLessons, ...vizLessons, ...dlLessons, ...aiLessons, ...peLessons, ...mathsLessons, ...cryptoLessons, ...archiLessons, ...compilLessons, ...nlpLessons, ...quantLessons, ...algoLessons]
+const ORDER: Group[] = ['js', 'py-bases', 'py-algo', 'py-lecture', 'py-projets', 'ds-numpy', 'ds-pandas', 'ds-ml', 'ds-viz', 'dl', 'dl-reseaux', 'ai-rag', 'ai-agents', 'pe', 'maths', 'crypto', 'archi', 'pg-calc', 'pg-robot', 'pg-faq', 'ia-api', 'git', 'c', 'cpp', 'robo', 'algo', 'quant', 'nlp', 'compil']
+export const lessons: Lesson[] = [...jsLessons.map((l) => ({ ...l, lang: 'js' as const, group: 'js' as const })), ...pyLessons, ...readLessons, ...dataLessons, ...vizLessons, ...dlLessons, ...aiLessons, ...peLessons, ...mathsLessons, ...cryptoLessons, ...archiLessons, ...compilLessons, ...nlpLessons, ...quantLessons, ...algoLessons, ...roboLessons, ...cLessons, ...cppLessons, ...outilsLessons, ...projetsLessons]
   .map((l, i) => ({ l, i }))
   .sort((a, b) => ORDER.indexOf(a.l.group ?? 'js') - ORDER.indexOf(b.l.group ?? 'js') || a.i - b.i)
   .map((x) => x.l)

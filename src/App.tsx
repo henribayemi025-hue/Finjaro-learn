@@ -54,6 +54,14 @@ const GROUPS = {
   nlp: { fr: 'NLP et Transformers', en: 'NLP and Transformers' },
   quant: { fr: 'Informatique quantique', en: 'Quantum computing' },
   algo: { fr: 'Algorithmique avancée', en: 'Advanced algorithms' },
+  robo: { fr: 'Robotique', en: 'Robotics' },
+  c: { fr: 'C', en: 'C' },
+  cpp: { fr: 'C++', en: 'C++' },
+  'ia-api': { fr: 'Outils IA · API et agents', en: 'AI tools · APIs and agents' },
+  git: { fr: 'Outils IA · Git et GitHub', en: 'AI tools · Git and GitHub' },
+  'pg-calc': { fr: 'Projet guidé · calculatrice', en: 'Guided project · calculator' },
+  'pg-robot': { fr: 'Projet guidé · robot explorateur', en: 'Guided project · explorer robot' },
+  'pg-faq': { fr: 'Projet guidé · assistant FAQ', en: 'Guided project · FAQ assistant' },
   archi: { fr: 'Ordinateurs', en: 'Computers' },
   crypto: { fr: 'Cryptographie', en: 'Cryptography' },
   maths: { fr: 'Maths pour l\'IA', en: 'Maths for AI' },
@@ -361,9 +369,9 @@ export default function App() {
           <div className="card p-5 sm:p-6 space-y-4">
           <div className="flex items-start justify-between gap-3">
             <h2 className="text-xl sm:text-2xl leading-tight">{lesson.title[lang]}</h2>
-            <span className="chip shrink-0">{lesson.lang === 'py' ? '🐍 Python' : '⚡ JavaScript'}</span>
+            <span className="chip shrink-0">{lesson.langue === 'c' ? '⚙️ C' : lesson.langue === 'cpp' ? '⚙️ C++' : lesson.lang === 'py' ? '🐍 Python' : '⚡ JavaScript'}</span>
           </div>
-          {ai && <AgentPanel lang={lang} signedIn={!!session} ctx={{ title: (lesson.lang === 'py' ? '[Python] ' : '[JavaScript] ') + lesson.title[lang], code, output: res?.output.join('\n') ?? '' }} />}
+          {ai && <AgentPanel lang={lang} signedIn={!!session} ctx={{ title: (lesson.langue === 'c' ? '[C] ' : lesson.langue === 'cpp' ? '[C++] ' : lesson.lang === 'py' ? '[Python] ' : '[JavaScript] ') + lesson.title[lang], code, output: res?.output.join('\n') ?? '' }} />}
           <section>
             <h3 className="text-sm uppercase tracking-wide text-ink/55 mb-1.5">{t.explain}</h3>
             <p className="leading-relaxed text-[15px]">{lesson.explain[lang]}</p>
