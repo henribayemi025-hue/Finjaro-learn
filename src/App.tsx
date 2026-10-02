@@ -51,6 +51,7 @@ const GROUPS = {
   compil: { fr: 'Compilateurs', en: 'Compilers' },
   nlp: { fr: 'NLP et Transformers', en: 'NLP and Transformers' },
   quant: { fr: 'Informatique quantique', en: 'Quantum computing' },
+  algo: { fr: 'Algorithmique avancée', en: 'Advanced algorithms' },
   archi: { fr: 'Ordinateurs', en: 'Computers' },
   crypto: { fr: 'Cryptographie', en: 'Cryptography' },
   maths: { fr: 'Maths pour l\'IA', en: 'Maths for AI' },

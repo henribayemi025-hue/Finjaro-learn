@@ -46,3 +46,5 @@ messages directs (create_trigger vers la session concernée).
 - 02/10 · Learn : refonte visuelle demandée par Beau (thèmes Finjaro/Noir redessinés, navigation mobile en bas, parcours cliquables). Aucun changement de base ni de fonction edge.
 
 - 02/10 · Learn : pistes « Compilateurs » (7) et « NLP et Transformers » (7), validées CPython puis navigateur. Rien côté base.
+
+- 02/10 · Learn : pistes « Informatique quantique » (6) et « Algorithmique avancée » (7) ; barre de symboles mobile. Rien côté base.

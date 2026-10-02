@@ -9,7 +9,7 @@ Règles qui filtrent : aucun chiffre ou diplôme inventé, aucune affiliation à
 ### Cours d'excellence (1–15)
 | # | Idée | État |
 |---|---|---|
-| 1 | Algorithmique avancée, structures complexes | ✅ en partie (14 leçons) · 🔜 suite : tas, arbres, Dijkstra, programmation dynamique |
+| 1 | Algorithmique avancée, structures complexes | ✅ 14 leçons + piste « Algorithmique avancée » (02/10) : 7 leçons (tas, Dijkstra, sac à dos, LCS, union-find, tri topologique, ABR) |
 | 2 | Architecture des ordinateurs | ✅ piste « Ordinateurs » (02/10) : 7 leçons (NAND, XOR, additionneur, n bits, complément à deux, UAL, mini-processeur) |
 | 3 | Maths pour le machine learning | ✅ piste « Maths pour l'IA » (01/10) : 10 leçons (vecteurs, cosinus, matrices, dérivée, gradient, moyenne/variance, Bayes, espérance, entropie, softmax) · 🔜 PCA |
 | 4 | Théorie de l'information, cryptographie | ✅ entropie + piste « Cryptographie » (02/10) : 8 leçons (César, Vigenère, fréquences, hachage, PGCD, exponentiation, RSA jouet, Diffie–Hellman) ; jouets, jamais pour de vraies données |
