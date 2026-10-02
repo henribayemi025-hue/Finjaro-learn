@@ -10,7 +10,7 @@ type Niveau = 'debutant' | 'intermediaire' | 'avance'
 /** Niveau conseillé de chaque parcours (une indication de difficulté, pas une note). */
 const NIVEAU: Record<string, Niveau> = {
   projets: 'debutant', prog: 'debutant', prompt: 'debutant',
-  data: 'intermediaire', dl: 'intermediaire', maths: 'intermediaire', crypto: 'intermediaire', archi: 'intermediaire', ccpp: 'intermediaire', robo: 'intermediaire', outils: 'intermediaire',
+  data: 'intermediaire', dl: 'intermediaire', maths: 'intermediaire', crypto: 'intermediaire', archi: 'intermediaire', ethique: 'intermediaire', ccpp: 'intermediaire', robo: 'intermediaire', outils: 'intermediaire',
   eng: 'avance', algo: 'avance', quant: 'avance', compil: 'avance', nlp: 'avance',
 }
 /** Projets phares : de vraies leçons de Learn. */

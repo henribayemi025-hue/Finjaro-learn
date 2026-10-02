@@ -3,7 +3,7 @@ import { acu } from './academy-i18n'
 import { TRACKS } from './tracks'
 import type { Lang } from './i18n'
 
-export const TRACK_ICON: Record<string, string> = { prog: '💻', data: '📊', dl: '🧠', eng: '🛠️', prompt: '💬', maths: '📐', crypto: '🔐', archi: '🔌', projets: '🏗️', outils: '🧰', ccpp: '⚙️', robo: '🤖', algo: '🧩', quant: '⚛️', compil: '⚙️', nlp: '🗣️' }
+export const TRACK_ICON: Record<string, string> = { prog: '💻', data: '📊', dl: '🧠', eng: '🛠️', prompt: '💬', maths: '📐', crypto: '🔐', archi: '🔌', ethique: '⚖️', projets: '🏗️', outils: '🧰', ccpp: '⚙️', robo: '🤖', algo: '🧩', quant: '⚛️', compil: '⚙️', nlp: '🗣️' }
 
 /** Parcours cliquables : choisir un parcours ouvre sa première leçon non faite. Aucun chiffre inventé : seuls les vrais nombres de leçons. */
 export default function Curriculum({ lang, done, current, onPick }: { lang: Lang; done: string[]; current: string; onPick: (key: string) => void }) {

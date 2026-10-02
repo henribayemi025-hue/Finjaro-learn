@@ -9,6 +9,7 @@ import { peLessons } from './lessonsPE'
 import { mathsLessons } from './lessonsMaths'
 import { cryptoLessons } from './lessonsCrypto'
 import { archiLessons } from './lessonsArchi'
+import { ethiqueLessons } from './lessonsEthique'
 import { robo2Lessons } from './lessonsRobo2'
 import { suiveurLessons } from './lessonsSuiveur'
 import { projetsLessons } from './lessonsProjets'
@@ -22,7 +23,7 @@ import { nlpLessons } from './lessonsNLP'
 import { compilLessons } from './lessonsCompil'
 
 type T = Record<Lang, string>
-export type Group = 'js' | 'py-bases' | 'py-algo' | 'py-lecture' | 'py-projets' | 'ds-numpy' | 'ds-pandas' | 'ds-ml' | 'ds-viz' | 'dl' | 'dl-reseaux' | 'ai-rag' | 'ai-agents' | 'pe' | 'maths' | 'crypto' | 'archi' | 'pg-calc' | 'pg-robot' | 'pg-faq' | 'pg-ligne' | 'ia-api' | 'git' | 'c' | 'cpp' | 'robo' | 'robo-traces' | 'robo-reel' | 'pg-ligne' | 'algo' | 'quant' | 'nlp' | 'compil'
+export type Group = 'js' | 'py-bases' | 'py-algo' | 'py-lecture' | 'py-projets' | 'ds-numpy' | 'ds-pandas' | 'ds-ml' | 'ds-viz' | 'dl' | 'dl-reseaux' | 'ai-rag' | 'ai-agents' | 'pe' | 'maths' | 'crypto' | 'archi' | 'ethique' | 'pg-calc' | 'pg-robot' | 'pg-faq' | 'pg-ligne' | 'ia-api' | 'git' | 'c' | 'cpp' | 'robo' | 'robo-traces' | 'robo-reel' | 'pg-ligne' | 'algo' | 'quant' | 'nlp' | 'compil'
 
 export interface Lesson {
   id: string
@@ -132,8 +133,8 @@ const jsLessons: Lesson[] = [
   },
 ]
 
-const ORDER: Group[] = ['js', 'py-bases', 'py-algo', 'py-lecture', 'py-projets', 'ds-numpy', 'ds-pandas', 'ds-ml', 'ds-viz', 'dl', 'dl-reseaux', 'ai-rag', 'ai-agents', 'pe', 'maths', 'crypto', 'archi', 'pg-calc', 'pg-robot', 'pg-faq', 'pg-ligne', 'ia-api', 'git', 'c', 'cpp', 'robo', 'robo-traces', 'robo-reel', 'algo', 'quant', 'nlp', 'compil']
-export const lessons: Lesson[] = [...jsLessons.map((l) => ({ ...l, lang: 'js' as const, group: 'js' as const })), ...pyLessons, ...readLessons, ...dataLessons, ...vizLessons, ...dlLessons, ...aiLessons, ...peLessons, ...mathsLessons, ...cryptoLessons, ...archiLessons, ...compilLessons, ...nlpLessons, ...quantLessons, ...algoLessons, ...roboLessons, ...cLessons, ...cppLessons, ...outilsLessons, ...projetsLessons, ...robo2Lessons, ...suiveurLessons]
+const ORDER: Group[] = ['js', 'py-bases', 'py-algo', 'py-lecture', 'py-projets', 'ds-numpy', 'ds-pandas', 'ds-ml', 'ds-viz', 'dl', 'dl-reseaux', 'ai-rag', 'ai-agents', 'pe', 'maths', 'crypto', 'archi', 'ethique', 'pg-calc', 'pg-robot', 'pg-faq', 'pg-ligne', 'ia-api', 'git', 'c', 'cpp', 'robo', 'robo-traces', 'robo-reel', 'algo', 'quant', 'nlp', 'compil']
+export const lessons: Lesson[] = [...jsLessons.map((l) => ({ ...l, lang: 'js' as const, group: 'js' as const })), ...pyLessons, ...readLessons, ...dataLessons, ...vizLessons, ...dlLessons, ...aiLessons, ...peLessons, ...mathsLessons, ...cryptoLessons, ...archiLessons, ...compilLessons, ...nlpLessons, ...quantLessons, ...algoLessons, ...roboLessons, ...cLessons, ...cppLessons, ...outilsLessons, ...projetsLessons, ...robo2Lessons, ...suiveurLessons, ...ethiqueLessons]
   .map((l, i) => ({ l, i }))
   .sort((a, b) => ORDER.indexOf(a.l.group ?? 'js') - ORDER.indexOf(b.l.group ?? 'js') || a.i - b.i)
   .map((x) => x.l)
