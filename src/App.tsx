@@ -241,8 +241,8 @@ export default function App() {
     <div className="min-h-screen pb-[calc(5.5rem+env(safe-area-inset-bottom))] xl:pb-0">
       <a href="#contenu" className="skip-link">{t.skip}</a>
       <header className="sticky top-0 z-30 border-b border-brass bg-[color-mix(in_srgb,var(--color-cream)_82%,transparent)] backdrop-blur-xl">
-        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5 min-w-0">
+        <div className="max-w-6xl 2xl:max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 min-w-0 xl:shrink-0">
             <span aria-hidden="true" className="size-9 shrink-0 rounded-xl grad text-white grid place-items-center font-extrabold text-lg shadow-md">F</span>
             <h1 className="text-lg font-extrabold whitespace-nowrap hidden sm:block xl:hidden 2xl:block" title={t.tagline}>Finjaro <span className="grad-text">Learn</span></h1>
             <h1 className="sr-only sm:hidden xl:block xl:sr-only 2xl:hidden">Finjaro Learn</h1>
@@ -250,7 +250,7 @@ export default function App() {
           <nav aria-label={t.lessonsTab} className="hidden xl:flex items-center gap-1 rounded-2xl bg-ink/5 p-1" role="tablist">
             {VIEWS.map((v) => (
               <button key={v} role="tab" aria-selected={view === v} onClick={() => setView(v)}
-                className={`whitespace-nowrap min-h-11 px-3 py-1.5 rounded-xl text-sm font-semibold ${view === v ? 'bg-paper shadow text-ink' : 'text-ink/60 hover:text-ink'}`}>
+                className={`whitespace-nowrap min-h-11 px-3 2xl:px-2.5 py-1.5 rounded-xl text-sm font-semibold ${view === v ? 'bg-paper shadow text-ink' : 'text-ink/60 hover:text-ink'}`}>
                 <span aria-hidden="true" className="hidden 2xl:inline">{VIEW_ICON[v]} </span>{tabLabel(v)}
               </button>
             ))}
