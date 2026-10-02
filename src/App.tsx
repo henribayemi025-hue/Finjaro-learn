@@ -346,7 +346,24 @@ export default function App() {
                 <span className="ml-2 font-mono">{lesson.lang === 'py' ? 'main.py' : 'main.js'}</span>
                 <button onClick={run} className="ml-auto btn btn-primary py-1 px-3 text-xs">▶ {t.run}</button>
               </div>
+              <div className="md:hidden flex gap-1 overflow-x-auto px-2 py-1.5 border-b border-white/10" role="toolbar" aria-label={lang === 'fr' ? 'Symboles' : 'Symbols'}>
+                {(lesson.lang === 'py' ? ['⇥', '(', ')', ':', '=', '"', "'", '[', ']', '{', '}', '#', '+', '-', '*', '/', '<', '>', '_', ','] : ['⇥', '(', ')', '{', '}', ';', '=', '"', "'", '[', ']', '.', '+', '-', '*', '/', '<', '>', '`', ',']).map((sym) => (
+                  <button key={sym} type="button" className="shrink-0 min-w-9 h-9 rounded-lg bg-white/10 font-mono text-sm text-code-fg active:bg-white/25"
+                    aria-label={sym === '⇥' ? 'Tab' : sym}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => {
+                      const el = document.getElementById('editeur') as HTMLTextAreaElement | null
+                      if (!el) return
+                      const ins = sym === '⇥' ? '    ' : sym
+                      const a = el.selectionStart, b = el.selectionEnd
+                      const v = code.slice(0, a) + ins + code.slice(b)
+                      setCode(v); save('code:' + lesson.id, v)
+                      requestAnimationFrame(() => { el.focus(); el.selectionStart = el.selectionEnd = a + ins.length })
+                    }}>{sym}</button>
+                ))}
+              </div>
               <textarea
+                id="editeur"
                 value={code}
                 onChange={(e) => { setCode(e.target.value); save('code:' + lesson.id, e.target.value) }}
                 onKeyDown={(e) => {

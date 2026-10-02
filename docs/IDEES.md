@@ -94,7 +94,7 @@ Salles vocales (46), pair-programming aléatoire (47), primes (48), tournois (49
 | 79 Débogueur temporel visuel | ✅ Python (bouton « Pas à pas ») |
 | 80 Données factices en un clic | 🔜 |
 | 81 Refactoring IA commenté | 🔜 via le tuteur |
-| 82 Mobile avec clavier de code | 🔜 barre de symboles |
+| 82 Mobile avec clavier de code | ✅ barre de symboles au-dessus de l'éditeur sur téléphone (02/10) |
 | 83 Tableau blanc d'architecture | 🔜 |
 | 84 Simulateur de charge | 🔜 simulation locale |
 | 85 Maquette UI au pixel près | 🔜 comparaison d'images dans la page |
