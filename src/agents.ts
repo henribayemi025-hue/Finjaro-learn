@@ -14,6 +14,14 @@ export interface Agent {
 
 export const agents: Agent[] = [
   {
+    // Finia : l'assistante de tout Finjaro ; dans Learn, elle est la tutrice (indices progressifs, jamais la réponse d'emblée).
+    id: 'finia',
+    name: 'Finia',
+    role: { fr: 'L’assistante de Finjaro, ta tutrice ici', en: 'Finjaro’s assistant, your tutor here' },
+    personality: { fr: 'Chaleureuse et simple : des indices pas à pas, jamais la réponse d’emblée.', en: 'Warm and simple: step-by-step hints, never the answer straight away.' },
+    ready: true,
+  },
+  {
     id: 'js',
     face: import.meta.env.BASE_URL + 'visages/01.jpg',
     name: 'Maya',

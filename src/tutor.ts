@@ -36,7 +36,7 @@ export interface FixProposal { explanation: string; fixed_code: string }
 export async function askFix(c: Omit<TutorCtx, 'question' | 'agentId'>): Promise<{ fix?: FixProposal; error?: 'quota' | 'ai' }> {
   if (!supabase) return { error: 'ai' }
   const { data, error } = await supabase.functions.invoke('learn-tutor', {
-    body: { mode: 'fix', question: '', code: c.code, lesson: c.lesson, output: c.output, lang: c.lang, agent: { id: 'js' } },
+    body: { mode: 'fix', question: '', code: c.code, lesson: c.lesson, output: c.output, lang: c.lang, agent: { id: 'finia' } },
   })
   if (error) {
     const status = (error as { context?: Response }).context?.status

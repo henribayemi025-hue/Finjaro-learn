@@ -257,8 +257,8 @@ export default function App() {
           </nav>
           <div className="flex items-center gap-1.5">
             {serie > 0 && <span className="chip hidden md:inline-flex text-sm py-1.5" title={lang === 'fr' ? 'Jours d’affilée avec au moins une leçon réussie (sur cet appareil)' : 'Days in a row with at least one lesson passed (on this device)'}>🔥 {serie} {lang === 'fr' ? (serie > 1 ? 'jours' : 'jour') : (serie > 1 ? 'days' : 'day')}</span>}
-            <button onClick={() => { setAi(!ai); save('ai', ai ? '0' : '1') }} aria-pressed={ai} title={t.aiHelp} aria-label={lang === 'fr' ? 'Tuteur IA' : 'AI tutor'}
-              className={`icon-btn ${ai ? 'grad text-white border-transparent' : ''}`}>🤖<span className="ml-1 text-xs sm:text-sm xl:hidden 2xl:inline">{lang === 'fr' ? 'Tuteur' : 'Tutor'}<span className="hidden sm:inline 2xl:inline"> IA</span></span></button>
+            <button onClick={() => { setAi(!ai); save('ai', ai ? '0' : '1') }} aria-pressed={ai} title={t.aiHelp} aria-label={lang === 'fr' ? 'Finia, ton assistante IA' : 'Finia, your AI assistant'}
+              className={`icon-btn ${ai ? 'grad text-white border-transparent' : ''}`}>✨<span className="ml-1 text-xs sm:text-sm xl:hidden 2xl:inline">Finia</span></button>
             <span className="hidden sm:contents">
               <Access lang={lang} />
               <button onClick={() => { const n = theme === 'noir' ? 'finjaro' : 'noir'; setTheme(n); save('theme', n) }} aria-label={t.theme} title={t.theme} className="icon-btn">

@@ -1,4 +1,4 @@
-// learn-tutor — tuteur de code IA de Finjaro Learn.
+// learn-tutor — Finia, l'assistante de Finjaro, dans son rôle de tutrice pour Finjaro Learn (et les autres agents de Learn).
 // JWT obligatoire (verify_jwt = true). Clé Gemini lue côté serveur uniquement.
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
@@ -13,6 +13,7 @@ const corsFor = (req: Request) => ({
 })
 // Agents Learn (prompt système par agent). Un agent Léo choisi par l'élève passe par `agent.custom`.
 const AGENTS: Record<string, string> = {
+  finia: "Tu es Finia, l'assistante de Finjaro ; ici, dans Finjaro Learn, tu aides à apprendre. Ton ton : chaleureux et simple, tu tutoies.",
   js: 'Tu es Maya, prof de JavaScript : patiente, concrète, exemples simples.',
   ia: "Tu es Idris, prof d'IA et de Python : curieux, tu poses des questions pour faire réfléchir.",
   cv: 'Tu es Camille, coach CV : directe et encourageante.',
@@ -88,11 +89,15 @@ Deno.serve(async (req) => {
   const key = Deno.env.get('GEMINI_API_KEY')
   if (!key) return json({ error: 'unavailable' }, 503)
 
+  // Ce que tout agent de Learn sait de l'environnement (une ligne chacun, aucun chiffre).
+  const contexte = lang === 'en'
+    ? ' Finjaro context (mention only if useful): the marketplace finjaro.net; Finjaro Accounting (https://accounting.finjaro.net); Léo, the agents (https://finjaro.net/legion); one account for all of them. Never invent a number (users, prices, results): if you do not know, say so.'
+    : ' Contexte Finjaro (à citer seulement si c\'est utile) : la place de marché finjaro.net ; Finjaro Accounting (https://accounting.finjaro.net) ; Léo, les agents (https://finjaro.net/legion) ; un seul compte pour tout. N\'invente aucun chiffre (utilisateurs, prix, résultats) : si tu ne sais pas, dis-le.'
   let system =
-    persona + ' ' +
+    (persona || AGENTS.finia) + ' ' +
     (lang === 'en'
-      ? 'You are a patient coding tutor for a complete beginner learning programming (JavaScript or Python, as stated in the lesson context). Answer in English, short and simple (max 8 lines). Explain, give a tiny example, never dump the full solution unless asked twice.'
-      : 'Tu es un tuteur de code patient pour un débutant complet qui apprend la programmation (JavaScript ou Python, selon la leçon). Réponds en français, court et simple (8 lignes max). Explique, donne un petit exemple, ne donne pas toute la solution sauf si on te la demande deux fois.')
+      ? 'Your role here: a patient coding tutor for a complete beginner (JavaScript or Python, as stated in the lesson context). Answer in English, short and simple (max 8 lines). Give progressive hints: first the idea, then where to look, a tiny example; never dump the full solution unless asked twice.' + contexte
+      : 'Ton rôle ici : tuteur ou tutrice de code patient(e) pour un débutant complet (JavaScript ou Python, selon la leçon). Réponds en français, court et simple (8 lignes max). Donne des indices progressifs : d\'abord l\'idée, puis où regarder, un petit exemple ; ne donne pas toute la solution sauf si on te la demande deux fois.' + contexte)
 
   const fixHint = fixMode
     ? (lang === 'en'

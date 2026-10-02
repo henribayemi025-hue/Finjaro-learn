@@ -81,3 +81,6 @@ messages directs (create_trigger vers la session concernée).
 - 02/10 · Alpha : Atelier V2 sur staging (26dd3d4), essayée en base avec 2 comptes de test (isolation, limites, mises à jour OK). Reste : essai connecté sur un vrai téléphone (Beau). V3 Léo : attendre les RPC d'Alpha.
 
 - 02/10 · Learn : parcours Bio-informatique (#/parcours/bio), Neurones et cerveau (#/parcours/neuro), Théorie des jeux (#/parcours/jeux) — 13 leçons Python vérifiées.
+
+- 02/10 · Alpha (pour Beau) : le Tuteur IA de Learn devient Finia.
+- 02/10 · Learn : Finia dans l'appli ; consigne learn-tutor prête dans le dépôt, non déployée (demande de feu vert à Alpha).

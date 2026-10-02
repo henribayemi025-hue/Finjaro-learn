@@ -13,7 +13,7 @@ export interface LessonCtx { title: string; code: string; output: string }
 
 export default function AgentPanel({ lang, signedIn, ctx }: { lang: Lang; signedIn: boolean; ctx: LessonCtx }) {
   const t = ui[lang]
-  const [agentId, setAgentId] = useState('js')
+  const [agentId, setAgentId] = useState('finia')
   const [question, setQuestion] = useState('')
   const a = acu(lang)
   const [calling, setCalling] = useState(false)
@@ -102,7 +102,7 @@ export default function AgentPanel({ lang, signedIn, ctx }: { lang: Lang; signed
       <div className="flex flex-wrap items-center gap-2 text-sm">
         <button onClick={() => setCreating(true)} className="rounded-md border border-ink/30 px-3 py-1.5">+ {a.custom}</button>
         {agent.key.startsWith('custom:') && (
-          <button className="underline text-xs" onClick={() => { const next = customs.filter((c) => 'custom:' + c.id !== agent.key); setCustoms(next); saveCustomAgents(next); setAgentId('js') }}>{a.remove}</button>
+          <button className="underline text-xs" onClick={() => { const next = customs.filter((c) => 'custom:' + c.id !== agent.key); setCustoms(next); saveCustomAgents(next); setAgentId('finia') }}>{a.remove}</button>
         )}
       </div>
       <label className="flex items-center gap-2 text-sm cursor-pointer">
@@ -120,6 +120,7 @@ export default function AgentPanel({ lang, signedIn, ctx }: { lang: Lang; signed
         <input
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter' && signedIn && !busy && question) { e.preventDefault(); void send() } }}
           placeholder={t.askPlaceholder.replace('{name}', agent.name)}
           className="basis-full sm:basis-auto flex-1 min-w-0 rounded-lg border border-ink/30 bg-white/60 px-3 py-2 text-sm"
           aria-label={t.ask}

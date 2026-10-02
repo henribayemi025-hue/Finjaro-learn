@@ -134,7 +134,7 @@ function Salon({ lang, session, espace, onBack }: { lang: Lang; session: Session
     const { error } = await supabase!.from('learn_messages').insert({ espace_id: espace.id, user_id: session.user.id, texte: q })
     if (error) { setNote(t.aiError); setBusy(false); return }
     await fetchMsgs(); ping()
-    // Un agent répond quand on le nomme (@Maya, @Idris).
+    // Un agent répond quand on le nomme (@Finia, @Maya, @Idris).
     const agent = agents.find((a) => a.ready && q.toLowerCase().includes('@' + a.name.toLowerCase()))
     if (agent) {
       const r = await askTutor({ question: q, code: '', lesson: espace.nom, output: '', lang, agentId: agent.id, espaceId: espace.id })
