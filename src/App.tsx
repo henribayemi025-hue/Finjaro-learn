@@ -3,6 +3,7 @@ import type { Session } from '@supabase/supabase-js'
 import Espaces from './Espaces'
 import Curriculum, { TRACK_ICON } from './Curriculum'
 import LoginGate from './LoginGate'
+import Chrono from './Chrono'
 import { TRACKS } from './tracks'
 import Progress, { recordDay } from './Progress'
 import Outils from './outils/Outils'
@@ -101,6 +102,7 @@ export default function App() {
   const [fixBusy, setFixBusy] = useState(false)
   const [fixNote, setFixNote] = useState('')
   const [showHint, setShowHint] = useState(false)
+  const [chrono, setChrono] = useState(false)
   const t = ui[lang]
   // Le débogueur s'ouvre sous l'exercice : on l'amène à l'écran, sinon on croit que le bouton ne fait rien.
   useEffect(() => { if (debug) requestAnimationFrame(() => document.getElementById('debug')?.scrollIntoView({ behavior: 'smooth', block: 'start' })) }, [debug])
@@ -265,7 +267,7 @@ export default function App() {
                 <h2 className="text-2xl sm:text-3xl mt-2 leading-tight">{lesson.title[lang]}</h2>
                 <p className="text-sm text-ink/65 mt-1">{lang === 'fr' ? `${done.length} leçon(s) réussie(s) sur ${lessons.length}` : `${done.length} of ${lessons.length} lessons passed`}</p>
               </div>
-              <div className="flex items-center gap-4 shrink-0">
+              <div className="flex flex-wrap items-center gap-3 shrink-0">
                 <div className="relative size-16" role="img" aria-label={pct + '%'}>
                   <svg viewBox="0 0 36 36" className="size-16 -rotate-90"><circle cx="18" cy="18" r="15.5" fill="none" stroke="currentColor" strokeOpacity=".1" strokeWidth="4" />
                     <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--color-terracotta)" strokeWidth="4" strokeLinecap="round" strokeDasharray={`${(pct / 100) * 97.4} 97.4`} /></svg>
@@ -274,6 +276,7 @@ export default function App() {
                 <button className="btn btn-primary px-5 py-3" onClick={() => document.getElementById('lecon')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>
                   {lang === 'fr' ? 'Reprendre' : 'Continue'} →
                 </button>
+                <button className="btn px-4 py-3" onClick={() => setChrono(true)}>⚡ {lang === 'fr' ? 'Défi chrono' : 'Speed challenge'}</button>
               </div>
             </div>
           </section>
@@ -281,6 +284,7 @@ export default function App() {
         </div>
       )}
       {burst > 0 && <Burst key={burst} />}
+      {chrono && <Chrono lang={lang} sound={sound} onClose={() => setChrono(false)} onPlayed={recordDay} />}
       <div id="lecon" className={`scroll-mt-20 max-w-6xl mx-auto px-4 py-5 grid gap-5 md:grid-cols-[250px_1fr] ${view !== 'lecons' ? 'hidden' : ''}`}>
         <nav aria-label={t.lessons} className="min-w-0 md:sticky md:top-20 md:self-start md:max-h-[calc(100vh-6rem)] md:overflow-y-auto md:pr-1">
           <h2 className="text-xs uppercase tracking-wider text-ink/55 mb-2 font-bold">{TRACK_ICON[track]} {acuName(lang, track)}</h2>

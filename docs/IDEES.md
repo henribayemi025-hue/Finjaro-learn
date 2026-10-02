@@ -50,7 +50,7 @@ Règles qui filtrent : aucun chiffre ou diplôme inventé, aucune affiliation à
 | 31 | Arbre de compétences | ✅ onglet Progression |
 | 32 | Thèmes d'éditeur évolutifs | 🔜 (2 thèmes Finjaro/Noir ✅) |
 | 33 | Succès | ✅ 13 succès calculés sur la vraie progression (« cachés » : 🔜) |
-| 34 | Mode survie chronométré | 🔜 |
+| 34 | Mode survie chronométré | ✅ « Défi chrono » (02/10) : 60 s, 55 questions « que va afficher ce code ? » (réponses calculées en exécutant le code), pénalité 3 s, record sur l'appareil |
 | 35 | Avatar personnalisable | 🔜 (visages ✅) |
 | 36 | Musique procédurale | 🔜 Web Audio |
 | 37 | Mode histoire | 🔜 scénarios d'exercices |
