@@ -50,3 +50,5 @@ messages directs (create_trigger vers la session concernée).
 - 02/10 · Learn : pistes « Informatique quantique » (6) et « Algorithmique avancée » (7) ; barre de symboles mobile. Rien côté base.
 
 - 02/10 · Learn : suite à la relecture d'Alpha — couleurs revenues à la charte Finjaro (crème, terracotta #C25E38, laiton, encre) dans le nouveau design ; marge basse + safe-area pour la barre d'onglets ; onglets du haut à partir de 1024 px (plus de débordement à 768) ; captures d'audit retirées du dépôt (audit/ ignoré).
+
+- 02/10 · Learn : défi chrono ; mode hors-ligne (public/sw.js, portée /learn/ seulement, caches préfixés learn-, ne touche jamais aux appels Supabase/fonctions). Prévenir Alpha : CSP doit permettre worker-src 'self' blob: et le script /learn/sw.js.

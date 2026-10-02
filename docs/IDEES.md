@@ -100,7 +100,7 @@ Salles vocales (46), pair-programming aléatoire (47), primes (48), tournois (49
 | 85 Maquette UI au pixel près | 🔜 comparaison d'images dans la page |
 
 ### Formats d'avenir (86–95)
-Green coding (86) 🔜 · hors-ligne (87) 🔜 service worker · dictée du code (88) 🔜 voix du navigateur · vidéos génératives (89) 💶 · accessibilité (90) ✅ police lisible, contraste élevé, texte plus grand, lien d'évitement, clavier · podcasts (91) 💶/🔜 voix du navigateur · VR (92) ⚠️ trop tôt · micro-défis en notification (93) 🤝 · reverse engineering (94) 🔜 · lecture de code (95) ✅ 13 exercices.
+Green coding (86) 🔜 · hors-ligne (87) ✅ service worker (02/10) : leçons, JavaScript et Python (Pyodide mis en cache) marchent sans réseau après une première visite · dictée du code (88) 🔜 voix du navigateur · vidéos génératives (89) 💶 · accessibilité (90) ✅ police lisible, contraste élevé, texte plus grand, lien d'évitement, clavier · podcasts (91) 💶/🔜 voix du navigateur · VR (92) ⚠️ trop tôt · micro-défis en notification (93) 🤝 · reverse engineering (94) 🔜 · lecture de code (95) ✅ 13 exercices.
 
 ### Rupture (96–100)
 Prédiction d'échec (96) 🧩 · test de Turing interne (97) 🧩 · symbiose avec Finjaro Core (98) 🤝 · intelligence de groupe (99) 🧩 (compteurs agrégés réels) · simulateur de startup (100) 🔜 simulation locale.
