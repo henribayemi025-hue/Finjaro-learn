@@ -3,6 +3,7 @@ import type { Session } from '@supabase/supabase-js'
 import Espaces from './Espaces'
 import { TRACK_ICON } from './Curriculum'
 import Accueil from './Accueil'
+import Lettre from './Lettre'
 import LoginGate from './LoginGate'
 import Chrono from './Chrono'
 import { TRACKS } from './tracks'
@@ -90,7 +91,16 @@ function save(key: string, v: string) {
 export default function App() {
   const [lang, setLang] = useState<Lang>(getLang)
   const [session, setSession] = useState<Session | null>(null)
-  const [view, setView] = useState<'lecons' | 'progression' | 'espaces' | 'outils' | 'entraide'>(() => (new URLSearchParams(window.location.search).has('join') ? 'espaces' : 'lecons'))
+  const lireLettre = () => { const m = window.location.hash.match(/^#lettre(?:\/(\d{4}-\d{2}-\d{2}))?$/); return m ? (m[1] ?? '') : null }
+  const [lettreDate, setLettreDate] = useState<string | null>(lireLettre)
+  const [view, setView] = useState<'lecons' | 'progression' | 'espaces' | 'outils' | 'entraide' | 'lettre'>(() => (lireLettre() !== null ? 'lettre' : new URLSearchParams(window.location.search).has('join') ? 'espaces' : 'lecons'))
+  // Adresse directe stable : #lettre (dernier numéro) ou #lettre/AAAA-MM-JJ.
+  useEffect(() => {
+    const h = () => { const d = lireLettre(); if (d !== null) { setLettreDate(d); setView('lettre'); window.scrollTo({ top: 0 }) } }
+    window.addEventListener('hashchange', h)
+    return () => window.removeEventListener('hashchange', h)
+  }, [])
+  useEffect(() => { if (view !== 'lettre' && window.location.hash.startsWith('#lettre')) history.replaceState(null, '', window.location.pathname + window.location.search) }, [view])
   const [theme, setTheme] = useState<'finjaro' | 'noir'>(() => (load('theme', 'finjaro') === 'noir' ? 'noir' : 'finjaro'))
   useEffect(() => { document.documentElement.dataset.theme = theme }, [theme])
   const [ai, setAi] = useState(() => load('ai', '0') === '1')
@@ -298,13 +308,14 @@ export default function App() {
         ))}
       </nav>
 
+      {view === 'lettre' && <div id="contenu" tabIndex={-1} className="max-w-6xl mx-auto px-4 py-6 outline-none"><Lettre lang={lang} date={lettreDate || null} onDate={(d) => { window.location.hash = 'lettre/' + d }} /></div>}
       {view === 'outils' && <div id="contenu" tabIndex={-1} className="max-w-6xl mx-auto px-4 py-6 outline-none">{session ? <Outils lang={lang} session={session} /> : <LoginGate lang={lang} icon="🧰" {...G.outils} />}</div>}
       {view === 'progression' && <div id="contenu" tabIndex={-1} className="max-w-6xl mx-auto px-4 py-6 outline-none"><Progress lang={lang} done={done} onOpen={(id) => { go(lessons.findIndex((l) => l.id === id)); setView('lecons') }} /></div>}
       {view === 'entraide' && <div id="contenu" tabIndex={-1} className="max-w-6xl mx-auto px-4 py-6 outline-none">{session ? <Entraide lang={lang} session={session} /> : <LoginGate lang={lang} icon="🤝" {...G.entraide} />}</div>}
       {view === 'espaces' && <div id="contenu" tabIndex={-1} className="max-w-6xl mx-auto px-4 py-6 outline-none">{session ? <Espaces lang={lang} session={session} /> : <LoginGate lang={lang} icon="👥" {...G.espaces} />}</div>}
       {view === 'lecons' && (
         <div className="max-w-6xl mx-auto px-4 pt-5 space-y-5">
-          <Accueil lang={lang} done={done} idx={idx} onOpen={(i) => go(i, true)} onChrono={() => setChrono(true)}
+          <Accueil lang={lang} done={done} idx={idx} onOpen={(i) => go(i, true)} onChrono={() => setChrono(true)} onLettre={() => { window.location.hash = 'lettre' }}
             onResume={() => document.getElementById('lecon')?.scrollIntoView({ behavior: 'smooth', block: 'start' })} />
         </div>
       )}

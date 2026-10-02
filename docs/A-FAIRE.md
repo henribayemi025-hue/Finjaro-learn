@@ -31,6 +31,7 @@ Chaque demande de Beau, le jour même. On coche ✅ avec la date, on ne supprime
 | 02/10 | (relayé par Alpha) D. Rester à jour : agent quotidien sur Internet + lettre d'info « Bloomberg de l'IA », vocabulaire nouveau ; chaque nouvelle sourcée et datée. | 📝 02/10 plan : docs/PLAN-VEILLE.md (envoyé à Alpha) |
 | 02/10 | (relayé par Alpha) E. S'inspirer des deux modèles Google AI Studio (docs/learn-modeles/ du dépôt de la place de marché) : « ce qu'il a fait est déjà bien, on va continuer ». | ✅ 02/10 : orange Finjaro #FF6B00 des modèles (clair) et noir à lueurs orange, titres Outfit, grande carte « Reprendre la leçon », projets clés, recherche + niveaux, cartes de parcours, barre du bas flottante. Pas de chiffre inventé (série affichée seulement si réelle). |
 | 02/10 | Relecture d'Alpha : résultat sous le pli sur téléphone, erreurs en jargon, cibles tactiles < 44 px, icônes sans libellé, pluriel, chargement Python sans indicateur, sw.js (opaque, cache par version). | ✅ 02/10 : les 7 corrigés et testés (390/1440) |
+| 02/10 | (relayé par Alpha) La lettre d'info quotidienne sur l'IA vit DANS Learn (+ raccourci depuis le menu des 6 points de la place de marché, fait par Alpha). | ✅ 02/10 : rubrique « La Lettre de l'IA » à l'adresse /learn/#lettre (et /learn/#lettre/AAAA-MM-JJ), carte sur l'accueil, anciens numéros, liens sources cliquables, tableau qui défile sur téléphone ; un numéro = public/lettre/AAAA-MM-JJ.md + une ligne dans index.json. Inscription par e-mail : plus tard (clé Resend de Beau). |
 
 ## 1. Ce qu'on attend de Beau
 

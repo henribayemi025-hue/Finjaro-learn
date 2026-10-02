@@ -139,3 +139,21 @@ button:not(:disabled):active { transform: translateY(1px); }
 :root[data-contraste="1"] .text-ink\/60, :root[data-contraste="1"] .text-ink\/70, :root[data-contraste="1"] .text-ink\/50 { color: var(--color-ink); }
 .skip-link { position: absolute; left: -999px; top: 0; z-index: 100; background: var(--color-terracotta); color: #fff; padding: .5rem 1rem; border-radius: 0 0 .5rem 0; }
 .skip-link:focus { left: 0; }
+
+/* La Lettre de l'IA : typographie de lecture */
+.lettre { line-height: 1.7; font-size: 1rem; }
+.lettre h1 { font-size: 1.6rem; line-height: 1.2; margin-bottom: .5rem; }
+.lettre h2 { font-size: 1.3rem; margin: 2rem 0 .75rem; padding-top: 1rem; border-top: 1px solid var(--color-brass); }
+.lettre h3 { font-size: 1.08rem; margin: 1.4rem 0 .4rem; }
+.lettre p { margin: .6rem 0; }
+.lettre ul { list-style: disc; padding-left: 1.3rem; margin: .5rem 0; }
+.lettre li { margin: .25rem 0; }
+.lettre a { color: var(--color-terracotta-dark); text-decoration: underline; text-underline-offset: 2px; word-break: break-word; }
+.lettre hr { display: none; }
+.lettre em { color: color-mix(in srgb, var(--color-ink) 70%, transparent); }
+.lettre strong { font-weight: 700; }
+.lettre-table { overflow-x: auto; margin: .8rem 0; border: 1px solid var(--color-brass); border-radius: .8rem; }
+.lettre-table table { border-collapse: collapse; min-width: 640px; width: 100%; font-size: .9rem; }
+.lettre-table th, .lettre-table td { padding: .55rem .75rem; text-align: left; vertical-align: top; border-bottom: 1px solid var(--color-brass); }
+.lettre-table th { background: color-mix(in srgb, var(--color-terracotta) 8%, transparent); font-weight: 700; }
+.lettre-table td:first-child a { white-space: nowrap; word-break: normal; }

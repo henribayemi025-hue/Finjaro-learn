@@ -56,3 +56,5 @@ messages directs (create_trigger vers la session concernée).
 - 02/10 · Learn : lot B+C (front pur) — Robotique, C et C++ (lecture, vérifié gcc/g++), Outils IA et GitHub (formes d'API vérifiées sur la doc, aucun prix, aucun appel réseau), Projets guidés. 192 leçons. Erreur « Python n'a pas pu se charger » expliquée.
 
 - 02/10 · Learn : accueil refait d'après les modèles AI Studio de Beau (orange #FF6B00 / noir à lueurs) ; plans PLAN-ATELIER.md et PLAN-VEILLE.md à relire par Alpha.
+
+- 02/10 · Learn : « La Lettre de l'IA » — /learn/#lettre ; format public/lettre/AAAA-MM-JJ.md + index.json (voir public/lettre/LISEZMOI.md) ; numéro 1 copié depuis henribeaubayemi/staging docs/lettre-ia. Dépendances ajoutées : marked, dompurify (gratuites).

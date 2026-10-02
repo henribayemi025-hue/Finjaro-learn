@@ -1,9 +1,10 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { lessons, type Lesson } from './lessons'
 import { acu } from './academy-i18n'
 import { TRACKS } from './tracks'
 import { TRACK_ICON } from './Curriculum'
 import type { Lang } from './i18n'
+import { chargerIndex, type Numero } from './Lettre'
 
 type Niveau = 'debutant' | 'intermediaire' | 'avance'
 /** Niveau conseillé de chaque parcours (une indication de difficulté, pas une note). */
@@ -48,10 +49,12 @@ function MiniReseau() {
   )
 }
 
-export default function Accueil({ lang, done, idx, onOpen, onResume, onChrono }: {
+export default function Accueil({ lang, done, idx, onOpen, onResume, onChrono, onLettre }: {
   lang: Lang; done: string[]; idx: number
-  onOpen: (i: number) => void; onResume: () => void; onChrono: () => void
+  onOpen: (i: number) => void; onResume: () => void; onChrono: () => void; onLettre: () => void
 }) {
+  const [dernier, setDernier] = useState<Numero | null>(null)
+  useEffect(() => { chargerIndex().then((l) => setDernier(l[0] ?? null)).catch(() => { /* pas de lettre : la carte reste discrète */ }) }, [])
   const t = T[lang]
   const a = acu(lang)
   const [q, setQ] = useState('')
@@ -96,6 +99,17 @@ export default function Accueil({ lang, done, idx, onOpen, onResume, onChrono }:
           </div>
         </div>
       </section>
+
+      {/* La Lettre de l'IA */}
+      <button onClick={onLettre} className="card w-full p-4 text-left flex items-center gap-4 hover:-translate-y-0.5 transition">
+        <span aria-hidden="true" className="size-12 shrink-0 rounded-2xl grad grid place-items-center text-2xl shadow-md">📰</span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-[10px] font-bold uppercase tracking-wider text-terracotta-dark">{lang === 'fr' ? 'Chaque matin' : 'Every morning'}</span>
+          <span className="block font-display text-lg leading-tight">{lang === 'fr' ? 'La Lettre de l’IA' : 'The AI Letter'}</span>
+          {dernier && <span className="block text-sm text-ink/65 truncate">{dernier.titre}</span>}
+        </span>
+        <span aria-hidden="true" className="text-terracotta-dark font-bold">→</span>
+      </button>
 
       {/* Projets clés */}
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
