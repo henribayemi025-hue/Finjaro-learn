@@ -476,6 +476,8 @@ export default function AtelierProjet({ lang, id, ai, signedIn, onBack }: { lang
         <button className={btnBarre} onClick={zip}>⤓ {t.zip}</button>
         {supabase && <button className={btnBarre} onClick={() => void enregistrer()} disabled={!!envoi}>☁ {envoi ? t.saving : t.save}</button>}
         <button className={btnBarre} onClick={nouvelleSession}>＋ {t.newSession}</button>
+        {/* L'Atelier de Léo (même site, même compte) : lien seulement, son accès dépend de la formule côté Léo. */}
+        <a className={btnBarre} href="/legion/atelier" target="_blank" rel="noopener">↗ {lang === 'fr' ? 'Ouvrir l’Atelier de Léo' : 'Open Léo’s Workshop'}</a>
       </div>
       {note && <p className="shrink-0 px-3 py-2 text-[13px] bg-[#FB7185]/15 text-[#FDA4AF]" role="alert">{note}</p>}
 

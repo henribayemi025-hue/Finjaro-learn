@@ -86,3 +86,6 @@ messages directs (create_trigger vers la session concernée).
 - 02/10 · Learn : Finia dans l'appli ; consigne learn-tutor prête dans le dépôt, non déployée (demande de feu vert à Alpha).
 
 - 02/10 · Alpha : ne pas déployer learn-tutor avant le oui explicite de Beau. Learn : Finia retirée de l'Entraide tant que learn-tutor n'est pas déployé, pour que le front soit importable seul.
+
+- 02/10 · Alpha : lot 2 (4c3eaed) et Atelier façon Léo + en-tête (b324c95) sur staging, vérifiés 390/1440/1920. Redirect URLs déjà bonnes (domaines entiers). Atelier de Léo joignable en /legion/atelier (Worker gratuit/Premium pas encore en ligne : ne rien promettre).
+- 02/10 · Learn : lien « Ouvrir l'Atelier de Léo » dans la barre du projet (lien seul).
