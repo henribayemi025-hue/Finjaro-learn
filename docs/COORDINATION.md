@@ -40,3 +40,5 @@ messages directs (create_trigger vers la session concernée).
 | 01/10 | Beau → Alpha → Learn | « La clé Gemini est déjà dans Supabase, connecte juste » : migration learn_quotas + learn-exos + learn-voix (éteinte par LEARN_VOIX_ENABLED) prêtes, rien appliqué ; app : exercice sur mesure vérifié, indice proactif. |
 
 - 01/10 · Learn : piste « Maths pour l'IA » (10 leçons, Python pur, validées CPython puis navigateur 390/1440). Rien côté base. Commit à importer : dernier de main.
+
+- 02/10 · Learn : piste « Cryptographie » (8 leçons, Python pur, validées CPython puis navigateur). Rien côté base.

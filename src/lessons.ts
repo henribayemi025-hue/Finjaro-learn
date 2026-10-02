@@ -7,9 +7,10 @@ import { aiLessons } from './lessonsAI'
 import { vizLessons } from './lessonsViz'
 import { peLessons } from './lessonsPE'
 import { mathsLessons } from './lessonsMaths'
+import { cryptoLessons } from './lessonsCrypto'
 
 type T = Record<Lang, string>
-export type Group = 'js' | 'py-bases' | 'py-algo' | 'py-lecture' | 'py-projets' | 'ds-numpy' | 'ds-pandas' | 'ds-ml' | 'ds-viz' | 'dl' | 'dl-reseaux' | 'ai-rag' | 'ai-agents' | 'pe' | 'maths'
+export type Group = 'js' | 'py-bases' | 'py-algo' | 'py-lecture' | 'py-projets' | 'ds-numpy' | 'ds-pandas' | 'ds-ml' | 'ds-viz' | 'dl' | 'dl-reseaux' | 'ai-rag' | 'ai-agents' | 'pe' | 'maths' | 'crypto'
 
 export interface Lesson {
   id: string
@@ -115,8 +116,8 @@ const jsLessons: Lesson[] = [
   },
 ]
 
-const ORDER: Group[] = ['js', 'py-bases', 'py-algo', 'py-lecture', 'py-projets', 'ds-numpy', 'ds-pandas', 'ds-ml', 'ds-viz', 'dl', 'dl-reseaux', 'ai-rag', 'ai-agents', 'pe', 'maths']
-export const lessons: Lesson[] = [...jsLessons.map((l) => ({ ...l, lang: 'js' as const, group: 'js' as const })), ...pyLessons, ...readLessons, ...dataLessons, ...vizLessons, ...dlLessons, ...aiLessons, ...peLessons, ...mathsLessons]
+const ORDER: Group[] = ['js', 'py-bases', 'py-algo', 'py-lecture', 'py-projets', 'ds-numpy', 'ds-pandas', 'ds-ml', 'ds-viz', 'dl', 'dl-reseaux', 'ai-rag', 'ai-agents', 'pe', 'maths', 'crypto']
+export const lessons: Lesson[] = [...jsLessons.map((l) => ({ ...l, lang: 'js' as const, group: 'js' as const })), ...pyLessons, ...readLessons, ...dataLessons, ...vizLessons, ...dlLessons, ...aiLessons, ...peLessons, ...mathsLessons, ...cryptoLessons]
   .map((l, i) => ({ l, i }))
   .sort((a, b) => ORDER.indexOf(a.l.group ?? 'js') - ORDER.indexOf(b.l.group ?? 'js') || a.i - b.i)
   .map((x) => x.l)

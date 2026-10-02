@@ -14,6 +14,8 @@ export const TRACKS: { key: string; name: L2; groups: Group[]; groupName: Partia
     groupName: { 'ai-rag': { fr: 'Recherche et RAG', en: 'Retrieval and RAG' }, 'ai-agents': { fr: 'Agents et production', en: 'Agents and production' } } },
   { key: 'prompt', name: { fr: 'Prompt engineering', en: 'Prompt engineering' }, groups: ['pe'],
     groupName: { pe: { fr: 'Prompt engineering', en: 'Prompt engineering' } } },
+  { key: 'crypto', name: { fr: 'Cryptographie', en: 'Cryptography' }, groups: ['crypto'],
+    groupName: { crypto: { fr: 'Chiffres, hachage, RSA', en: 'Ciphers, hashing, RSA' } } },
   { key: 'maths', name: { fr: "Maths pour l'IA", en: 'Maths for AI' }, groups: ['maths'],
     groupName: { maths: { fr: 'Vecteurs, gradient, probabilités', en: 'Vectors, gradient, probability' } } },
 ]

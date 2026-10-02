@@ -12,7 +12,7 @@ Règles qui filtrent : aucun chiffre ou diplôme inventé, aucune affiliation à
 | 1 | Algorithmique avancée, structures complexes | ✅ en partie (14 leçons) · 🔜 suite : tas, arbres, Dijkstra, programmation dynamique |
 | 2 | Architecture des ordinateurs | 🔜 piste « Ordinateurs » : portes logiques, additionneur, ALU, mémoire |
 | 3 | Maths pour le machine learning | ✅ piste « Maths pour l'IA » (01/10) : 10 leçons (vecteurs, cosinus, matrices, dérivée, gradient, moyenne/variance, Bayes, espérance, entropie, softmax) · 🔜 PCA |
-| 4 | Théorie de l'information, cryptographie | ✅ entropie · 🔜 piste « Crypto » : César/Vigenère, hachage, RSA jouet |
+| 4 | Théorie de l'information, cryptographie | ✅ entropie + piste « Cryptographie » (02/10) : 8 leçons (César, Vigenère, fréquences, hachage, PGCD, exponentiation, RSA jouet, Diffie–Hellman) ; jouets, jamais pour de vraies données |
 | 5 | Systèmes distribués | 🔜 simulations en Python (réplication, consensus simplifié) |
 | 6 | Informatique quantique | 🔜 piste « Quantique » : qubits simulés avec NumPy (Hadamard, intrication, Grover) |
 | 7 | Neurosciences computationnelles | 🔜 neurone à impulsions (LIF) en Python |
