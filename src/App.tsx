@@ -42,6 +42,10 @@ const VIEWS = ['lecons', 'atelier', 'lettre', 'progression', 'espaces', 'outils'
 const BAS = ['lecons', 'atelier', 'lettre', 'progression'] as const
 const PLUS = ['espaces', 'outils', 'entraide'] as const
 const VIEW_ICON = { lecons: '📚', atelier: '🛠️', lettre: '📰', progression: '📈', espaces: '👥', outils: '🧰', entraide: '🤝' } as const
+/** Vignettes de la barre des rubriques : photo si fournie (public/onglets/…, droits vérifiés), sinon pictogramme sur dégradé. */
+const VIEW_IMG: Partial<Record<keyof typeof VIEW_ICON, string>> = {
+  lecons: import.meta.env.BASE_URL + 'visages/02.jpg',
+}
 
 
 function acuName(lang: Lang, key: string) {
@@ -244,21 +248,13 @@ export default function App() {
         <div className="max-w-6xl 2xl:max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0 xl:shrink-0">
             <span aria-hidden="true" className="size-9 shrink-0 rounded-xl grad text-white grid place-items-center font-extrabold text-lg shadow-md">F</span>
-            <h1 className="text-lg font-extrabold whitespace-nowrap hidden sm:block xl:hidden 2xl:block" title={t.tagline}>Finjaro <span className="grad-text">Learn</span></h1>
-            <h1 className="sr-only sm:hidden xl:block xl:sr-only 2xl:hidden">Finjaro Learn</h1>
+            <h1 className="text-lg font-extrabold whitespace-nowrap hidden sm:block" title={t.tagline}>Finjaro <span className="grad-text">Learn</span></h1>
+            <h1 className="sr-only sm:hidden">Finjaro Learn</h1>
           </div>
-          <nav aria-label={t.lessonsTab} className="hidden xl:flex items-center gap-1 rounded-2xl bg-ink/5 p-1" role="tablist">
-            {VIEWS.map((v) => (
-              <button key={v} role="tab" aria-selected={view === v} onClick={() => setView(v)}
-                className={`whitespace-nowrap min-h-11 px-3 2xl:px-2.5 py-1.5 rounded-xl text-sm font-semibold ${view === v ? 'bg-paper shadow text-ink' : 'text-ink/60 hover:text-ink'}`}>
-                <span aria-hidden="true" className="hidden 2xl:inline">{VIEW_ICON[v]} </span>{tabLabel(v)}
-              </button>
-            ))}
-          </nav>
           <div className="flex items-center gap-1.5">
             {serie > 0 && <span className="chip hidden md:inline-flex text-sm py-1.5" title={lang === 'fr' ? 'Jours d’affilée avec au moins une leçon réussie (sur cet appareil)' : 'Days in a row with at least one lesson passed (on this device)'}>🔥 {serie} {lang === 'fr' ? (serie > 1 ? 'jours' : 'jour') : (serie > 1 ? 'days' : 'day')}</span>}
             <button onClick={() => { setAi(!ai); save('ai', ai ? '0' : '1') }} aria-pressed={ai} title={t.aiHelp} aria-label={lang === 'fr' ? 'Finia, ton assistante IA' : 'Finia, your AI assistant'}
-              className={`icon-btn ${ai ? 'grad text-white border-transparent' : ''}`}>✨<span className="ml-1 text-xs sm:text-sm xl:hidden 2xl:inline">Finia</span></button>
+              className={`icon-btn ${ai ? 'grad text-white border-transparent' : ''}`}>✨<span className="ml-1 text-xs sm:text-sm">Finia</span></button>
             <span className="hidden sm:contents">
               <Access lang={lang} />
               <button onClick={() => { const n = theme === 'noir' ? 'finjaro' : 'noir'; setTheme(n); save('theme', n) }} aria-label={t.theme} title={t.theme} className="icon-btn">
@@ -297,6 +293,26 @@ export default function App() {
           )}
         </div>
       </header>
+
+      {/* Sur téléphone, la barre du bas suffit dans une leçon ou un projet ; sur grand écran, les vignettes restent partout. */}
+      {(
+        <nav aria-label={lang === 'fr' ? 'Rubriques' : 'Sections'} className={`max-w-6xl 2xl:max-w-7xl mx-auto px-4 pt-4 ${route.v === 'lecon' || (route.v === 'atelier' && route.id) ? 'hidden xl:block' : ''}`} role="tablist">
+          <ul className="flex gap-3 sm:gap-4 overflow-x-auto pt-1.5 pb-1 -mx-1 px-1.5 [scrollbar-width:none]">
+            {VIEWS.map((v) => (
+              <li key={v} className="shrink-0">
+                <button role="tab" aria-selected={view === v} onClick={() => setView(v)} className="group flex flex-col items-center gap-1.5 w-[4.6rem] sm:w-20">
+                  <span className={`block size-16 sm:size-[4.5rem] rounded-2xl overflow-hidden transition ${view === v ? 'ring-[3px] ring-terracotta ring-offset-2 ring-offset-cream shadow-lg' : 'ring-1 ring-brass group-hover:-translate-y-0.5 group-hover:shadow-md'}`}>
+                    {VIEW_IMG[v]
+                      ? <img src={VIEW_IMG[v]} alt="" loading="lazy" className="size-full object-cover" />
+                      : <span aria-hidden="true" className="size-full grid place-items-center text-3xl bg-gradient-to-br from-terracotta/20 to-amber/25">{VIEW_ICON[v]}</span>}
+                  </span>
+                  <span className={`text-xs sm:text-[13px] leading-tight text-center ${view === v ? 'font-bold text-ink' : 'font-semibold text-ink/70'}`}>{tabLabel(v)}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
 
       <nav className="bottom-nav xl:hidden" role="tablist" aria-label={t.lessonsTab}>
         {BAS.map((v) => (
