@@ -20,7 +20,7 @@ import { supabase } from './supabase'
 import { ui, type Lang } from './i18n'
 import { lessons } from './lessons'
 import AgentPanel from './AgentPanel'
-import FiniaAccueil from './FiniaAccueil'
+import Classe from './Classe'
 import DiffModal from './DiffModal'
 import { askFix, type FixProposal } from './tutor'
 import { playError, playSuccess } from './sounds'
@@ -396,28 +396,31 @@ export default function App() {
             <h2 className="text-xl sm:text-2xl leading-tight">{lesson.title[lang]}</h2>
             <span className="chip shrink-0">{lesson.langue === 'c' ? '⚙️ C' : lesson.langue === 'cpp' ? '⚙️ C++' : lesson.lang === 'py' ? '🐍 Python' : '⚡ JavaScript'}</span>
           </div>
-          <FiniaAccueil key={lesson.id} lang={lang} titre={lesson.title[lang]} pos={pos} total={trackLessons.length} parcours={acuName(lang, track)}
-            onGo={() => document.getElementById('explication')?.scrollIntoView({ behavior: 'smooth', block: 'start' })} />
+          <Classe key={lesson.id} lang={lang} titre={lesson.title[lang]} pos={pos} total={trackLessons.length} parcours={acuName(lang, track)} track={track} langage={lesson.lang ?? 'js'}
+            tache={lesson.task[lang]} indice={lesson.hint[lang]} aExemple={!!lesson.example} signedIn={!!session} ai={ai} code={code} sortie={res?.output.join('\n') ?? ''}
+            etat={!res ? 'rien' : res.passed ? 'ok' : res.error ? 'erreur' : res.passed === false ? 'ko' : 'rien'}
+            erreur={res?.error ? (expliqueErreur(res.error, lang) ?? res.error.split('\n').filter(Boolean).pop() ?? '') : ''}
+            aller={(id) => { const el = document.getElementById(id); el?.scrollIntoView({ behavior: 'smooth', block: 'start' }); if (id === 'exercice') setTimeout(() => document.getElementById('editeur')?.focus({ preventScroll: true }), 400) }} />
           <section id="explication" className="scroll-mt-32">
             <h3 className="text-sm uppercase tracking-wide text-ink/55 mb-1.5">{t.explain}</h3>
             <p className="leading-relaxed text-[15px]">{lesson.explain[lang]}</p>
           </section>
           {lesson.example && (
-            <section>
+            <section id="exemple" className="scroll-mt-32">
               <h3 className="text-sm uppercase tracking-wide text-ink/55 mb-1.5">{t.example}</h3>
               <pre className={pre}>{lesson.example}</pre>
             </section>
           )}
           </div>
           {lesson.predict && (
-            <div className="card p-5 sm:p-6">
+            <div id="exercice" className="card p-5 sm:p-6 scroll-mt-32">
             <Predict key={lesson.id} lesson={lesson} lang={lang} hasNext={idx < lessons.length - 1}
               onCorrect={() => { if (sound) playSuccess(); void markPassed(lesson.predict!.answer) }} onNext={() => ouvre(idx + 1)} />
             </div>
           )}
-          {lesson.lecture && <Lecture key={lesson.id} lang={lang} points={lesson.lecture[lang]} fait={done.includes(lesson.id)} hasNext={idx < lessons.length - 1}
-            onOk={() => { if (sound) playSuccess(); void markPassed('') }} onNext={() => ouvre(idx + 1)} />}
-          {!lesson.predict && !lesson.lecture && <section className="card p-5 sm:p-6 space-y-3">
+          {lesson.lecture && <div id="exercice" className="scroll-mt-32"><Lecture key={lesson.id} lang={lang} points={lesson.lecture[lang]} fait={done.includes(lesson.id)} hasNext={idx < lessons.length - 1}
+            onOk={() => { if (sound) playSuccess(); void markPassed('') }} onNext={() => ouvre(idx + 1)} /></div>}
+          {!lesson.predict && !lesson.lecture && <section id="exercice" className="card p-5 sm:p-6 space-y-3 scroll-mt-32">
             <h3 className="text-sm uppercase tracking-wide text-ink/55">{t.exercise}</h3>
             <p className="font-semibold text-[15px] rounded-xl border-l-4 border-terracotta bg-terracotta/8 px-3 py-2">{lesson.task[lang]}</p>
             <div className="grid gap-3 xl:grid-cols-2 items-start">
@@ -556,7 +559,7 @@ export default function App() {
             </div>
             </div>
           </section>}
-          {ai && <AgentPanel lang={lang} signedIn={!!session} ctx={{ title: (lesson.langue === 'c' ? '[C] ' : lesson.langue === 'cpp' ? '[C++] ' : lesson.lang === 'py' ? '[Python] ' : '[JavaScript] ') + lesson.title[lang], code, output: res?.output.join('\n') ?? '' }} />}
+          {ai && <details className="card px-5 py-3"><summary className="cursor-pointer font-semibold min-h-11 flex items-center">{lang === 'fr' ? 'Plus avec les agents : appel vocal, créer mon agent, Léo' : 'More with agents: voice call, create my agent, Léo'}</summary><AgentPanel lang={lang} signedIn={!!session} ctx={{ title: (lesson.langue === 'c' ? '[C] ' : lesson.langue === 'cpp' ? '[C++] ' : lesson.lang === 'py' ? '[Python] ' : '[JavaScript] ') + lesson.title[lang], code, output: res?.output.join('\n') ?? '' }} /></details>}
           {exo && <ExoGenereModal lang={lang} exo={exo} packages={lesson.packages} onClose={() => setExo(null)} />}
           {debug && lesson.lang === 'py' && <div id="debug" className="scroll-mt-20"><StepDebugger lang={lang} code={code} packages={lesson.packages} onClose={() => setDebug(false)} /></div>}
           {fix && (
