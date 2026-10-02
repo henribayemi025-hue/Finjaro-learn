@@ -3,6 +3,8 @@ import type { Session } from '@supabase/supabase-js'
 import Espaces from './Espaces'
 import { TRACK_ICON } from './Curriculum'
 import Accueil from './Accueil'
+import Parcours from './Parcours'
+import Atelier from './Atelier'
 import Lettre from './Lettre'
 import LoginGate from './LoginGate'
 import Chrono from './Chrono'
@@ -34,40 +36,9 @@ import { expliqueErreur } from './explainError'
 
 const pre = 'rounded-xl bg-code text-code-fg p-4 text-sm overflow-x-auto whitespace-pre-wrap font-mono'
 const trackOf = (g: string | undefined) => TRACKS.find((tr) => (tr.groups as string[]).includes(g ?? 'js'))?.key ?? 'prog'
-const VIEWS = ['lecons', 'progression', 'espaces', 'outils', 'entraide'] as const
-const VIEW_ICON = { lecons: '📚', progression: '📈', espaces: '👥', outils: '🧰', entraide: '🤝' } as const
+const VIEWS = ['lecons', 'atelier', 'progression', 'espaces', 'outils', 'entraide'] as const
+const VIEW_ICON = { lecons: '📚', atelier: '🛠️', progression: '📈', espaces: '👥', outils: '🧰', entraide: '🤝' } as const
 
-const GROUPS = {
-  js: { fr: 'JavaScript', en: 'JavaScript' },
-  'py-bases': { fr: 'Python · bases', en: 'Python · basics' },
-  'py-algo': { fr: 'Python · algorithmes et structures', en: 'Python · algorithms and structures' },
-  'py-lecture': { fr: 'Python · lire du code', en: 'Python · reading code' },
-  'py-projets': { fr: 'Python · projets', en: 'Python · projects' },
-  'ds-numpy': { fr: 'Data science · NumPy', en: 'Data science · NumPy' },
-  'ds-pandas': { fr: 'Data science · pandas', en: 'Data science · pandas' },
-  'ds-ml': { fr: 'Data science · statistiques et apprentissage', en: 'Data science · statistics and learning' },
-  'ds-viz': { fr: 'Data science · graphiques et projet', en: 'Data science · charts and project' },
-  dl: { fr: 'Deep learning · les bases', en: 'Deep learning · the basics' },
-  'dl-reseaux': { fr: 'Deep learning · réseaux de neurones', en: 'Deep learning · neural networks' },
-  'ai-rag': { fr: 'AI engineering · recherche et RAG', en: 'AI engineering · retrieval and RAG' },
-  'ai-agents': { fr: 'AI engineering · agents et production', en: 'AI engineering · agents and production' },
-  pe: { fr: 'Prompt engineering', en: 'Prompt engineering' },
-  compil: { fr: 'Compilateurs', en: 'Compilers' },
-  nlp: { fr: 'NLP et Transformers', en: 'NLP and Transformers' },
-  quant: { fr: 'Informatique quantique', en: 'Quantum computing' },
-  algo: { fr: 'Algorithmique avancée', en: 'Advanced algorithms' },
-  robo: { fr: 'Robotique', en: 'Robotics' },
-  c: { fr: 'C', en: 'C' },
-  cpp: { fr: 'C++', en: 'C++' },
-  'ia-api': { fr: 'Outils IA · API et agents', en: 'AI tools · APIs and agents' },
-  git: { fr: 'Outils IA · Git et GitHub', en: 'AI tools · Git and GitHub' },
-  'pg-calc': { fr: 'Projet guidé · calculatrice', en: 'Guided project · calculator' },
-  'pg-robot': { fr: 'Projet guidé · robot explorateur', en: 'Guided project · explorer robot' },
-  'pg-faq': { fr: 'Projet guidé · assistant FAQ', en: 'Guided project · FAQ assistant' },
-  archi: { fr: 'Ordinateurs', en: 'Computers' },
-  crypto: { fr: 'Cryptographie', en: 'Cryptography' },
-  maths: { fr: 'Maths pour l\'IA', en: 'Maths for AI' },
-} as const
 
 function acuName(lang: Lang, key: string) {
   return TRACKS.find((tr) => tr.key === key)?.name[lang] ?? ''
@@ -88,19 +59,33 @@ function save(key: string, v: string) {
   try { localStorage.setItem('learn:' + key, v) } catch { /* ignoré */ }
 }
 
+type Route = { v: 'accueil' } | { v: 'parcours'; k: string } | { v: 'lecon'; id: string } | { v: 'lettre'; date: string | null } | { v: 'atelier'; id: string | null } | { v: 'progression' | 'espaces' | 'outils' | 'entraide' }
+function lireRoute(): Route {
+  const h = decodeURIComponent(window.location.hash.replace(/^#\/?/, ''))
+  const [a, b] = h.split('/')
+  if (a === 'lettre') return { v: 'lettre', date: /^\d{4}-\d{2}-\d{2}$/.test(b ?? '') ? b : null }
+  if (a === 'parcours' && b && TRACKS.some((t) => t.key === b)) return { v: 'parcours', k: b }
+  if (a === 'lecon' && b && lessons.some((l) => l.id === b)) return { v: 'lecon', id: b }
+  if (a === 'atelier') return { v: 'atelier', id: b && /^[a-z0-9]{4,40}$/.test(b) ? b : null }
+  if (a === 'progression' || a === 'espaces' || a === 'outils' || a === 'entraide') return { v: a }
+  if (!h && new URLSearchParams(window.location.search).has('join')) return { v: 'espaces' }
+  return { v: 'accueil' }
+}
+
 export default function App() {
   const [lang, setLang] = useState<Lang>(getLang)
   const [session, setSession] = useState<Session | null>(null)
-  const lireLettre = () => { const m = window.location.hash.match(/^#lettre(?:\/(\d{4}-\d{2}-\d{2}))?$/); return m ? (m[1] ?? '') : null }
-  const [lettreDate, setLettreDate] = useState<string | null>(lireLettre)
-  const [view, setView] = useState<'lecons' | 'progression' | 'espaces' | 'outils' | 'entraide' | 'lettre'>(() => (lireLettre() !== null ? 'lettre' : new URLSearchParams(window.location.search).has('join') ? 'espaces' : 'lecons'))
-  // Adresse directe stable : #lettre (dernier numéro) ou #lettre/AAAA-MM-JJ.
+  // ───────── Une adresse par écran : #/ (accueil), #/parcours/<clé>, #/lecon/<id>, #/progression, #/espaces, #/outils, #/entraide, #/lettre[/AAAA-MM-JJ] ─────────
+  const [route, setRoute] = useState<Route>(() => lireRoute())
   useEffect(() => {
-    const h = () => { const d = lireLettre(); if (d !== null) { setLettreDate(d); setView('lettre'); window.scrollTo({ top: 0 }) } }
+    const h = () => { setRoute(lireRoute()); window.scrollTo({ top: 0 }) }
     window.addEventListener('hashchange', h)
     return () => window.removeEventListener('hashchange', h)
   }, [])
-  useEffect(() => { if (view !== 'lettre' && window.location.hash.startsWith('#lettre')) history.replaceState(null, '', window.location.pathname + window.location.search) }, [view])
+  const view = route.v === 'accueil' || route.v === 'parcours' || route.v === 'lecon' ? 'lecons' : route.v
+  const lettreDate = route.v === 'lettre' ? route.date : null
+  const nav = (h: string) => { if (window.location.hash !== h) window.location.hash = h; else window.scrollTo({ top: 0 }) }
+  const setView = (v: typeof VIEWS[number]) => nav(v === 'lecons' ? '#/' : '#/' + v)
   const [theme, setTheme] = useState<'finjaro' | 'noir'>(() => (load('theme', 'finjaro') === 'noir' ? 'noir' : 'finjaro'))
   useEffect(() => { document.documentElement.dataset.theme = theme }, [theme])
   const [ai, setAi] = useState(() => load('ai', '0') === '1')
@@ -145,10 +130,16 @@ export default function App() {
     })
   }, [session])
 
-  const go = (i: number, scroll = false) => {
+  /** Ouvre l'écran d'une leçon (nouvelle adresse : le retour du navigateur ramène où on était). */
+  const ouvre = (i: number) => nav('#/lecon/' + lessons[i].id)
+  useEffect(() => {
+    if (route.v !== 'lecon') return
+    const i = lessons.findIndex((l) => l.id === route.id)
+    if (i >= 0 && i !== idx) go(i)
+  }, [route]) // eslint-disable-line react-hooks/exhaustive-deps
+  const go = (i: number) => {
     setIdx(i)
     save('last', lessons[i].id)
-    if (scroll) requestAnimationFrame(() => document.getElementById('lecon')?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
     setCode(load('code:' + lessons[i].id, lessons[i].starter))
     setRes(null)
     setFails(0)
@@ -185,7 +176,7 @@ export default function App() {
       const el = document.getElementById('resultat')
       if (!el) return
       const r2 = el.getBoundingClientRect()
-      const bas = window.innerHeight - (window.innerWidth < 1024 ? 96 : 16)
+      const bas = window.innerHeight - (window.innerWidth < 1280 ? 96 : 16)
       if (r2.bottom > bas) el.scrollIntoView({ block: r2.height > bas - 80 ? 'start' : 'end', behavior: 'smooth' })
     }, 60)
     if (sound && r.passed !== null) (r.passed ? playSuccess : playError)()
@@ -225,7 +216,8 @@ export default function App() {
 
   const track = trackOf(lesson.group)
   const trackLessons = lessons.map((l, i) => ({ l, i })).filter(({ l }) => trackOf(l.group) === track)
-  const tabLabel = (v: typeof VIEWS[number]) => v === 'lecons' ? t.lessonsTab : v === 'progression' ? t.progressTab : v === 'espaces' ? t.spaces : v === 'entraide' ? entraideUi(lang).tab : outilsUi[lang].tab
+  const pos = trackLessons.findIndex(({ i }) => i === idx) + 1
+  const tabLabel = (v: typeof VIEWS[number]) => v === 'lecons' ? t.lessonsTab : v === 'atelier' ? (lang === 'fr' ? 'Atelier' : 'Workshop') : v === 'progression' ? t.progressTab : v === 'espaces' ? t.spaces : v === 'entraide' ? entraideUi(lang).tab : outilsUi[lang].tab
   const serie = streaks(loadDays()).cur
   const G = {
     espaces: lang === 'fr'
@@ -240,16 +232,16 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-0">
+    <div className="min-h-screen pb-[calc(5.5rem+env(safe-area-inset-bottom))] xl:pb-0">
       <a href="#contenu" className="skip-link">{t.skip}</a>
       <header className="sticky top-0 z-30 border-b border-brass bg-[color-mix(in_srgb,var(--color-cream)_82%,transparent)] backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0">
             <span aria-hidden="true" className="size-9 shrink-0 rounded-xl grad text-white grid place-items-center font-extrabold text-lg shadow-md">F</span>
-            <h1 className="text-lg font-extrabold whitespace-nowrap hidden sm:block lg:hidden xl:block" title={t.tagline}>Finjaro <span className="grad-text">Learn</span></h1>
-            <h1 className="sr-only sm:hidden lg:block lg:sr-only xl:hidden">Finjaro Learn</h1>
+            <h1 className="text-lg font-extrabold whitespace-nowrap hidden sm:block xl:hidden 2xl:block" title={t.tagline}>Finjaro <span className="grad-text">Learn</span></h1>
+            <h1 className="sr-only sm:hidden xl:block xl:sr-only 2xl:hidden">Finjaro Learn</h1>
           </div>
-          <nav aria-label={t.lessonsTab} className="hidden lg:flex items-center gap-1 rounded-2xl bg-ink/5 p-1" role="tablist">
+          <nav aria-label={t.lessonsTab} className="hidden xl:flex items-center gap-1 rounded-2xl bg-ink/5 p-1" role="tablist">
             {VIEWS.map((v) => (
               <button key={v} role="tab" aria-selected={view === v} onClick={() => setView(v)}
                 className={`whitespace-nowrap min-h-11 px-3 py-1.5 rounded-xl text-sm font-semibold ${view === v ? 'bg-paper shadow text-ink' : 'text-ink/60 hover:text-ink'}`}>
@@ -260,7 +252,7 @@ export default function App() {
           <div className="flex items-center gap-1.5">
             {serie > 0 && <span className="chip hidden md:inline-flex text-sm py-1.5" title={lang === 'fr' ? 'Jours d’affilée avec au moins une leçon réussie (sur cet appareil)' : 'Days in a row with at least one lesson passed (on this device)'}>🔥 {serie} {lang === 'fr' ? (serie > 1 ? 'jours' : 'jour') : (serie > 1 ? 'days' : 'day')}</span>}
             <button onClick={() => { setAi(!ai); save('ai', ai ? '0' : '1') }} aria-pressed={ai} title={t.aiHelp} aria-label={lang === 'fr' ? 'Tuteur IA' : 'AI tutor'}
-              className={`icon-btn ${ai ? 'grad text-white border-transparent' : ''}`}>🤖<span className="ml-1 text-xs sm:text-sm lg:hidden 2xl:inline">{lang === 'fr' ? 'Tuteur' : 'Tutor'}<span className="hidden sm:inline 2xl:inline"> IA</span></span></button>
+              className={`icon-btn ${ai ? 'grad text-white border-transparent' : ''}`}>🤖<span className="ml-1 text-xs sm:text-sm xl:hidden 2xl:inline">{lang === 'fr' ? 'Tuteur' : 'Tutor'}<span className="hidden sm:inline 2xl:inline"> IA</span></span></button>
             <span className="hidden sm:contents">
               <Access lang={lang} />
               <button onClick={() => { const n = theme === 'noir' ? 'finjaro' : 'noir'; setTheme(n); save('theme', n) }} aria-label={t.theme} title={t.theme} className="icon-btn">
@@ -300,7 +292,7 @@ export default function App() {
         </div>
       </header>
 
-      <nav className="bottom-nav lg:hidden" role="tablist" aria-label={t.lessonsTab}>
+      <nav className="bottom-nav xl:hidden" role="tablist" aria-label={t.lessonsTab}>
         {VIEWS.map((v) => (
           <button key={v} role="tab" aria-selected={view === v} onClick={() => { setView(v); window.scrollTo({ top: 0 }) }}>
             <span className="ico" aria-hidden="true">{VIEW_ICON[v]}</span>{tabLabel(v)}
@@ -308,52 +300,34 @@ export default function App() {
         ))}
       </nav>
 
-      {view === 'lettre' && <div id="contenu" tabIndex={-1} className="max-w-6xl mx-auto px-4 py-6 outline-none"><Lettre lang={lang} date={lettreDate || null} onDate={(d) => { window.location.hash = 'lettre/' + d }} /></div>}
-      {view === 'outils' && <div id="contenu" tabIndex={-1} className="max-w-6xl mx-auto px-4 py-6 outline-none">{session ? <Outils lang={lang} session={session} /> : <LoginGate lang={lang} icon="🧰" {...G.outils} />}</div>}
-      {view === 'progression' && <div id="contenu" tabIndex={-1} className="max-w-6xl mx-auto px-4 py-6 outline-none"><Progress lang={lang} done={done} onOpen={(id) => { go(lessons.findIndex((l) => l.id === id)); setView('lecons') }} /></div>}
-      {view === 'entraide' && <div id="contenu" tabIndex={-1} className="max-w-6xl mx-auto px-4 py-6 outline-none">{session ? <Entraide lang={lang} session={session} /> : <LoginGate lang={lang} icon="🤝" {...G.entraide} />}</div>}
-      {view === 'espaces' && <div id="contenu" tabIndex={-1} className="max-w-6xl mx-auto px-4 py-6 outline-none">{session ? <Espaces lang={lang} session={session} /> : <LoginGate lang={lang} icon="👥" {...G.espaces} />}</div>}
-      {view === 'lecons' && (
-        <div className="max-w-6xl mx-auto px-4 pt-5 space-y-5">
-          <Accueil lang={lang} done={done} idx={idx} onOpen={(i) => go(i, true)} onChrono={() => setChrono(true)} onLettre={() => { window.location.hash = 'lettre' }}
-            onResume={() => document.getElementById('lecon')?.scrollIntoView({ behavior: 'smooth', block: 'start' })} />
+      <main id="contenu" tabIndex={-1} className="outline-none">
+      {route.v === 'atelier' && <div className="max-w-6xl mx-auto px-4 py-5"><Atelier lang={lang} id={route.id} ai={ai} signedIn={!!session} onOpen={(i) => nav('#/atelier/' + i)} onBack={() => nav('#/atelier')} /></div>}
+      {view === 'lettre' && <div className="max-w-6xl mx-auto px-4 py-6 outline-none"><Lettre lang={lang} date={lettreDate} onDate={(d) => nav('#/lettre/' + d)} /></div>}
+      {view === 'outils' && <div className="max-w-6xl mx-auto px-4 py-6 outline-none">{session ? <Outils lang={lang} session={session} /> : <LoginGate lang={lang} icon="🧰" {...G.outils} />}</div>}
+      {view === 'progression' && <div className="max-w-6xl mx-auto px-4 py-6 outline-none"><Progress lang={lang} done={done} onOpen={(id) => nav('#/lecon/' + id)} /></div>}
+      {view === 'entraide' && <div className="max-w-6xl mx-auto px-4 py-6 outline-none">{session ? <Entraide lang={lang} session={session} /> : <LoginGate lang={lang} icon="🤝" {...G.entraide} />}</div>}
+      {view === 'espaces' && <div className="max-w-6xl mx-auto px-4 py-6 outline-none">{session ? <Espaces lang={lang} session={session} /> : <LoginGate lang={lang} icon="👥" {...G.espaces} />}</div>}
+      {route.v === 'accueil' && (
+        <div className="max-w-6xl mx-auto px-4 py-5 outline-none">
+          <Accueil lang={lang} done={done} idx={idx} onOpen={ouvre} onTrack={(k) => nav('#/parcours/' + k)} onChrono={() => setChrono(true)} onLettre={() => nav('#/lettre')}
+            onResume={() => ouvre(idx)} />
+        </div>
+      )}
+      {route.v === 'parcours' && (
+        <div className="max-w-4xl mx-auto px-4 py-5 outline-none">
+          <Parcours lang={lang} k={route.k} done={done} current={lesson.id} onOpen={ouvre} onBack={() => nav('#/')} />
         </div>
       )}
       {burst > 0 && <Burst key={burst} />}
       {chrono && <Chrono lang={lang} sound={sound} onClose={() => setChrono(false)} onPlayed={recordDay} />}
-      <div id="lecon" className={`scroll-mt-20 max-w-6xl mx-auto px-4 py-5 grid gap-5 md:grid-cols-[250px_1fr] ${view !== 'lecons' ? 'hidden' : ''}`}>
-        <nav aria-label={t.lessons} className="min-w-0 md:sticky md:top-20 md:self-start md:max-h-[calc(100vh-6rem)] md:overflow-y-auto md:pr-1">
-          <h2 className="text-xs uppercase tracking-wider text-ink/55 mb-2 font-bold">{TRACK_ICON[track]} {acuName(lang, track)}</h2>
-          <select
-            className="md:hidden w-full rounded-xl border border-ink/30 px-3 py-2.5 text-sm font-medium"
-            aria-label={t.lessons}
-            value={idx}
-            onChange={(e) => go(Number(e.target.value))}
-          >
-            {trackLessons.map(({ l, i }) => <option key={l.id} value={i}>{i + 1}. {l.title[lang]}{done.includes(l.id) ? ' ✓' : ''}</option>)}
-          </select>
-          <ol className="hidden md:flex md:flex-col gap-1">
-            {trackLessons.map(({ l, i }, k) => (
-              <li key={l.id}>
-                {(k === 0 || trackLessons[k - 1].l.group !== l.group) && (
-                  <span className="block text-[11px] uppercase tracking-wide text-ink/45 mt-3 mb-1 font-semibold">{GROUPS[l.group ?? 'js'][lang]}</span>
-                )}
-                <button
-                  onClick={() => go(i)}
-                  aria-current={i === idx ? 'step' : undefined}
-                  className={`w-full min-h-11 text-left rounded-xl px-2.5 py-2.5 text-sm flex items-start gap-2 ${i === idx ? 'bg-paper shadow-sm ring-1 ring-terracotta/50 font-semibold' : 'hover:bg-ink/5 text-ink/80'}`}
-                >
-                  <span className={`shrink-0 size-5 mt-px rounded-full grid place-items-center text-[10px] font-bold ${done.includes(l.id) ? 'grad text-white' : i === idx ? 'bg-terracotta/15 text-terracotta-dark' : 'bg-ink/8 text-ink/55'}`}>
-                    {done.includes(l.id) ? <span aria-label={t.done}>✓</span> : i + 1}
-                  </span>
-                  <span className="min-w-0">{l.title[lang]}</span>
-                </button>
-              </li>
-            ))}
-          </ol>
-        </nav>
-
-        <main id="contenu" tabIndex={-1} className="space-y-4 min-w-0 outline-none">
+      {route.v === 'lecon' && <div id="lecon" className="max-w-6xl mx-auto px-4 py-4">
+        <div className="space-y-4 min-w-0">
+          <div className="sticky top-16 z-20 -mx-4 px-4 py-2 bg-[color-mix(in_srgb,var(--color-cream)_88%,transparent)] backdrop-blur-xl border-b border-brass flex items-center gap-2">
+            <button className="btn px-3" onClick={() => nav('#/parcours/' + track)} aria-label={(lang === 'fr' ? 'Retour au parcours ' : 'Back to track ') + acuName(lang, track)}>←<span className="hidden sm:inline"> {TRACK_ICON[track]} {acuName(lang, track)}</span></button>
+            <span className="flex-1 text-center text-sm font-semibold text-ink/70 truncate">{lang === 'fr' ? 'Leçon' : 'Lesson'} {pos} / {trackLessons.length}</span>
+            <button className="icon-btn" disabled={pos <= 1} onClick={() => ouvre(trackLessons[pos - 2].i)} aria-label={lang === 'fr' ? 'Leçon précédente' : 'Previous lesson'}>‹</button>
+            <button className="icon-btn" disabled={pos >= trackLessons.length} onClick={() => ouvre(trackLessons[pos].i)} aria-label={lang === 'fr' ? 'Leçon suivante' : 'Next lesson'}>›</button>
+          </div>
           <div className="card p-5 sm:p-6 space-y-4">
           <div className="flex items-start justify-between gap-3">
             <h2 className="text-xl sm:text-2xl leading-tight">{lesson.title[lang]}</h2>
@@ -374,7 +348,7 @@ export default function App() {
           {lesson.predict && (
             <div className="card p-5 sm:p-6">
             <Predict key={lesson.id} lesson={lesson} lang={lang} hasNext={idx < lessons.length - 1}
-              onCorrect={() => { if (sound) playSuccess(); void markPassed(lesson.predict!.answer) }} onNext={() => go(idx + 1)} />
+              onCorrect={() => { if (sound) playSuccess(); void markPassed(lesson.predict!.answer) }} onNext={() => ouvre(idx + 1)} />
             </div>
           )}
           {!lesson.predict && <section className="card p-5 sm:p-6 space-y-3">
@@ -468,12 +442,12 @@ export default function App() {
             </div>
             <div className="min-w-0">
             {running === 'py' ? (
-              <div id="resultat" className="scroll-mt-20 scroll-mb-28 lg:scroll-mb-4 rounded-2xl border border-dashed border-terracotta/50 p-6 text-center text-sm" role="status">
+              <div id="resultat" className="scroll-mt-20 scroll-mb-28 xl:scroll-mb-4 rounded-2xl border border-dashed border-terracotta/50 p-6 text-center text-sm" role="status">
                 <p className="font-semibold">⏳ {lang === 'fr' ? 'Chargement de Python… (une seule fois)' : 'Loading Python… (only once)'}</p>
                 <p className="text-ink/60 text-xs mt-1">{lang === 'fr' ? 'Quelques secondes la première fois ; ensuite c’est instantané.' : 'A few seconds the first time; instant afterwards.'}</p>
               </div>
             ) : res ? (
-              <div id="resultat" className="space-y-2 scroll-mt-20 scroll-mb-28 lg:scroll-mb-4" aria-live="polite">
+              <div id="resultat" className="space-y-2 scroll-mt-20 scroll-mb-28 xl:scroll-mb-4" aria-live="polite">
                 <div className="ide">
                   <div className="ide-bar"><span>›_ {t.output}</span></div>
                   <pre className="p-4 text-sm whitespace-pre-wrap font-mono overflow-x-auto">{res.output.length ? res.output.join('\n') : t.noOutput}</pre>
@@ -497,7 +471,7 @@ export default function App() {
                 {res.passed === true && golf && <p className="text-xs text-ink/70">⛳ {t.golf} : {golf.n} {t.chars} · {t.bestGolf} : {golf.best}</p>}
                 {res.passed === false && !res.error && <p className="rounded-xl bg-terracotta/10 border border-terracotta/40 p-3 text-sm text-terracotta-dark">{t.ko}</p>}
                 {res.passed && idx < lessons.length - 1 && (
-                  <button onClick={() => go(idx + 1, true)} className="btn btn-dark">
+                  <button onClick={() => ouvre(idx + 1)} className="btn btn-dark">
                     {t.next} →
                   </button>
                 )}
@@ -516,8 +490,9 @@ export default function App() {
             <DiffModal lang={lang} original={code} fix={fix} onClose={() => setFix(null)}
               onAccept={() => { setCode(fix.fixed_code); save('code:' + lesson.id, fix.fixed_code); setFix(null); setRes(null) }} />
           )}
-        </main>
-      </div>
+        </div>
+      </div>}
+      </main>
     </div>
   )
 }

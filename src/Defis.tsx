@@ -62,7 +62,7 @@ export default function Defis({ lang, userId, espaceId }: { lang: Lang; userId: 
       {isHost && (
         <div className="flex gap-2 items-center flex-wrap">
           <label className="text-sm">{t.pick}
-            <select value={pick} onChange={(e) => setPick(e.target.value)} className="ml-2 rounded-md border border-ink/30 bg-white/60 px-2 py-1">
+            <select value={pick} onChange={(e) => setPick(e.target.value)} className="mt-1 sm:mt-0 sm:ml-2 block sm:inline-block w-full sm:w-auto max-w-full sm:max-w-md min-h-11 rounded-md border border-ink/30 bg-white/60 px-2 py-1">
               {lessons.map((l) => <option key={l.id} value={l.id}>{l.title[lang]}</option>)}
             </select>
           </label>

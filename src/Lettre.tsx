@@ -208,7 +208,7 @@ export default function Lettre({ lang, date, onDate }: { lang: Lang; date: strin
               <div role="group" aria-label="filtres" className="flex gap-1 rounded-2xl border border-brass bg-paper p-1 overflow-x-auto">
                 {filtres.map(([k, l, n]) => (
                   <button key={k} aria-pressed={filtre === k} onClick={() => setFiltre(k)}
-                    className={`shrink-0 min-h-10 rounded-xl px-3 text-sm font-semibold flex items-center gap-1.5 ${filtre === k ? 'grad text-white' : 'text-ink/70 hover:text-ink'}`}>
+                    className={`shrink-0 min-h-11 rounded-xl px-3 text-sm font-semibold flex items-center gap-1.5 ${filtre === k ? 'grad text-white' : 'text-ink/70 hover:text-ink'}`}>
                     {l}<span className={`text-[11px] rounded-md px-1.5 ${filtre === k ? 'bg-white/25' : 'bg-ink/8'}`}>{n}</span>
                   </button>
                 ))}

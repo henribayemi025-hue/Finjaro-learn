@@ -49,9 +49,9 @@ function MiniReseau() {
   )
 }
 
-export default function Accueil({ lang, done, idx, onOpen, onResume, onChrono, onLettre }: {
+export default function Accueil({ lang, done, idx, onOpen, onTrack, onResume, onChrono, onLettre }: {
   lang: Lang; done: string[]; idx: number
-  onOpen: (i: number) => void; onResume: () => void; onChrono: () => void; onLettre: () => void
+  onOpen: (i: number) => void; onTrack: (k: string) => void; onResume: () => void; onChrono: () => void; onLettre: () => void
 }) {
   const [dernier, setDernier] = useState<Numero | null>(null)
   useEffect(() => { chargerIndex().then((l) => setDernier(l[0] ?? null)).catch(() => { /* pas de lettre : la carte reste discrète */ }) }, [])
@@ -90,7 +90,7 @@ export default function Accueil({ lang, done, idx, onOpen, onResume, onChrono, o
             <div className="flex flex-wrap gap-2 pt-1">
               <button className="btn btn-primary text-base px-6 py-3.5" onClick={onResume}>▶ {t.resume} →</button>
               <button className="btn px-4" onClick={onChrono}>⚡ {t.chrono}</button>
-              <button className="btn px-4" onClick={() => { const i = lessons.findIndex((l) => trackOf(l) === 'projets' && !done.includes(l.id)); onOpen(i >= 0 ? i : lessons.findIndex((l) => trackOf(l) === 'projets')) }}>🏗️ {t.projets}</button>
+              <button className="btn px-4" onClick={() => onTrack('projets')}>🏗️ {t.projets}</button>
             </div>
           </div>
           <div className="hidden lg:block rounded-2xl border border-brass bg-cream/60 p-4">
@@ -139,7 +139,7 @@ export default function Accueil({ lang, done, idx, onOpen, onResume, onChrono, o
         <div role="group" aria-label="niveau" className="flex gap-1 rounded-2xl border border-brass bg-paper p-1 overflow-x-auto">
           {(['', 'debutant', 'intermediaire', 'avance'] as const).map((n) => (
             <button key={n || 'tous'} aria-pressed={niv === n} onClick={() => setNiv(n)}
-              className={`shrink-0 min-h-10 rounded-xl px-3 text-sm font-semibold ${niv === n ? 'grad text-white' : 'text-ink/70 hover:text-ink'}`}>{n ? t[n] : t.all}</button>
+              className={`shrink-0 min-h-11 rounded-xl px-3 text-sm font-semibold ${niv === n ? 'grad text-white' : 'text-ink/70 hover:text-ink'}`}>{n ? t[n] : t.all}</button>
           ))}
         </div>
       </section>
@@ -172,17 +172,17 @@ export default function Accueil({ lang, done, idx, onOpen, onResume, onChrono, o
             return (
               <li key={key} className="snap-start shrink-0 w-[85%] sm:w-[60%] md:w-auto">
                 <div className="card h-full p-4 sm:p-5 flex flex-col gap-3">
-                  <div className="flex items-start gap-3">
+                  <button onClick={() => onTrack(key)} className="flex items-start gap-3 text-left rounded-xl -m-1 p-1 hover:bg-ink/5" aria-label={(lang === 'fr' ? 'Ouvrir le parcours ' : 'Open track ') + name[lang]}>
                     <span aria-hidden="true" className="size-12 shrink-0 rounded-2xl grad grid place-items-center text-xl shadow-md">{TRACK_ICON[key]}</span>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-display text-lg leading-tight">{name[lang]}</h3>
-                      <p className="text-xs text-ink/60 mt-1 flex flex-wrap gap-x-2 items-center">
+                    <span className="min-w-0 flex-1">
+                      <h3 className="font-display text-lg leading-tight">{name[lang]} <span aria-hidden="true" className="text-terracotta-dark">›</span></h3>
+                      <span className="text-xs text-ink/60 mt-1 flex flex-wrap gap-x-2 items-center">
                         <span>{ls.length} {t.lessons}</span><span aria-hidden="true">·</span>
                         <span className="uppercase tracking-wide font-semibold text-[10px] rounded-md bg-ink/6 px-1.5 py-0.5">{t[NIVEAU[key] ?? 'intermediaire']}</span>
-                      </p>
-                    </div>
+                      </span>
+                    </span>
                     {fait > 0 && <span className="chip shrink-0">✓ {fait}/{ls.length}</span>}
-                  </div>
+                  </button>
                   <p className="text-sm text-ink/70 line-clamp-2">{desc}</p>
                   <div>
                     <div className="flex justify-between text-xs mb-1"><span className="text-ink/60">{t.verified}</span><span className="font-bold">{p}%</span></div>

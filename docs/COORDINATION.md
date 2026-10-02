@@ -60,3 +60,5 @@ messages directs (create_trigger vers la session concernée).
 - 02/10 · Learn : « La Lettre de l'IA » — /learn/#lettre ; format public/lettre/AAAA-MM-JJ.md + index.json (voir public/lettre/LISEZMOI.md) ; numéro 1 copié depuis henribeaubayemi/staging docs/lettre-ia. Dépendances ajoutées : marked, dompurify (gratuites).
 
 - 02/10 · Learn : La Lettre de l'IA refaite façon « Finjaro Pulse » (en-tête édition du jour, filtres + recherche, carrousel des dépôts avec git clone, prompt du jour façon éditeur avec Copier, actus en cartes avec dessin vectoriel, favoris sur l'appareil). Tout vient du fichier du jour.
+
+- 02/10 · Learn : écrans séparés (#/, #/parcours/<clé>, #/lecon/<id>, #/atelier[/<id>], #/progression…, #/lettre ; #lettre reste accepté) ; Atelier V1 (IndexedDB, rien en base) ; SQL Atelier V2 proposé à Alpha (non appliqué).

@@ -69,7 +69,7 @@ export default function CoCode({ lang, me, send, handlerRef }: {
       </div>
       <p className="text-xs text-ink/70" aria-live="polite">{iAmPilot ? t.driving : t.watching}</p>
       <label className="text-sm block">{t.lesson}
-        <select value={s.lesson} disabled={!iAmPilot} onChange={(e) => pickLesson(e.target.value)} className="ml-2 rounded-md border border-ink/30 bg-white/60 px-2 py-1 disabled:opacity-60">
+        <select value={s.lesson} disabled={!iAmPilot} onChange={(e) => pickLesson(e.target.value)} className="mt-1 sm:mt-0 sm:ml-2 block sm:inline-block w-full sm:w-auto max-w-full sm:max-w-md min-h-11 rounded-md border border-ink/30 bg-white/60 px-2 py-1 disabled:opacity-60">
           {lessons.map((l) => <option key={l.id} value={l.id}>{l.title[lang]}</option>)}
         </select>
       </label>

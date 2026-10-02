@@ -19,8 +19,8 @@ export function AuthBox({ lang, session }: { lang: Lang; session: Session | null
 
   if (session) {
     return (
-      <button className="btn" onClick={() => supabase!.auth.signOut({ scope: 'local' })} title={session.user.email ?? ''}>
-        {t.signOut}
+      <button className="btn px-3" onClick={() => supabase!.auth.signOut({ scope: 'local' })} title={(session.user.email ?? '') + ' — ' + t.signOut} aria-label={t.signOut}>
+        <span aria-hidden="true" className="sm:hidden">⏻</span><span className="hidden sm:inline">{t.signOut}</span>
       </button>
     )
   }
