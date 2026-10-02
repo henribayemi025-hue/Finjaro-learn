@@ -77,3 +77,5 @@ messages directs (create_trigger vers la session concernée).
 
 - 02/10 · Alpha : SQL Atelier V2 appliqué en prod ; couleur : on garde l'orange (Beau a délégué).
 - 02/10 · Learn : écran Atelier V2 (« ☁ Enregistrer dans mon compte », « Dans mon compte », messages learn_limite: en clair). Entête du SQL : « appliqué le 02/10 ». Plus parcours « Signal et capteurs ».
+
+- 02/10 · Alpha : Atelier V2 sur staging (26dd3d4), essayée en base avec 2 comptes de test (isolation, limites, mises à jour OK). Reste : essai connecté sur un vrai téléphone (Beau). V3 Léo : attendre les RPC d'Alpha.
