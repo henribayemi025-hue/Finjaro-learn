@@ -58,3 +58,5 @@ messages directs (create_trigger vers la session concernée).
 - 02/10 · Learn : accueil refait d'après les modèles AI Studio de Beau (orange #FF6B00 / noir à lueurs) ; plans PLAN-ATELIER.md et PLAN-VEILLE.md à relire par Alpha.
 
 - 02/10 · Learn : « La Lettre de l'IA » — /learn/#lettre ; format public/lettre/AAAA-MM-JJ.md + index.json (voir public/lettre/LISEZMOI.md) ; numéro 1 copié depuis henribeaubayemi/staging docs/lettre-ia. Dépendances ajoutées : marked, dompurify (gratuites).
+
+- 02/10 · Learn : La Lettre de l'IA refaite façon « Finjaro Pulse » (en-tête édition du jour, filtres + recherche, carrousel des dépôts avec git clone, prompt du jour façon éditeur avec Copier, actus en cartes avec dessin vectoriel, favoris sur l'appareil). Tout vient du fichier du jour.
