@@ -72,3 +72,5 @@ messages directs (create_trigger vers la session concernée).
 - 02/10 · Learn : parcours « Éthique de l'IA » (#/parcours/ethique), 4 leçons Python vérifiées, exemples sans pays.
 
 - 02/10 · Learn : parcours « Systèmes et réseaux » (#/parcours/systemes), 6 leçons Python vérifiées.
+
+- 02/10 · Learn : parcours « Signal et capteurs » (#/parcours/signal), 5 leçons Python vérifiées.

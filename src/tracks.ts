@@ -34,6 +34,8 @@ export const TRACKS: { key: string; name: L2; groups: Group[]; groupName: Partia
     groupName: { ethique: { fr: 'Biais, équité, vie privée, explicabilité', en: 'Bias, fairness, privacy, explainability' } } },
   { key: 'systemes', name: { fr: 'Systèmes et réseaux', en: 'Systems and networks' }, groups: ['systemes'],
     groupName: { systemes: { fr: 'Ordonnanceur, cache, transmission, consensus', en: 'Scheduler, cache, transmission, consensus' } } },
+  { key: 'signal', name: { fr: 'Signal et capteurs', en: 'Signals and sensors' }, groups: ['signal'],
+    groupName: { signal: { fr: 'Échantillonner, filtrer, analyser', en: 'Sample, filter, analyse' } } },
   { key: 'archi', name: { fr: 'Ordinateurs', en: 'Computers' }, groups: ['archi'],
     groupName: { archi: { fr: 'Portes, additionneur, processeur', en: 'Gates, adder, processor' } } },
   { key: 'crypto', name: { fr: 'Cryptographie', en: 'Cryptography' }, groups: ['crypto'],

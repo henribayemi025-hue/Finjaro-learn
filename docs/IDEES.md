@@ -18,7 +18,7 @@ Règles qui filtrent : aucun chiffre ou diplôme inventé, aucune affiliation à
 | 7 | Neurosciences computationnelles | 🔜 neurone à impulsions (LIF) en Python |
 | 8 | Bio-informatique | 🔜 séquences ADN, alignement (jeux de données écrits à la main, pas de données réelles inventées) |
 | 9 | Théorie des jeux | 🔜 dilemme du prisonnier, équilibre de Nash 2×2 |
-| 10 | Signal et vision | 🔜 convolution ✅, FFT, filtres |
+| 10 | Signal et vision | ✅ 02/10 : parcours « Signal et capteurs » (repliement, moyenne glissante, convolution, Fourier, pics) |
 | 11 | Éthique de l'IA | ✅ 02/10 : 4 leçons (biais, équité des erreurs, k-anonymat, importance par permutation) sur données jouets ; textes de loi : seulement si sourcés |
 | 12 | Mini-OS | 🔜 ordonnanceur, pagination simulés |
 | 13 | Compilateurs / langage | ✅ piste « Compilateurs » (02/10) : 7 leçons (lexeur, NPI, gare de triage, parseur récursif, interpréteur, machine à pile, calculatrice) |
