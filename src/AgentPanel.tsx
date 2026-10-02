@@ -63,7 +63,23 @@ export default function AgentPanel({ lang, signedIn, ctx }: { lang: Lang; signed
 
   return (
     <section className="rounded-xl border-2 border-brass bg-paper p-3 space-y-3" aria-label={t.agents}>
-      <h3 className="font-serif font-bold text-lg">{t.agents}</h3>
+      <h3 className="font-bold text-lg">{lang === 'fr' ? `Une question ? Demande à ${agent.name}` : `A question? Ask ${agent.name}`}</h3>
+      <fieldset className="space-y-1.5">
+        <legend className="text-sm font-semibold mb-1">{lang === 'fr' ? 'Comment veux-tu qu’elle réponde ?' : 'How should she answer?'}</legend>
+        <div className="grid sm:grid-cols-2 gap-2">
+          {([false, true] as const).map((q) => (
+            <label key={String(q)} className={`cursor-pointer rounded-xl border p-3 text-sm flex gap-2 items-start ${socratique === q ? 'border-terracotta bg-terracotta/10' : 'border-brass/60'}`}>
+              <input type="radio" name="mode-finia" checked={socratique === q} className="mt-0.5 accent-[var(--color-terracotta)] size-4"
+                onChange={() => { setSocratique(q); try { localStorage.setItem('learn:socratique', q ? '1' : '0') } catch { /* ignoré */ } }} />
+              <span><strong>{q ? (lang === 'fr' ? 'Par questions' : 'With questions') : (lang === 'fr' ? 'Normal' : 'Normal')}</strong><br />
+                <span className="text-ink/70">{q ? (lang === 'fr' ? 'Elle ne donne pas la réponse : elle te pose des questions pour que tu trouves toi-même.' : 'She doesn’t give the answer: she asks questions so you find it yourself.') : (lang === 'fr' ? 'Elle t’explique, avec un petit exemple.' : 'She explains, with a small example.')}</span></span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+      <details className="rounded-lg border border-brass/60 px-3 py-2 text-sm">
+        <summary className="cursor-pointer font-semibold min-h-11 flex items-center">{lang === 'fr' ? 'Changer d’agent et options' : 'Change agent and options'}</summary>
+        <div className="space-y-3 pt-2">
       <ul className="grid grid-cols-2 lg:grid-cols-4 gap-2">
         {cards.map((a) => (
           <li key={a.key}>
@@ -105,16 +121,14 @@ export default function AgentPanel({ lang, signedIn, ctx }: { lang: Lang; signed
           <button className="underline text-xs" onClick={() => { const next = customs.filter((c) => 'custom:' + c.id !== agent.key); setCustoms(next); saveCustomAgents(next); setAgentId('finia') }}>{a.remove}</button>
         )}
       </div>
-      <label className="flex items-center gap-2 text-sm cursor-pointer">
-        <input type="checkbox" checked={socratique} className="accent-[var(--color-terracotta)] size-4"
-          onChange={(e) => { setSocratique(e.target.checked); try { localStorage.setItem('learn:socratique', e.target.checked ? '1' : '0') } catch { /* ignoré */ } }} />
-        <span><strong>{a.socratic}</strong> — {a.socraticHelp}</span>
-      </label>
+
       <label className="flex items-center gap-2 text-sm cursor-pointer">
         <input type="checkbox" checked={voixIA} className="accent-[var(--color-terracotta)] size-4"
           onChange={(e) => { setVoixIAState(e.target.checked); setVoixIA(e.target.checked) }} />
         <span><strong>{a.voiceAI}</strong> — {a.voiceAIHelp}</span>
       </label>
+        </div>
+      </details>
       <p className="text-sm text-ink/70">{agent.personality}</p>
       <div className="flex flex-wrap sm:flex-nowrap gap-2">
         <input

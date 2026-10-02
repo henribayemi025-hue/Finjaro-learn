@@ -2,7 +2,7 @@ import type { Lang } from './i18n'
 
 export const ac = {
   fr: {
-    socratic: 'Mode socratique', socraticHelp: 'l’agent ne donne pas la réponse : il te pose des questions pour te guider',
+    socratic: 'Me guider par des questions', socraticHelp: 'Finia ne donne pas la réponse : elle te pose des questions pour que tu trouves toi-même',
     voiceAI: 'Voix IA', voiceAIHelp: 'une vraie voix générée quand le service est ouvert ; sinon la voix de ton navigateur',
     hangUp: 'Raccrocher', callTitle: 'Appel avec', listening: 'Je t’écoute…', thinking: 'Je réfléchis…', speaking: 'Je parle…',
     idle: 'Appuie sur le micro pour parler.', micOn: 'Parler', micOff: 'Arrêter', you: 'Toi', noSpeech: 'La reconnaissance vocale n’est pas disponible sur ce navigateur. Essaie Chrome ou Safari.',
@@ -37,7 +37,7 @@ export const ac = {
     },
   },
   en: {
-    socratic: 'Socratic mode', socraticHelp: 'the agent never gives the answer: it asks questions to guide you',
+    socratic: 'Guide me with questions', socraticHelp: 'Finia doesn’t give the answer: she asks questions so you find it yourself',
     voiceAI: 'AI voice', voiceAIHelp: 'a real generated voice when the service is open; otherwise your browser voice',
     hangUp: 'Hang up', callTitle: 'Call with', listening: 'Listening…', thinking: 'Thinking…', speaking: 'Speaking…',
     idle: 'Press the mic to talk.', micOn: 'Talk', micOff: 'Stop', you: 'You', noSpeech: 'Speech recognition is not available in this browser. Try Chrome or Safari.',

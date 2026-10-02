@@ -20,6 +20,7 @@ import { supabase } from './supabase'
 import { ui, type Lang } from './i18n'
 import { lessons } from './lessons'
 import AgentPanel from './AgentPanel'
+import FiniaAccueil from './FiniaAccueil'
 import DiffModal from './DiffModal'
 import { askFix, type FixProposal } from './tutor'
 import { playError, playSuccess } from './sounds'
@@ -368,8 +369,9 @@ export default function App() {
             <h2 className="text-xl sm:text-2xl leading-tight">{lesson.title[lang]}</h2>
             <span className="chip shrink-0">{lesson.langue === 'c' ? '⚙️ C' : lesson.langue === 'cpp' ? '⚙️ C++' : lesson.lang === 'py' ? '🐍 Python' : '⚡ JavaScript'}</span>
           </div>
-          {ai && <AgentPanel lang={lang} signedIn={!!session} ctx={{ title: (lesson.langue === 'c' ? '[C] ' : lesson.langue === 'cpp' ? '[C++] ' : lesson.lang === 'py' ? '[Python] ' : '[JavaScript] ') + lesson.title[lang], code, output: res?.output.join('\n') ?? '' }} />}
-          <section>
+          <FiniaAccueil key={lesson.id} lang={lang} titre={lesson.title[lang]} pos={pos} total={trackLessons.length} parcours={acuName(lang, track)}
+            onGo={() => document.getElementById('explication')?.scrollIntoView({ behavior: 'smooth', block: 'start' })} />
+          <section id="explication" className="scroll-mt-32">
             <h3 className="text-sm uppercase tracking-wide text-ink/55 mb-1.5">{t.explain}</h3>
             <p className="leading-relaxed text-[15px]">{lesson.explain[lang]}</p>
           </section>
@@ -527,6 +529,7 @@ export default function App() {
             </div>
             </div>
           </section>}
+          {ai && <AgentPanel lang={lang} signedIn={!!session} ctx={{ title: (lesson.langue === 'c' ? '[C] ' : lesson.langue === 'cpp' ? '[C++] ' : lesson.lang === 'py' ? '[Python] ' : '[JavaScript] ') + lesson.title[lang], code, output: res?.output.join('\n') ?? '' }} />}
           {exo && <ExoGenereModal lang={lang} exo={exo} packages={lesson.packages} onClose={() => setExo(null)} />}
           {debug && lesson.lang === 'py' && <div id="debug" className="scroll-mt-20"><StepDebugger lang={lang} code={code} packages={lesson.packages} onClose={() => setDebug(false)} /></div>}
           {fix && (
