@@ -84,10 +84,10 @@ h1, h2, h3, h4 { font-family: var(--font-display); letter-spacing: -0.025em; fon
 .ide textarea { background: transparent; color: var(--color-code-fg); border: 0; outline: none; resize: vertical; width: 100%; caret-color: var(--color-amber); }
 
 /* Barre d'onglets mobile en bas de l'écran */
-.bottom-nav { position: fixed; left: .75rem; right: .75rem; bottom: calc(.6rem + env(safe-area-inset-bottom)); z-index: 30; display: grid; grid-template-columns: repeat(6, 1fr);
+.bottom-nav { position: fixed; left: .75rem; right: .75rem; bottom: calc(.6rem + env(safe-area-inset-bottom)); z-index: 30; display: grid; grid-template-columns: repeat(5, 1fr);
   background: color-mix(in srgb, var(--color-paper) 85%, transparent); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--color-brass); border-radius: 1.4rem; padding: .3rem; box-shadow: 0 12px 32px -12px rgb(0 0 0 / .35); }
-.bottom-nav button { display: flex; flex-direction: column; align-items: center; gap: .1rem; padding: .4rem 0 .35rem; border-radius: 1.1rem; font-size: .62rem; font-weight: 700; color: color-mix(in srgb, var(--color-ink) 60%, transparent); min-height: 2.9rem; }
+.bottom-nav button { display: flex; flex-direction: column; align-items: center; gap: .1rem; padding: .4rem 0 .35rem; border-radius: 1.1rem; font-size: .66rem; font-weight: 700; color: color-mix(in srgb, var(--color-ink) 60%, transparent); min-height: 2.9rem; }
 .bottom-nav button[aria-selected="true"] { color: #fff; background-image: linear-gradient(135deg, var(--color-terracotta), color-mix(in srgb, var(--color-terracotta) 55%, var(--color-amber))); box-shadow: 0 6px 18px -8px var(--color-terracotta); }
 .bottom-nav .ico { font-size: 1.15rem; line-height: 1; }
 

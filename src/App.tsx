@@ -5,6 +5,7 @@ import { TRACK_ICON } from './Curriculum'
 import Accueil from './Accueil'
 import Parcours from './Parcours'
 import Atelier from './Atelier'
+import { nouvelId, sauverProjet } from './atelierStore'
 import Lettre from './Lettre'
 import LoginGate from './LoginGate'
 import Chrono from './Chrono'
@@ -36,8 +37,10 @@ import { expliqueErreur } from './explainError'
 
 const pre = 'rounded-xl bg-code text-code-fg p-4 text-sm overflow-x-auto whitespace-pre-wrap font-mono'
 const trackOf = (g: string | undefined) => TRACKS.find((tr) => (tr.groups as string[]).includes(g ?? 'js'))?.key ?? 'prog'
-const VIEWS = ['lecons', 'atelier', 'progression', 'espaces', 'outils', 'entraide'] as const
-const VIEW_ICON = { lecons: '📚', atelier: '🛠️', progression: '📈', espaces: '👥', outils: '🧰', entraide: '🤝' } as const
+const VIEWS = ['lecons', 'atelier', 'lettre', 'progression', 'espaces', 'outils', 'entraide'] as const
+const BAS = ['lecons', 'atelier', 'lettre', 'progression'] as const
+const PLUS = ['espaces', 'outils', 'entraide'] as const
+const VIEW_ICON = { lecons: '📚', atelier: '🛠️', lettre: '📰', progression: '📈', espaces: '👥', outils: '🧰', entraide: '🤝' } as const
 
 
 function acuName(lang: Lang, key: string) {
@@ -65,6 +68,7 @@ function lireRoute(): Route {
   const [a, b] = h.split('/')
   if (a === 'lettre') return { v: 'lettre', date: /^\d{4}-\d{2}-\d{2}$/.test(b ?? '') ? b : null }
   if (a === 'parcours' && b && TRACKS.some((t) => t.key === b)) return { v: 'parcours', k: b }
+  if (a === 'parcours') return { v: 'accueil' }
   if (a === 'lecon' && b && lessons.some((l) => l.id === b)) return { v: 'lecon', id: b }
   if (a === 'atelier') return { v: 'atelier', id: b && /^[a-z0-9]{4,40}$/.test(b) ? b : null }
   if (a === 'progression' || a === 'espaces' || a === 'outils' || a === 'entraide') return { v: a }
@@ -110,6 +114,7 @@ export default function App() {
   const [chrono, setChrono] = useState(false)
   const [running, setRunning] = useState<'' | 'run' | 'py'>('')
   const [menu, setMenu] = useState(false)
+  const [plus, setPlus] = useState(false)
   const t = ui[lang]
   // Le débogueur s'ouvre sous l'exercice : on l'amène à l'écran, sinon on croit que le bouton ne fait rien.
   useEffect(() => { if (debug) requestAnimationFrame(() => document.getElementById('debug')?.scrollIntoView({ behavior: 'smooth', block: 'start' })) }, [debug])
@@ -217,7 +222,7 @@ export default function App() {
   const track = trackOf(lesson.group)
   const trackLessons = lessons.map((l, i) => ({ l, i })).filter(({ l }) => trackOf(l.group) === track)
   const pos = trackLessons.findIndex(({ i }) => i === idx) + 1
-  const tabLabel = (v: typeof VIEWS[number]) => v === 'lecons' ? t.lessonsTab : v === 'atelier' ? (lang === 'fr' ? 'Atelier' : 'Workshop') : v === 'progression' ? t.progressTab : v === 'espaces' ? t.spaces : v === 'entraide' ? entraideUi(lang).tab : outilsUi[lang].tab
+  const tabLabel = (v: typeof VIEWS[number]) => v === 'lecons' ? t.lessonsTab : v === 'atelier' ? (lang === 'fr' ? 'Atelier' : 'Workshop') : v === 'lettre' ? (lang === 'fr' ? 'Lettre IA' : 'AI Letter') : v === 'progression' ? t.progressTab : v === 'espaces' ? t.spaces : v === 'entraide' ? entraideUi(lang).tab : outilsUi[lang].tab
   const serie = streaks(loadDays()).cur
   const G = {
     espaces: lang === 'fr'
@@ -245,7 +250,7 @@ export default function App() {
             {VIEWS.map((v) => (
               <button key={v} role="tab" aria-selected={view === v} onClick={() => setView(v)}
                 className={`whitespace-nowrap min-h-11 px-3 py-1.5 rounded-xl text-sm font-semibold ${view === v ? 'bg-paper shadow text-ink' : 'text-ink/60 hover:text-ink'}`}>
-                <span aria-hidden="true">{VIEW_ICON[v]}</span> {tabLabel(v)}
+                <span aria-hidden="true" className="hidden 2xl:inline">{VIEW_ICON[v]} </span>{tabLabel(v)}
               </button>
             ))}
           </nav>
@@ -293,12 +298,24 @@ export default function App() {
       </header>
 
       <nav className="bottom-nav xl:hidden" role="tablist" aria-label={t.lessonsTab}>
-        {VIEWS.map((v) => (
-          <button key={v} role="tab" aria-selected={view === v} onClick={() => { setView(v); window.scrollTo({ top: 0 }) }}>
+        {BAS.map((v) => (
+          <button key={v} role="tab" aria-selected={view === v} onClick={() => { setPlus(false); setView(v) }}>
             <span className="ico" aria-hidden="true">{VIEW_ICON[v]}</span>{tabLabel(v)}
           </button>
         ))}
+        <button role="tab" aria-selected={(PLUS as readonly string[]).includes(view)} aria-expanded={plus} onClick={() => setPlus(!plus)}>
+          <span className="ico" aria-hidden="true">⋯</span>{lang === 'fr' ? 'Plus' : 'More'}
+        </button>
       </nav>
+      {plus && (
+        <div role="dialog" aria-label={lang === 'fr' ? 'Plus' : 'More'} className="card fixed left-3 right-3 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-40 p-2 shadow-2xl rise xl:hidden">
+          {PLUS.map((v) => (
+            <button key={v} onClick={() => { setPlus(false); setView(v) }} className={`w-full min-h-12 rounded-xl px-4 text-left font-semibold flex items-center gap-3 ${view === v ? 'bg-terracotta/12' : 'hover:bg-ink/5'}`}>
+              <span aria-hidden="true" className="text-xl">{VIEW_ICON[v]}</span>{tabLabel(v)}
+            </button>
+          ))}
+        </div>
+      )}
 
       <main id="contenu" tabIndex={-1} className="outline-none">
       {route.v === 'atelier' && <div className="max-w-6xl mx-auto px-4 py-5"><Atelier lang={lang} id={route.id} ai={ai} signedIn={!!session} onOpen={(i) => nav('#/atelier/' + i)} onBack={() => nav('#/atelier')} /></div>}
@@ -409,6 +426,12 @@ export default function App() {
               >
                 {t.solution}
               </button>
+              <button className="btn" onClick={async () => {
+                const ext = lesson.lang === 'py' ? 'py' : 'js'
+                const id = nouvelId()
+                await sauverProjet({ id, titre: lesson.title[lang], lang: lesson.lang === 'py' ? 'py' : 'js', principal: 'main.' + ext, fichiers: [{ chemin: 'main.' + ext, contenu: code }], maj: new Date().toISOString() })
+                nav('#/atelier/' + id)
+              }}>🛠️ {lang === 'fr' ? 'Ouvrir dans l’éditeur' : 'Open in the editor'}</button>
               {lesson.lang === 'py' && (
                 <button onClick={() => setDebug(!debug)} aria-pressed={debug} className="btn">🕰 {t.debug}</button>
               )}
