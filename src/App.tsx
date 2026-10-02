@@ -48,6 +48,7 @@ const GROUPS = {
   'ai-rag': { fr: 'AI engineering · recherche et RAG', en: 'AI engineering · retrieval and RAG' },
   'ai-agents': { fr: 'AI engineering · agents et production', en: 'AI engineering · agents and production' },
   pe: { fr: 'Prompt engineering', en: 'Prompt engineering' },
+  compil: { fr: 'Compilateurs', en: 'Compilers' },
   archi: { fr: 'Ordinateurs', en: 'Computers' },
   crypto: { fr: 'Cryptographie', en: 'Cryptography' },
   maths: { fr: 'Maths pour l\'IA', en: 'Maths for AI' },

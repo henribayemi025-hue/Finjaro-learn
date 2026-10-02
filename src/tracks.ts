@@ -14,6 +14,8 @@ export const TRACKS: { key: string; name: L2; groups: Group[]; groupName: Partia
     groupName: { 'ai-rag': { fr: 'Recherche et RAG', en: 'Retrieval and RAG' }, 'ai-agents': { fr: 'Agents et production', en: 'Agents and production' } } },
   { key: 'prompt', name: { fr: 'Prompt engineering', en: 'Prompt engineering' }, groups: ['pe'],
     groupName: { pe: { fr: 'Prompt engineering', en: 'Prompt engineering' } } },
+  { key: 'compil', name: { fr: 'Compilateurs', en: 'Compilers' }, groups: ['compil'],
+    groupName: { compil: { fr: 'Du texte au code exécuté', en: 'From text to running code' } } },
   { key: 'archi', name: { fr: 'Ordinateurs', en: 'Computers' }, groups: ['archi'],
     groupName: { archi: { fr: 'Portes, additionneur, processeur', en: 'Gates, adder, processor' } } },
   { key: 'crypto', name: { fr: 'Cryptographie', en: 'Cryptography' }, groups: ['crypto'],

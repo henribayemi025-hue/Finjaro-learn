@@ -21,7 +21,7 @@ Règles qui filtrent : aucun chiffre ou diplôme inventé, aucune affiliation à
 | 10 | Signal et vision | 🔜 convolution ✅, FFT, filtres |
 | 11 | Éthique de l'IA | 🔜 mesurer un biais sur des données jouets ; textes de loi : seulement si sourcés |
 | 12 | Mini-OS | 🔜 ordonnanceur, pagination simulés |
-| 13 | Compilateurs / langage | 🔜 piste « Compilateurs » : analyseur lexical, parseur, interpréteur |
+| 13 | Compilateurs / langage | ✅ piste « Compilateurs » (02/10) : 7 leçons (lexeur, NPI, gare de triage, parseur récursif, interpréteur, machine à pile, calculatrice) |
 | 14 | Réseaux de zéro | 🔜 paquets, somme de contrôle, retransmission simulés |
 | 15 | NLP profond, Transformers | ✅ attention · 🔜 tokenisation BPE, n-grammes, bloc Transformer |
 
