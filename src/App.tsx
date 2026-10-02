@@ -27,7 +27,8 @@ import ExoGenereModal from './ExoGenere'
 import { genereExo, type ExoGenere } from './exos'
 import { agents } from './agents'
 import AgentFace from './AgentFace'
-import { runLesson, type RunResult } from './runner'
+import { runLesson, pythonPret, type RunResult } from './runner'
+import { expliqueErreur } from './explainError'
 
 const pre = 'rounded-xl bg-code text-code-fg p-4 text-sm overflow-x-auto whitespace-pre-wrap font-mono'
 const trackOf = (g: string | undefined) => TRACKS.find((tr) => (tr.groups as string[]).includes(g ?? 'js'))?.key ?? 'prog'
@@ -103,6 +104,8 @@ export default function App() {
   const [fixNote, setFixNote] = useState('')
   const [showHint, setShowHint] = useState(false)
   const [chrono, setChrono] = useState(false)
+  const [running, setRunning] = useState<'' | 'run' | 'py'>('')
+  const [menu, setMenu] = useState(false)
   const t = ui[lang]
   // Le débogueur s'ouvre sous l'exercice : on l'amène à l'écran, sinon on croit que le bouton ne fait rien.
   useEffect(() => { if (debug) requestAnimationFrame(() => document.getElementById('debug')?.scrollIntoView({ behavior: 'smooth', block: 'start' })) }, [debug])
@@ -154,8 +157,18 @@ export default function App() {
   }
 
   const run = async () => {
-    const r = await runLesson(lesson, code)
+    if (running) return
+    setRunning(lesson.lang === 'py' && !pythonPret(lesson.packages) ? 'py' : 'run')
+    const r = await runLesson(lesson, code).finally(() => setRunning(''))
     setRes(r)
+    // Sur téléphone le résultat est sous l'éditeur : on l'amène à l'écran (au-dessus de la barre d'onglets du bas).
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const el = document.getElementById('resultat')
+      if (!el) return
+      const r2 = el.getBoundingClientRect()
+      const bas = window.innerHeight - (window.innerWidth < 1024 ? 92 : 16)
+      if (r2.bottom > bas) window.scrollBy({ top: Math.min(r2.bottom - bas, r2.top - 80), behavior: 'smooth' })
+    }))
     if (sound && r.passed !== null) (r.passed ? playSuccess : playError)()
     if (r.passed === false) setFails((f) => f + 1)
     if (r.passed) {
@@ -225,23 +238,50 @@ export default function App() {
           <nav aria-label={t.lessonsTab} className="hidden lg:flex items-center gap-1 rounded-2xl bg-ink/5 p-1" role="tablist">
             {VIEWS.map((v) => (
               <button key={v} role="tab" aria-selected={view === v} onClick={() => setView(v)}
-                className={`whitespace-nowrap px-3 py-1.5 rounded-xl text-sm font-semibold ${view === v ? 'bg-paper shadow text-ink' : 'text-ink/60 hover:text-ink'}`}>
+                className={`whitespace-nowrap min-h-11 px-3 py-1.5 rounded-xl text-sm font-semibold ${view === v ? 'bg-paper shadow text-ink' : 'text-ink/60 hover:text-ink'}`}>
                 <span aria-hidden="true">{VIEW_ICON[v]}</span> {tabLabel(v)}
               </button>
             ))}
           </nav>
           <div className="flex items-center gap-1.5">
             <button onClick={() => { setAi(!ai); save('ai', ai ? '0' : '1') }} aria-pressed={ai} title={t.aiHelp} aria-label={lang === 'fr' ? 'Tuteur IA' : 'AI tutor'}
-              className={`icon-btn ${ai ? 'grad text-white border-transparent' : ''}`}>🤖<span className="hidden 2xl:inline ml-1">{lang === 'fr' ? 'Tuteur IA' : 'AI tutor'}</span></button>
-            <Access lang={lang} />
-            <button onClick={() => { const n = theme === 'noir' ? 'finjaro' : 'noir'; setTheme(n); save('theme', n) }} aria-label={t.theme} title={t.theme} className="icon-btn">
-              {theme === 'noir' ? '☀' : '☾'}
-            </button>
-            <button className="icon-btn" aria-label={lang === 'fr' ? 'English' : 'Français'} onClick={() => { const l = lang === 'fr' ? 'en' : 'fr'; setLang(l); save('lang', l) }}>
-              {lang === 'fr' ? 'EN' : 'FR'}
+              className={`icon-btn ${ai ? 'grad text-white border-transparent' : ''}`}>🤖<span className="ml-1 text-xs sm:text-sm lg:hidden 2xl:inline">{lang === 'fr' ? 'Tuteur' : 'Tutor'}<span className="hidden sm:inline 2xl:inline"> IA</span></span></button>
+            <span className="hidden sm:contents">
+              <Access lang={lang} />
+              <button onClick={() => { const n = theme === 'noir' ? 'finjaro' : 'noir'; setTheme(n); save('theme', n) }} aria-label={t.theme} title={t.theme} className="icon-btn">
+                {theme === 'noir' ? '☀' : '☾'}
+              </button>
+              <button className="icon-btn" aria-label={lang === 'fr' ? 'English' : 'Français'} title={lang === 'fr' ? 'English' : 'Français'} onClick={() => { const l = lang === 'fr' ? 'en' : 'fr'; setLang(l); save('lang', l) }}>
+                {lang === 'fr' ? 'EN' : 'FR'}
+              </button>
+            </span>
+            <button className="icon-btn sm:hidden" aria-expanded={menu} aria-label={lang === 'fr' ? 'Réglages' : 'Settings'} onClick={() => setMenu(!menu)}>
+              ⚙<span className="ml-1 text-xs">{lang === 'fr' ? 'Réglages' : 'Settings'}</span>
             </button>
             <AuthBox lang={lang} session={session} />
           </div>
+          {menu && (
+            <div role="dialog" aria-label={lang === 'fr' ? 'Réglages' : 'Settings'} className="card fixed left-3 right-3 top-[4.5rem] z-40 p-4 space-y-4 shadow-2xl rise sm:hidden">
+              <div>
+                <p className="text-xs uppercase tracking-wide text-ink/55 font-bold mb-1">{t.theme}</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {(['finjaro', 'noir'] as const).map((th) => (
+                    <button key={th} aria-pressed={theme === th} onClick={() => { setTheme(th); save('theme', th) }} className={`btn ${theme === th ? 'ring-2 ring-terracotta' : ''}`}>{th === 'noir' ? '☾ Noir' : '☀ Finjaro'}</button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-ink/55 font-bold mb-1">{lang === 'fr' ? 'Langue' : 'Language'}</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {(['fr', 'en'] as const).map((l) => (
+                    <button key={l} aria-pressed={lang === l} onClick={() => { setLang(l); save('lang', l) }} className={`btn ${lang === l ? 'ring-2 ring-terracotta' : ''}`}>{l === 'fr' ? 'Français' : 'English'}</button>
+                  ))}
+                </div>
+              </div>
+              <Access lang={lang} inline />
+              <button className="btn w-full" onClick={() => setMenu(false)}>{lang === 'fr' ? 'Fermer' : 'Close'}</button>
+            </div>
+          )}
         </div>
       </header>
 
@@ -265,7 +305,7 @@ export default function App() {
               <div className="min-w-0">
                 <p className="chip">{TRACK_ICON[track]} {lang === 'fr' ? 'Ta prochaine leçon' : 'Your next lesson'}</p>
                 <h2 className="text-2xl sm:text-3xl mt-2 leading-tight">{lesson.title[lang]}</h2>
-                <p className="text-sm text-ink/65 mt-1">{lang === 'fr' ? `${done.length} leçon(s) réussie(s) sur ${lessons.length}` : `${done.length} of ${lessons.length} lessons passed`}</p>
+                <p className="text-sm text-ink/65 mt-1">{lang === 'fr' ? `${done.length} ${done.length > 1 ? 'leçons réussies' : 'leçon réussie'} sur ${lessons.length}` : `${done.length} of ${lessons.length} ${lessons.length > 1 ? 'lessons' : 'lesson'} passed`}</p>
               </div>
               <div className="flex flex-wrap items-center gap-3 shrink-0">
                 <div className="relative size-16" role="img" aria-label={pct + '%'}>
@@ -305,7 +345,7 @@ export default function App() {
                 <button
                   onClick={() => go(i)}
                   aria-current={i === idx ? 'step' : undefined}
-                  className={`w-full text-left rounded-xl px-2.5 py-2 text-sm flex items-start gap-2 ${i === idx ? 'bg-paper shadow-sm ring-1 ring-terracotta/50 font-semibold' : 'hover:bg-ink/5 text-ink/80'}`}
+                  className={`w-full min-h-11 text-left rounded-xl px-2.5 py-2.5 text-sm flex items-start gap-2 ${i === idx ? 'bg-paper shadow-sm ring-1 ring-terracotta/50 font-semibold' : 'hover:bg-ink/5 text-ink/80'}`}
                 >
                   <span className={`shrink-0 size-5 mt-px rounded-full grid place-items-center text-[10px] font-bold ${done.includes(l.id) ? 'grad text-white' : i === idx ? 'bg-terracotta/15 text-terracotta-dark' : 'bg-ink/8 text-ink/55'}`}>
                     {done.includes(l.id) ? <span aria-label={t.done}>✓</span> : i + 1}
@@ -350,7 +390,7 @@ export default function App() {
               <div className="ide-bar">
                 <span className="ide-dot bg-[#ff5f57]" /><span className="ide-dot bg-[#febc2e]" /><span className="ide-dot bg-[#28c840]" />
                 <span className="ml-2 font-mono">{lesson.lang === 'py' ? 'main.py' : 'main.js'}</span>
-                <button onClick={run} className="ml-auto btn btn-primary py-1 px-3 text-xs">▶ {t.run}</button>
+                <button onClick={run} disabled={!!running} className="ml-auto btn btn-primary py-1 px-3 text-xs">▶ {t.run}</button>
               </div>
               <div className="md:hidden flex gap-1 overflow-x-auto px-2 py-1.5 border-b border-white/10" role="toolbar" aria-label={lang === 'fr' ? 'Symboles' : 'Symbols'}>
                 {(lesson.lang === 'py' ? ['⇥', '(', ')', ':', '=', '"', "'", '[', ']', '{', '}', '#', '+', '-', '*', '/', '<', '>', '_', ','] : ['⇥', '(', ')', '{', '}', ';', '=', '"', "'", '[', ']', '.', '+', '-', '*', '/', '<', '>', '`', ',']).map((sym) => (
@@ -391,7 +431,7 @@ export default function App() {
               />
             </div>
             <div className="flex flex-wrap gap-2">
-              <button onClick={run} className="btn btn-primary">▶ {t.run}</button>
+              <button onClick={run} disabled={!!running} className="btn btn-primary">{running ? '⏳' : '▶'} {t.run}</button>
               <button onClick={() => setShowHint(true)} className="btn">💡 {t.hint}</button>
               <button
                 onClick={() => { setCode(lesson.solution); save('code:' + lesson.id, lesson.solution) }}
@@ -431,14 +471,32 @@ export default function App() {
             {showHint && <p className="rounded-xl bg-amber/12 border border-amber/50 p-3 text-sm">💡 {lesson.hint[lang]}</p>}
             </div>
             <div className="min-w-0">
-            {res ? (
-              <div className="space-y-2" aria-live="polite">
+            {running === 'py' ? (
+              <div id="resultat" className="rounded-2xl border border-dashed border-terracotta/50 p-6 text-center text-sm" role="status">
+                <p className="font-semibold">⏳ {lang === 'fr' ? 'Chargement de Python… (une seule fois)' : 'Loading Python… (only once)'}</p>
+                <p className="text-ink/60 text-xs mt-1">{lang === 'fr' ? 'Quelques secondes la première fois ; ensuite c’est instantané.' : 'A few seconds the first time; instant afterwards.'}</p>
+              </div>
+            ) : res ? (
+              <div id="resultat" className="space-y-2" aria-live="polite">
                 <div className="ide">
                   <div className="ide-bar"><span>›_ {t.output}</span></div>
                   <pre className="p-4 text-sm whitespace-pre-wrap font-mono overflow-x-auto">{res.output.length ? res.output.join('\n') : t.noOutput}</pre>
                 </div>
                 {res.figures?.map((f, i) => <Chart key={i} fig={f} />)}
-                {res.error && <p className="rounded-xl bg-terracotta/10 border border-terracotta/40 p-3 text-sm text-terracotta-dark">{t.error} {res.error}</p>}
+                {res.error && (() => {
+                  const simple = expliqueErreur(res.error, lang)
+                  return (
+                    <div className="rounded-xl bg-terracotta/10 border border-terracotta/40 p-3 text-sm space-y-1">
+                      <p className="font-semibold text-terracotta-dark">⚠️ {simple ?? t.error + ' ' + res.error}</p>
+                      {simple && (
+                        <details>
+                          <summary className="cursor-pointer text-xs text-ink/65">{lang === 'fr' ? 'Détail technique' : 'Technical detail'}</summary>
+                          <pre className="mt-1 text-xs font-mono whitespace-pre-wrap">{res.error}</pre>
+                        </details>
+                      )}
+                    </div>
+                  )
+                })()}
                 {res.passed === true && <p className="rounded-xl p-3 font-semibold bg-[color-mix(in_srgb,#22c55e_14%,transparent)] border border-[color-mix(in_srgb,#22c55e_45%,transparent)]">✅ {t.ok}</p>}
                 {res.passed === true && golf && <p className="text-xs text-ink/70">⛳ {t.golf} : {golf.n} {t.chars} · {t.bestGolf} : {golf.best}</p>}
                 {res.passed === false && !res.error && <p className="rounded-xl bg-terracotta/10 border border-terracotta/40 p-3 text-sm text-terracotta-dark">{t.ko}</p>}

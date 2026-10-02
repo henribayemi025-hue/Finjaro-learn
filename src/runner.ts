@@ -171,6 +171,10 @@ onmessage = async (e) => {
 
 let pyWorker: Worker | null = null
 let pyReady: Promise<void> | null = null
+let pyOk = false
+
+/** Python (et ces bibliothèques) déjà chargés ? Sinon le premier lancement prend quelques secondes. */
+export function pythonPret(pkgs: string[] = []) { return pyOk && pkgs.every((p) => loadedPkgs.has(p)) }
 
 function startPython(): Promise<void> {
   if (pyReady) return pyReady
@@ -179,14 +183,14 @@ function startPython(): Promise<void> {
   pyWorker = w
   pyReady = new Promise<void>((resolve, reject) => {
     const t = setTimeout(() => { reset(); reject(new Error('Python : chargement trop long (réseau ?)')) }, 90000)
-    w.onmessage = (e) => { if (e.data.type === 'ready') { clearTimeout(t); resolve() } else if (e.data.type === 'fatal') { clearTimeout(t); reset(); reject(new Error(e.data.error)) } }
+    w.onmessage = (e) => { if (e.data.type === 'ready') { clearTimeout(t); pyOk = true; resolve() } else if (e.data.type === 'fatal') { clearTimeout(t); reset(); reject(new Error(e.data.error)) } }
     w.onerror = (e) => { clearTimeout(t); reset(); reject(new Error(e.message)) }
     w.postMessage({ type: 'init' })
   })
   return pyReady
 }
 
-function reset() { pyWorker?.terminate(); pyWorker = null; pyReady = null; loadedPkgs.clear() }
+function reset() { pyWorker?.terminate(); pyWorker = null; pyReady = null; pyOk = false; loadedPkgs.clear() }
 
 /** Exécute du Python dans un Worker isolé (Pyodide). Boucle infinie : le Worker est arrêté après 20 s. */
 const loadedPkgs = new Set<string>()

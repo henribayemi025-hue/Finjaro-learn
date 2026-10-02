@@ -11,7 +11,7 @@ const T = {
 } as const
 
 /** Réglages d'accessibilité gardés sur l'appareil (police lisible, contraste, taille). */
-export default function Access({ lang }: { lang: Lang }) {
+export default function Access({ lang, inline = false }: { lang: Lang; inline?: boolean }) {
   const t = T[lang]
   const [prefs, setPrefs] = useState<Prefs>(load)
   const [open, setOpen] = useState(false)
@@ -20,6 +20,14 @@ export default function Access({ lang }: { lang: Lang }) {
     d.lisible = prefs.lisible ? '1' : ''; d.contraste = prefs.contraste ? '1' : ''; d.grand = prefs.grand ? '1' : ''
     try { localStorage.setItem(KEY, JSON.stringify(prefs)) } catch { /* ignoré */ }
   }, [prefs])
+
+  const cases = (['lisible', 'contraste', 'grand'] as const).map((k) => (
+    <label key={k} className="flex items-center gap-2 cursor-pointer min-h-11">
+      <input type="checkbox" checked={prefs[k]} onChange={(e) => setPrefs({ ...prefs, [k]: e.target.checked })} className="size-5 accent-[var(--color-terracotta)]" />
+      {t[k]}
+    </label>
+  ))
+  if (inline) return <fieldset className="space-y-1"><legend className="text-xs uppercase tracking-wide text-ink/55 font-bold mb-1">{t.btn}</legend>{cases}</fieldset>
 
   return (
     <div className="relative">
