@@ -260,6 +260,23 @@ export default function App() {
       : { title: 'Help each other', text: entraideUi(lang).login, points: ['Ask a question', 'Help others', 'Kind moderation'] },
   }
 
+  const tuiles = (compact: boolean) => (
+    <ul className={`flex overflow-x-auto [scrollbar-width:none] ${compact ? 'gap-1 2xl:gap-2 py-1 px-1' : 'gap-3 sm:gap-4 pt-1.5 pb-1 -mx-1 px-1.5'}`}>
+      {VIEWS.map((v) => (
+        <li key={v} className="shrink-0">
+          <button role="tab" aria-selected={view === v} onClick={() => setView(v)} className={`group flex flex-col items-center ${compact ? 'gap-1 w-[4.4rem] 2xl:w-[4.8rem]' : 'gap-1.5 w-[4.6rem] sm:w-20'}`}>
+            <span className={`block ${compact ? 'size-10' : 'size-16 sm:size-[4.5rem]'} rounded-xl overflow-hidden transition ${view === v ? 'ring-[3px] ring-terracotta ring-offset-2 ring-offset-cream shadow-md' : 'ring-1 ring-brass group-hover:-translate-y-0.5 group-hover:shadow-md'}`}>
+              {VIEW_IMG[v]
+                ? <img src={VIEW_IMG[v]} alt="" loading="lazy" className="size-full object-cover" />
+                : <span aria-hidden="true" className="size-full grid place-items-center text-2xl bg-gradient-to-br from-terracotta/20 to-amber/25">{VIEW_ICON[v]}</span>}
+            </span>
+            <span className={`${compact ? 'text-[11px]' : 'text-xs sm:text-[13px]'} leading-tight text-center whitespace-nowrap ${view === v ? 'font-bold text-ink' : 'font-semibold text-ink/70'}`}>{tabLabel(v)}</span>
+          </button>
+        </li>
+      ))}
+    </ul>
+  )
+
   return (
     <div className="min-h-screen pb-[calc(5.5rem+env(safe-area-inset-bottom))] xl:pb-0">
       <a href="#contenu" className="skip-link">{t.skip}</a>
@@ -271,12 +288,13 @@ export default function App() {
         </div>
       )}
       <header className="sticky top-0 z-30 border-b border-brass bg-[color-mix(in_srgb,var(--color-cream)_82%,transparent)] backdrop-blur-xl">
-        <div className="max-w-6xl 2xl:max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
+        <div className="max-w-6xl 2xl:max-w-7xl mx-auto px-4 h-16 xl:h-[4.75rem] flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0 xl:shrink-0">
             <span aria-hidden="true" className="size-9 shrink-0 rounded-xl grad text-white grid place-items-center font-extrabold text-lg shadow-md">F</span>
             <h1 className="text-lg font-extrabold whitespace-nowrap hidden sm:block" title={t.tagline}>Finjaro <span className="grad-text">Learn</span></h1>
             <h1 className="sr-only sm:hidden">Finjaro Learn</h1>
           </div>
+          <nav aria-label={lang === 'fr' ? 'Rubriques' : 'Sections'} className="hidden xl:block min-w-0" role="tablist">{tuiles(true)}</nav>
           <div className="flex items-center gap-1.5">
             {serie > 0 && <span className="chip hidden md:inline-flex text-sm py-1.5" title={lang === 'fr' ? 'Jours d’affilée avec au moins une leçon réussie (sur cet appareil)' : 'Days in a row with at least one lesson passed (on this device)'}>🔥 {serie} {lang === 'fr' ? (serie > 1 ? 'jours' : 'jour') : (serie > 1 ? 'days' : 'day')}</span>}
             <button onClick={() => { setAi(!ai); save('ai', ai ? '0' : '1') }} aria-pressed={ai} title={t.aiHelp} aria-label={lang === 'fr' ? 'Finia, ton assistante IA' : 'Finia, your AI assistant'}
@@ -320,24 +338,9 @@ export default function App() {
         </div>
       </header>
 
-      {/* Sur téléphone, la barre du bas suffit dans une leçon ou un projet ; sur grand écran, les vignettes restent partout. */}
-      {(
-        <nav aria-label={lang === 'fr' ? 'Rubriques' : 'Sections'} className={`max-w-6xl 2xl:max-w-7xl mx-auto px-4 pt-4 ${route.v === 'lecon' || (route.v === 'atelier' && route.id) ? 'hidden xl:block' : ''}`} role="tablist">
-          <ul className="flex gap-3 sm:gap-4 overflow-x-auto pt-1.5 pb-1 -mx-1 px-1.5 [scrollbar-width:none]">
-            {VIEWS.map((v) => (
-              <li key={v} className="shrink-0">
-                <button role="tab" aria-selected={view === v} onClick={() => setView(v)} className="group flex flex-col items-center gap-1.5 w-[4.6rem] sm:w-20">
-                  <span className={`block size-16 sm:size-[4.5rem] rounded-2xl overflow-hidden transition ${view === v ? 'ring-[3px] ring-terracotta ring-offset-2 ring-offset-cream shadow-lg' : 'ring-1 ring-brass group-hover:-translate-y-0.5 group-hover:shadow-md'}`}>
-                    {VIEW_IMG[v]
-                      ? <img src={VIEW_IMG[v]} alt="" loading="lazy" className="size-full object-cover" />
-                      : <span aria-hidden="true" className="size-full grid place-items-center text-3xl bg-gradient-to-br from-terracotta/20 to-amber/25">{VIEW_ICON[v]}</span>}
-                  </span>
-                  <span className={`text-xs sm:text-[13px] leading-tight text-center ${view === v ? 'font-bold text-ink' : 'font-semibold text-ink/70'}`}>{tabLabel(v)}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </nav>
+      {/* Sous 1280 px : la rangée de vignettes sous l'en-tête (pas dans une leçon ni un projet : la barre du bas suffit). */}
+      {route.v !== 'lecon' && !(route.v === 'atelier' && route.id) && (
+        <nav aria-label={lang === 'fr' ? 'Rubriques' : 'Sections'} className="xl:hidden max-w-6xl mx-auto px-4 pt-4" role="tablist">{tuiles(false)}</nav>
       )}
 
       <nav className="bottom-nav xl:hidden" role="tablist" aria-label={t.lessonsTab}>
@@ -382,7 +385,7 @@ export default function App() {
       {chrono && <Chrono lang={lang} sound={sound} onClose={() => setChrono(false)} onPlayed={recordDay} />}
       {route.v === 'lecon' && <div id="lecon" className="max-w-6xl mx-auto px-4 py-4">
         <div className="space-y-4 min-w-0">
-          <div className="sticky top-16 z-20 -mx-4 px-4 py-2 bg-[color-mix(in_srgb,var(--color-cream)_88%,transparent)] backdrop-blur-xl border-b border-brass flex items-center gap-2">
+          <div className="sticky top-16 xl:top-[4.75rem] z-20 -mx-4 px-4 py-2 bg-[color-mix(in_srgb,var(--color-cream)_88%,transparent)] backdrop-blur-xl border-b border-brass flex items-center gap-2">
             <button className="btn px-3" onClick={() => nav('#/parcours/' + trackSlug(track))} aria-label={(lang === 'fr' ? 'Retour au parcours ' : 'Back to track ') + acuName(lang, track)}>←<span className="hidden sm:inline"> {TRACK_ICON[track]} {acuName(lang, track)}</span></button>
             <span className="flex-1 text-center text-sm font-semibold text-ink/70 truncate">{lang === 'fr' ? 'Leçon' : 'Lesson'} {pos} / {trackLessons.length}</span>
             <button className="icon-btn" disabled={pos <= 1} onClick={() => ouvre(trackLessons[pos - 2].i)} aria-label={lang === 'fr' ? 'Leçon précédente' : 'Previous lesson'}>‹</button>
