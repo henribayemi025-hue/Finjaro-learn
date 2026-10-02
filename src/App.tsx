@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import Espaces from './Espaces'
-import Curriculum, { TRACK_ICON } from './Curriculum'
+import { TRACK_ICON } from './Curriculum'
+import Accueil from './Accueil'
 import LoginGate from './LoginGate'
 import Chrono from './Chrono'
 import { TRACKS } from './tracks'
-import Progress, { recordDay } from './Progress'
+import Progress, { recordDay, loadDays, streaks } from './Progress'
 import Outils from './outils/Outils'
 import Entraide from './entraide/Entraide'
 import { eu as entraideUi } from './entraide/i18n'
@@ -170,13 +171,13 @@ export default function App() {
     const r = await runLesson(lesson, code).finally(() => setRunning(''))
     setRes(r)
     // Sur téléphone le résultat est sous l'éditeur : on l'amène à l'écran (au-dessus de la barre d'onglets du bas).
-    requestAnimationFrame(() => requestAnimationFrame(() => {
+    setTimeout(() => {
       const el = document.getElementById('resultat')
       if (!el) return
       const r2 = el.getBoundingClientRect()
-      const bas = window.innerHeight - (window.innerWidth < 1024 ? 92 : 16)
-      if (r2.bottom > bas) window.scrollBy({ top: Math.min(r2.bottom - bas, r2.top - 80), behavior: 'smooth' })
-    }))
+      const bas = window.innerHeight - (window.innerWidth < 1024 ? 96 : 16)
+      if (r2.bottom > bas) el.scrollIntoView({ block: r2.height > bas - 80 ? 'start' : 'end', behavior: 'smooth' })
+    }, 60)
     if (sound && r.passed !== null) (r.passed ? playSuccess : playError)()
     if (r.passed === false) setFails((f) => f + 1)
     if (r.passed) {
@@ -214,13 +215,8 @@ export default function App() {
 
   const track = trackOf(lesson.group)
   const trackLessons = lessons.map((l, i) => ({ l, i })).filter(({ l }) => trackOf(l.group) === track)
-  const pickTrack = (key: string) => {
-    const mine = lessons.map((l, i) => ({ l, i })).filter(({ l }) => trackOf(l.group) === key)
-    const next = mine.find(({ l }) => !done.includes(l.id)) ?? mine[0]
-    if (next) go(next.i, true)
-  }
   const tabLabel = (v: typeof VIEWS[number]) => v === 'lecons' ? t.lessonsTab : v === 'progression' ? t.progressTab : v === 'espaces' ? t.spaces : v === 'entraide' ? entraideUi(lang).tab : outilsUi[lang].tab
-  const pct = Math.round((done.length / lessons.length) * 100)
+  const serie = streaks(loadDays()).cur
   const G = {
     espaces: lang === 'fr'
       ? { title: 'Apprendre à plusieurs', text: t.spacesLogin, points: ['Un salon de discussion par groupe', 'Coder ensemble en direct', 'Des défis de groupe'] }
@@ -234,7 +230,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen pb-[calc(4.5rem+env(safe-area-inset-bottom))] lg:pb-0">
+    <div className="min-h-screen pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-0">
       <a href="#contenu" className="skip-link">{t.skip}</a>
       <header className="sticky top-0 z-30 border-b border-brass bg-[color-mix(in_srgb,var(--color-cream)_82%,transparent)] backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
@@ -252,6 +248,7 @@ export default function App() {
             ))}
           </nav>
           <div className="flex items-center gap-1.5">
+            {serie > 0 && <span className="chip hidden md:inline-flex text-sm py-1.5" title={lang === 'fr' ? 'Jours d’affilée avec au moins une leçon réussie (sur cet appareil)' : 'Days in a row with at least one lesson passed (on this device)'}>🔥 {serie} {lang === 'fr' ? (serie > 1 ? 'jours' : 'jour') : (serie > 1 ? 'days' : 'day')}</span>}
             <button onClick={() => { setAi(!ai); save('ai', ai ? '0' : '1') }} aria-pressed={ai} title={t.aiHelp} aria-label={lang === 'fr' ? 'Tuteur IA' : 'AI tutor'}
               className={`icon-btn ${ai ? 'grad text-white border-transparent' : ''}`}>🤖<span className="ml-1 text-xs sm:text-sm lg:hidden 2xl:inline">{lang === 'fr' ? 'Tuteur' : 'Tutor'}<span className="hidden sm:inline 2xl:inline"> IA</span></span></button>
             <span className="hidden sm:contents">
@@ -307,28 +304,8 @@ export default function App() {
       {view === 'espaces' && <div id="contenu" tabIndex={-1} className="max-w-6xl mx-auto px-4 py-6 outline-none">{session ? <Espaces lang={lang} session={session} /> : <LoginGate lang={lang} icon="👥" {...G.espaces} />}</div>}
       {view === 'lecons' && (
         <div className="max-w-6xl mx-auto px-4 pt-5 space-y-5">
-          <section className="card overflow-hidden relative p-5 sm:p-7 rise">
-            <div aria-hidden="true" className="absolute -right-16 -top-20 size-64 rounded-full grad opacity-15 blur-2xl" />
-            <div className="relative flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
-              <div className="min-w-0">
-                <p className="chip">{TRACK_ICON[track]} {lang === 'fr' ? 'Ta prochaine leçon' : 'Your next lesson'}</p>
-                <h2 className="text-2xl sm:text-3xl mt-2 leading-tight">{lesson.title[lang]}</h2>
-                <p className="text-sm text-ink/65 mt-1">{lang === 'fr' ? `${done.length} ${done.length > 1 ? 'leçons réussies' : 'leçon réussie'} sur ${lessons.length}` : `${done.length} of ${lessons.length} ${lessons.length > 1 ? 'lessons' : 'lesson'} passed`}</p>
-              </div>
-              <div className="flex flex-wrap items-center gap-3 shrink-0">
-                <div className="relative size-16" role="img" aria-label={pct + '%'}>
-                  <svg viewBox="0 0 36 36" className="size-16 -rotate-90"><circle cx="18" cy="18" r="15.5" fill="none" stroke="currentColor" strokeOpacity=".1" strokeWidth="4" />
-                    <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--color-terracotta)" strokeWidth="4" strokeLinecap="round" strokeDasharray={`${(pct / 100) * 97.4} 97.4`} /></svg>
-                  <span className="absolute inset-0 grid place-items-center text-sm font-bold">{pct}%</span>
-                </div>
-                <button className="btn btn-primary px-5 py-3" onClick={() => document.getElementById('lecon')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>
-                  {lang === 'fr' ? 'Reprendre' : 'Continue'} →
-                </button>
-                <button className="btn px-4 py-3" onClick={() => setChrono(true)}>⚡ {lang === 'fr' ? 'Défi chrono' : 'Speed challenge'}</button>
-              </div>
-            </div>
-          </section>
-          <Curriculum lang={lang} done={done} current={track} onPick={pickTrack} />
+          <Accueil lang={lang} done={done} idx={idx} onOpen={(i) => go(i, true)} onChrono={() => setChrono(true)}
+            onResume={() => document.getElementById('lecon')?.scrollIntoView({ behavior: 'smooth', block: 'start' })} />
         </div>
       )}
       {burst > 0 && <Burst key={burst} />}
@@ -480,12 +457,12 @@ export default function App() {
             </div>
             <div className="min-w-0">
             {running === 'py' ? (
-              <div id="resultat" className="rounded-2xl border border-dashed border-terracotta/50 p-6 text-center text-sm" role="status">
+              <div id="resultat" className="scroll-mt-20 scroll-mb-28 lg:scroll-mb-4 rounded-2xl border border-dashed border-terracotta/50 p-6 text-center text-sm" role="status">
                 <p className="font-semibold">⏳ {lang === 'fr' ? 'Chargement de Python… (une seule fois)' : 'Loading Python… (only once)'}</p>
                 <p className="text-ink/60 text-xs mt-1">{lang === 'fr' ? 'Quelques secondes la première fois ; ensuite c’est instantané.' : 'A few seconds the first time; instant afterwards.'}</p>
               </div>
             ) : res ? (
-              <div id="resultat" className="space-y-2" aria-live="polite">
+              <div id="resultat" className="space-y-2 scroll-mt-20 scroll-mb-28 lg:scroll-mb-4" aria-live="polite">
                 <div className="ide">
                   <div className="ide-bar"><span>›_ {t.output}</span></div>
                   <pre className="p-4 text-sm whitespace-pre-wrap font-mono overflow-x-auto">{res.output.length ? res.output.join('\n') : t.noOutput}</pre>
