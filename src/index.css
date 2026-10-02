@@ -1,16 +1,16 @@
 @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Atkinson+Hyperlegible:wght@400;700&display=swap");
 @import "tailwindcss";
 
-/* Deux thèmes : « Finjaro » (clair, orange Finjaro, encre) et « Noir » (noir profond, même orange).
+/* Deux thèmes : « Finjaro » (crème, terracotta, laiton, encre — la charte du site) et « Noir » (noir profond, même terracotta).
    Les noms des jetons restent (cream, paper, ink, terracotta, brass) : tous les écrans en héritent. */
 @theme {
-  --color-cream: #f7f5f1;          /* fond de page */
-  --color-paper: #ffffff;          /* cartes */
-  --color-ink: #12141c;            /* texte */
-  --color-terracotta: #e8562a;     /* orange Finjaro (action) */
-  --color-terracotta-dark: #b83d16;
-  --color-amber: #f59e0b;          /* second ton du dégradé */
-  --color-brass: #d8d2c8;          /* bordures, fonds doux */
+  --color-cream: #f8f3e9;          /* fond de page (crème) */
+  --color-paper: #fffdf8;          /* cartes */
+  --color-ink: #171b26;            /* texte (encre) */
+  --color-terracotta: #c25e38;     /* terracotta Finjaro (action) */
+  --color-terracotta-dark: #a24a29;
+  --color-amber: #c99a4b;          /* laiton : second ton du dégradé */
+  --color-brass: #e3d6bf;          /* bordures laiton clair */
   --color-code: #0f1117;
   --color-code-fg: #e8e6e3;
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
@@ -22,9 +22,9 @@
   --color-cream: #08080a;
   --color-paper: #131317;
   --color-ink: #f2f1ee;
-  --color-terracotta: #ff6a3d;
-  --color-terracotta-dark: #ff9a75;
-  --color-amber: #fbbf24;
+  --color-terracotta: #e2764c;
+  --color-terracotta-dark: #f0956f;
+  --color-amber: #c9a35a;
   --color-brass: #2b2b33;
   --color-code: #000000;
   --color-code-fg: #ecebe8;

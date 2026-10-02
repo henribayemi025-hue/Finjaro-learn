@@ -211,16 +211,16 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen pb-20 md:pb-0">
+    <div className="min-h-screen pb-[calc(4.5rem+env(safe-area-inset-bottom))] lg:pb-0">
       <a href="#contenu" className="skip-link">{t.skip}</a>
       <header className="sticky top-0 z-30 border-b border-brass bg-[color-mix(in_srgb,var(--color-cream)_82%,transparent)] backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0">
             <span aria-hidden="true" className="size-9 shrink-0 rounded-xl grad text-white grid place-items-center font-extrabold text-lg shadow-md">F</span>
-            <h1 className="text-lg font-extrabold whitespace-nowrap hidden sm:block md:hidden xl:block" title={t.tagline}>Finjaro <span className="grad-text">Learn</span></h1>
-            <h1 className="sr-only sm:hidden md:block md:sr-only xl:hidden">Finjaro Learn</h1>
+            <h1 className="text-lg font-extrabold whitespace-nowrap hidden sm:block lg:hidden xl:block" title={t.tagline}>Finjaro <span className="grad-text">Learn</span></h1>
+            <h1 className="sr-only sm:hidden lg:block lg:sr-only xl:hidden">Finjaro Learn</h1>
           </div>
-          <nav aria-label={t.lessonsTab} className="hidden md:flex items-center gap-1 rounded-2xl bg-ink/5 p-1" role="tablist">
+          <nav aria-label={t.lessonsTab} className="hidden lg:flex items-center gap-1 rounded-2xl bg-ink/5 p-1" role="tablist">
             {VIEWS.map((v) => (
               <button key={v} role="tab" aria-selected={view === v} onClick={() => setView(v)}
                 className={`whitespace-nowrap px-3 py-1.5 rounded-xl text-sm font-semibold ${view === v ? 'bg-paper shadow text-ink' : 'text-ink/60 hover:text-ink'}`}>
@@ -230,7 +230,7 @@ export default function App() {
           </nav>
           <div className="flex items-center gap-1.5">
             <button onClick={() => { setAi(!ai); save('ai', ai ? '0' : '1') }} aria-pressed={ai} title={t.aiHelp} aria-label={lang === 'fr' ? 'Tuteur IA' : 'AI tutor'}
-              className={`icon-btn ${ai ? 'grad text-white border-transparent' : ''}`}>🤖<span className="hidden xl:inline ml-1">{lang === 'fr' ? 'Tuteur IA' : 'AI tutor'}</span></button>
+              className={`icon-btn ${ai ? 'grad text-white border-transparent' : ''}`}>🤖<span className="hidden 2xl:inline ml-1">{lang === 'fr' ? 'Tuteur IA' : 'AI tutor'}</span></button>
             <Access lang={lang} />
             <button onClick={() => { const n = theme === 'noir' ? 'finjaro' : 'noir'; setTheme(n); save('theme', n) }} aria-label={t.theme} title={t.theme} className="icon-btn">
               {theme === 'noir' ? '☀' : '☾'}
@@ -243,7 +243,7 @@ export default function App() {
         </div>
       </header>
 
-      <nav className="bottom-nav md:hidden" role="tablist" aria-label={t.lessonsTab}>
+      <nav className="bottom-nav lg:hidden" role="tablist" aria-label={t.lessonsTab}>
         {VIEWS.map((v) => (
           <button key={v} role="tab" aria-selected={view === v} onClick={() => { setView(v); window.scrollTo({ top: 0 }) }}>
             <span className="ico" aria-hidden="true">{VIEW_ICON[v]}</span>{tabLabel(v)}
