@@ -15,7 +15,7 @@ import Outils from './outils/Outils'
 import Entraide from './entraide/Entraide'
 import { eu as entraideUi } from './entraide/i18n'
 import { o as outilsUi } from './outils/i18n'
-import { AuthBox } from './Auth'
+import { AuthBox, Bienvenue, messageAuth } from './Auth'
 import { supabase } from './supabase'
 import { ui, type Lang } from './i18n'
 import { lessons } from './lessons'
@@ -122,14 +122,31 @@ export default function App() {
   const [running, setRunning] = useState<'' | 'run' | 'py'>('')
   const [menu, setMenu] = useState(false)
   const [plus, setPlus] = useState(false)
+  const [authNote, setAuthNote] = useState('')
   const t = ui[lang]
   // Le débogueur s'ouvre sous l'exercice : on l'amène à l'écran, sinon on croit que le bouton ne fait rien.
   useEffect(() => { if (debug) requestAnimationFrame(() => document.getElementById('debug')?.scrollIntoView({ behavior: 'smooth', block: 'start' })) }, [debug])
 
   useEffect(() => {
     if (!supabase) return
+    // Retour d'un lien de connexion refusé (déjà utilisé, expiré) : message clair au lieu d'une page muette.
+    const h = window.location.hash
+    if (h.startsWith('#error')) {
+      const q = new URLSearchParams(h.slice(1))
+      setAuthNote(messageAuth({ code: q.get('error_code') ?? '', message: q.get('error_description') ?? '', status: 403 }, lang))
+      history.replaceState(null, '', window.location.pathname + '#/')
+    }
     supabase.auth.getSession().then(({ data }) => setSession(data.session))
-    const { data } = supabase.auth.onAuthStateChange((_e, s) => setSession(s))
+    const { data } = supabase.auth.onAuthStateChange((e, s) => {
+      setSession(s)
+      // Après Google, Apple ou un lien e-mail : on rouvre la page où l'on était.
+      if (e === 'SIGNED_IN') {
+        let r = ''
+        try { r = sessionStorage.getItem('learn:retour') ?? ''; sessionStorage.removeItem('learn:retour') } catch { /* ignoré */ }
+        if (r.startsWith('#/')) window.location.hash = r
+        setAuthNote('')
+      }
+    })
     return () => data.subscription.unsubscribe()
   }, [])
 
@@ -246,6 +263,13 @@ export default function App() {
   return (
     <div className="min-h-screen pb-[calc(5.5rem+env(safe-area-inset-bottom))] xl:pb-0">
       <a href="#contenu" className="skip-link">{t.skip}</a>
+      <Bienvenue lang={lang} session={session} />
+      {authNote && !session && (
+        <div role="alert" className="fixed left-3 right-3 top-20 sm:left-auto sm:right-6 sm:w-96 z-40 card p-4 text-sm space-y-2 shadow-2xl">
+          <p>{authNote}</p>
+          <div className="flex gap-2"><button className="btn btn-primary flex-1" onClick={() => { setAuthNote(''); window.dispatchEvent(new Event('learn:login')) }}>{t.signIn}</button><button className="btn" onClick={() => setAuthNote('')}>{t.close}</button></div>
+        </div>
+      )}
       <header className="sticky top-0 z-30 border-b border-brass bg-[color-mix(in_srgb,var(--color-cream)_82%,transparent)] backdrop-blur-xl">
         <div className="max-w-6xl 2xl:max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0 xl:shrink-0">
