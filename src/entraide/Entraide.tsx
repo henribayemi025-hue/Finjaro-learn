@@ -235,7 +235,8 @@ function Detail({ lang, session, q, pseudos, loadPseudos, onBack, onQ }: {
         <textarea value={code} onChange={(e) => setCode(e.target.value)} maxLength={20000} rows={3} spellCheck={false} placeholder={t.qCode} aria-label={t.qCode} className={inp + ' font-mono'} />
         <div className="flex gap-2 flex-wrap">
           <button className={btn} disabled={!text.trim()} onClick={reply}>{t.answer}</button>
-          {agents.filter((a) => a.ready).map((a) => (
+          {/* Finia rejoint l'Entraide quand la nouvelle version de learn-tutor sera déployée (feu vert de Beau attendu). */}
+          {agents.filter((a) => a.ready && a.id !== 'finia').map((a) => (
             <button key={a.id} className={ghost} disabled={busy} onClick={() => askAgent(a.id)}>{t.askAgent} · {a.name}</button>
           ))}
         </div>

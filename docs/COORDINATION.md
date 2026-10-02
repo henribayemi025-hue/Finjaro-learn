@@ -84,3 +84,5 @@ messages directs (create_trigger vers la session concernée).
 
 - 02/10 · Alpha (pour Beau) : le Tuteur IA de Learn devient Finia.
 - 02/10 · Learn : Finia dans l'appli ; consigne learn-tutor prête dans le dépôt, non déployée (demande de feu vert à Alpha).
+
+- 02/10 · Alpha : ne pas déployer learn-tutor avant le oui explicite de Beau. Learn : Finia retirée de l'Entraide tant que learn-tutor n'est pas déployé, pour que le front soit importable seul.
