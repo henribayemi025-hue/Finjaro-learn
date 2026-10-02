@@ -15,6 +15,7 @@ export default function Curriculum({ lang, done }: { lang: Lang; done: string[] 
     { k: 'prompt', groups: ['pe'] },
     { k: 'maths', groups: ['maths'] },
     { k: 'crypto', groups: ['crypto'] },
+    { k: 'archi', groups: ['archi'] },
   ] as const
   return (
     <details className="space-y-2" open={open} onToggle={(e) => setOpen((e.target as HTMLDetailsElement).open)}>
