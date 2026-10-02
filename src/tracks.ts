@@ -4,8 +4,8 @@ type L2 = { fr: string; en: string }
 
 /** Les parcours et leurs sections (partagé par la vue d'ensemble et l'arbre de compétences). */
 export const TRACKS: { key: string; name: L2; groups: Group[]; groupName: Partial<Record<Group, L2>> }[] = [
-  { key: 'projets', name: { fr: 'Projets guidés', en: 'Guided projects' }, groups: ['pg-calc', 'pg-robot', 'pg-faq'],
-    groupName: { 'pg-calc': { fr: 'Calculatrice', en: 'Calculator' }, 'pg-robot': { fr: 'Robot explorateur', en: 'Explorer robot' }, 'pg-faq': { fr: 'Assistant FAQ', en: 'FAQ assistant' } } },
+  { key: 'projets', name: { fr: 'Projets guidés', en: 'Guided projects' }, groups: ['pg-calc', 'pg-robot', 'pg-faq', 'pg-ligne'],
+    groupName: { 'pg-calc': { fr: 'Calculatrice', en: 'Calculator' }, 'pg-robot': { fr: 'Robot explorateur', en: 'Explorer robot' }, 'pg-faq': { fr: 'Assistant FAQ', en: 'FAQ assistant' }, 'pg-ligne': { fr: 'Robot suiveur de ligne (7 étapes)', en: 'Line-following robot (7 steps)' } } },
   { key: 'prog', name: { fr: 'Programmation', en: 'Programming' }, groups: ['js', 'py-bases', 'py-algo', 'py-lecture', 'py-projets'],
     groupName: { js: { fr: 'JavaScript', en: 'JavaScript' }, 'py-bases': { fr: 'Python · bases', en: 'Python · basics' }, 'py-algo': { fr: 'Algorithmes et structures', en: 'Algorithms and structures' }, 'py-lecture': { fr: 'Lire du code', en: 'Reading code' }, 'py-projets': { fr: 'Projets', en: 'Projects' } } },
   { key: 'data', name: { fr: 'Data science', en: 'Data science' }, groups: ['ds-numpy', 'ds-pandas', 'ds-ml', 'ds-viz'],
@@ -24,8 +24,8 @@ export const TRACKS: { key: string; name: L2; groups: Group[]; groupName: Partia
     groupName: { quant: { fr: 'Qubits simulés', en: 'Simulated qubits' } } },
   { key: 'algo', name: { fr: 'Algorithmique avancée', en: 'Advanced algorithms' }, groups: ['algo'],
     groupName: { algo: { fr: 'Structures et graphes', en: 'Structures and graphs' } } },
-  { key: 'robo', name: { fr: 'Robotique', en: 'Robotics' }, groups: ['robo'],
-    groupName: { robo: { fr: 'Robot simulé', en: 'Simulated robot' } } },
+  { key: 'robo', name: { fr: 'Robotique', en: 'Robotics' }, groups: ['robo', 'robo-traces', 'robo-reel'],
+    groupName: { robo: { fr: 'Robot simulé', en: 'Simulated robot' }, 'robo-traces': { fr: 'Vérifier par la trace', en: 'Checking by trace' }, 'robo-reel': { fr: 'Du simulé au réel', en: 'From simulation to reality' } } },
   { key: 'ccpp', name: { fr: 'C et C++', en: 'C and C++' }, groups: ['c', 'cpp'],
     groupName: { c: { fr: 'C', en: 'C' }, cpp: { fr: 'C++', en: 'C++' } } },
   { key: 'outils', name: { fr: 'Outils IA et GitHub', en: 'AI tools and GitHub' }, groups: ['ia-api', 'git'],

@@ -26,6 +26,7 @@ import { playError, playSuccess } from './sounds'
 import Chart from './Chart'
 import StepDebugger from './StepDebugger'
 import Predict from './Predict'
+import Lecture from './Lecture'
 import Burst from './Burst'
 import Access from './Access'
 import ExoGenereModal from './ExoGenere'
@@ -368,7 +369,9 @@ export default function App() {
               onCorrect={() => { if (sound) playSuccess(); void markPassed(lesson.predict!.answer) }} onNext={() => ouvre(idx + 1)} />
             </div>
           )}
-          {!lesson.predict && <section className="card p-5 sm:p-6 space-y-3">
+          {lesson.lecture && <Lecture key={lesson.id} lang={lang} points={lesson.lecture[lang]} fait={done.includes(lesson.id)} hasNext={idx < lessons.length - 1}
+            onOk={() => { if (sound) playSuccess(); void markPassed('') }} onNext={() => ouvre(idx + 1)} />}
+          {!lesson.predict && !lesson.lecture && <section className="card p-5 sm:p-6 space-y-3">
             <h3 className="text-sm uppercase tracking-wide text-ink/55">{t.exercise}</h3>
             <p className="font-semibold text-[15px] rounded-xl border-l-4 border-terracotta bg-terracotta/8 px-3 py-2">{lesson.task[lang]}</p>
             <div className="grid gap-3 xl:grid-cols-2 items-start">
