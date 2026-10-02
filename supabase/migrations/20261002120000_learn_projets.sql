@@ -1,5 +1,5 @@
 -- Finjaro Learn — Atelier V2 : projets de code enregistrés dans le compte.
--- PROPOSITION RELUE PAR ALPHA (2e version) : rien n'est appliqué tant qu'Alpha ne l'a pas fait. Additive uniquement, ré-exécutable.
+-- PROPOSITION RELUE PAR ALPHA (2e version), appliquée le 02/10 par Alpha. Additive uniquement. Ne pas relancer telle quelle avec l'outil MCP (les drop policy le bloquent).
 -- V1 (livrée) garde les projets sur l'appareil, sans limite ; la V2 ajoute la sauvegarde dans le compte, avec des plafonds
 -- serrés car la base est commune (place de marché, Accounting, Léo) : 30 projets, 100 000 caractères par fichier,
 -- 5 Mo au total par personne. L'export en fichier depuis l'appareil reste illimité.

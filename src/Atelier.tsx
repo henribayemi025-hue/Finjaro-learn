@@ -5,11 +5,17 @@ import { expliqueErreur } from './explainError'
 import Chart from './Chart'
 import AgentPanel from './AgentPanel'
 import { listeProjets, lireProjet, sauverProjet, supprimerProjet, nouvelId, exporter, importer, codePython, codeJs, type Projet } from './atelierStore'
+import { listeCompte, enregistrerCompte, chargerCompte, supprimerCompte, nonEnregistre, ErreurCompte, type ResumeCompte } from './atelierCompte'
+import { supabase } from './supabase'
 import type { Lang } from './i18n'
 
 const T = {
   fr: {
-    title: 'Atelier', sub: 'Tes projets de code, avec plusieurs fichiers. Ils restent sur cet appareil : pense à les exporter pour les garder ailleurs.',
+    title: 'Atelier', sub: 'Tes projets de code, avec plusieurs fichiers. Ils s’enregistrent sur cet appareil ; connecte-toi pour les garder aussi dans ton compte et les retrouver ailleurs.',
+    cloud: 'Dans mon compte', cloudSave: 'Enregistrer dans mon compte', cloudShort: 'Compte', cloudSaving: 'Envoi…', cloudSaved: 'Enregistré dans ton compte', cloudDirty: 'Modifications pas encore dans ton compte',
+    cloudLogin: 'Connecte-toi pour garder tes projets dans ton compte et les retrouver sur tous tes appareils.', login: 'Se connecter', cloudNone: 'Rien dans ton compte pour l’instant : ouvre un projet et « Enregistrer dans mon compte ».',
+    cloudDel: 'Supprimer du compte', confirmCloudDel: 'Supprimer ce projet de ton compte ? (la copie sur cet appareil, s’il y en a une, reste)', cloudErr: 'Impossible de lire ton compte pour l’instant.',
+    cloudNewer: 'La version de ton compte est plus récente que celle de cet appareil, qui a des modifications non enregistrées. Remplacer la copie de cet appareil ?', limits: '30 projets, 50 fichiers par projet, 5 Mo au total',
     newPy: '+ Projet Python', newJs: '+ Projet JavaScript', import: 'Importer un projet', templates: 'Partir d’un modèle', mine: 'Mes projets', none: 'Aucun projet pour l’instant.',
     open: 'Ouvrir', del: 'Supprimer', confirmDel: 'Supprimer ce projet de l’appareil ? (exporte-le d’abord si tu veux le garder)', back: 'Atelier', run: 'Lancer', export: 'Exporter',
     files: 'Fichiers', addFile: '+ Fichier', rename: 'Renommer', delFile: 'Supprimer le fichier', main: 'principal', setMain: 'En faire le fichier principal', output: 'Console',
@@ -17,7 +23,11 @@ const T = {
     badName: 'Nom invalide ou déjà pris.', notFound: 'Projet introuvable sur cet appareil.', untitled: 'Mon projet', lastSave: 'Enregistré sur l’appareil', hint: 'Lance le projet : la console affiche ici le résultat du fichier principal.',
   },
   en: {
-    title: 'Workshop', sub: 'Your code projects, with several files. They stay on this device: export them to keep them elsewhere.',
+    title: 'Workshop', sub: 'Your code projects, with several files. They are saved on this device; sign in to keep them in your account too and find them elsewhere.',
+    cloud: 'In my account', cloudSave: 'Save to my account', cloudShort: 'Account', cloudSaving: 'Sending…', cloudSaved: 'Saved to your account', cloudDirty: 'Changes not yet in your account',
+    cloudLogin: 'Sign in to keep your projects in your account and find them on all your devices.', login: 'Sign in', cloudNone: 'Nothing in your account yet: open a project and “Save to my account”.',
+    cloudDel: 'Delete from account', confirmCloudDel: 'Delete this project from your account? (the copy on this device, if any, stays)', cloudErr: 'Cannot read your account right now.',
+    cloudNewer: 'Your account’s version is newer than this device’s, which has unsaved changes. Replace this device’s copy?', limits: '30 projects, 50 files per project, 5 MB in total',
     newPy: '+ Python project', newJs: '+ JavaScript project', import: 'Import a project', templates: 'Start from a template', mine: 'My projects', none: 'No project yet.',
     open: 'Open', del: 'Delete', confirmDel: 'Delete this project from the device? (export it first to keep it)', back: 'Workshop', run: 'Run', export: 'Export',
     files: 'Files', addFile: '+ File', rename: 'Rename', delFile: 'Delete file', main: 'main', setMain: 'Make it the main file', output: 'Console',
@@ -55,8 +65,19 @@ export default function Atelier({ lang, id, ai, signedIn, onOpen, onBack }: { la
   const [running, setRunning] = useState<'' | 'run' | 'py'>('')
   const [note, setNote] = useState('')
   const fichierRef = useRef<HTMLInputElement>(null)
+  const compteOn = !!supabase && signedIn
+  const [compte, setCompte] = useState<ResumeCompte[] | null>(null)
+  const [compteErr, setCompteErr] = useState('')
+  const [envoi, setEnvoi] = useState<'' | 'envoi' | 'ok'>('')
+  const [envoiErr, setEnvoiErr] = useState('')
 
   useEffect(() => { if (!id) listeProjets().then(setListe).catch(() => setListe([])) }, [id])
+  useEffect(() => {
+    setCompte(null); setCompteErr('')
+    if (id || !compteOn) return
+    listeCompte().then(setCompte).catch(() => { setCompte([]); setCompteErr(t.cloudErr) })
+  }, [id, compteOn, t.cloudErr])
+  useEffect(() => { setEnvoi(''); setEnvoiErr('') }, [id])
   useEffect(() => {
     setP(null); setRes(null); setIntrouvable(false)
     if (!id) return
@@ -73,6 +94,30 @@ export default function Atelier({ lang, id, ai, signedIn, onOpen, onBack }: { la
     const np: Projet = { ...proj, id: nouvelId(), maj: new Date().toISOString() }
     await sauverProjet(np)
     onOpen(np.id)
+  }
+
+  /** Ouvre un projet du compte : la copie de l'appareil si elle est à jour, sinon la version du compte. */
+  const ouvrirCompte = async (r: ResumeCompte) => {
+    const locaux = await listeProjets()
+    const local = locaux.find((x) => x.compteId === r.id)
+    if (local && local.compteMaj && local.compteMaj >= r.updated_at) { onOpen(local.id); return }
+    if (local && nonEnregistre(local) && !confirm(t.cloudNewer)) { onOpen(local.id); return }
+    try {
+      const proj = await chargerCompte(r.id, local?.id)
+      await sauverProjet(proj); onOpen(proj.id)
+    } catch { setCompteErr(t.cloudErr) }
+  }
+  const enregistrer = async () => {
+    if (!p || envoi === 'envoi') return
+    if (!compteOn) { window.dispatchEvent(new Event('learn:login')); return }
+    setEnvoi('envoi'); setEnvoiErr('')
+    try {
+      const np = await enregistrerCompte(p, lang)
+      setP((cur) => (cur && cur.id === np.id ? { ...cur, compteId: np.compteId, compteSnap: np.compteSnap, compteMaj: np.compteMaj, titre: cur.titre.trim() ? cur.titre : np.titre } : cur))
+      setEnvoi('ok')
+    } catch (e) {
+      setEnvoi(''); setEnvoiErr(e instanceof ErreurCompte ? e.message : (lang === 'fr' ? 'La sauvegarde dans le compte a échoué. Ton projet reste sur cet appareil.' : 'Saving to your account failed. Your project stays on this device.'))
+    }
   }
 
   // ───────── Liste des projets ─────────
@@ -114,15 +159,54 @@ export default function Atelier({ lang, id, ai, signedIn, onOpen, onBack }: { la
             ))}
           </ul>
         </section>
+        {supabase && (
+          <section aria-labelledby="atelier-compte">
+            <h3 id="atelier-compte" className="font-display text-xl mb-1">☁ {t.cloud}</h3>
+            <p className="text-xs text-ink/55 mb-3">{t.limits}</p>
+            {!signedIn ? (
+              <div className="card p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+                <p className="flex-1 text-sm text-ink/75">{t.cloudLogin}</p>
+                <button className="btn btn-primary" onClick={() => window.dispatchEvent(new Event('learn:login'))}>{t.login}</button>
+              </div>
+            ) : (
+              <>
+                {compteErr && <p className="text-sm text-terracotta-dark mb-2" role="alert">{compteErr}</p>}
+                {compte === null && !compteErr && <p className="text-sm text-ink/60" role="status">…</p>}
+                {compte && !compte.length && !compteErr && <p className="text-sm text-ink/60">{t.cloudNone}</p>}
+                <ul className="grid gap-2">
+                  {(compte ?? []).map((x) => (
+                    <li key={x.id} className="card p-3 flex items-center gap-2 sm:gap-3 min-w-0">
+                      <span aria-hidden="true" className="chip hidden sm:inline-flex">{x.langage === 'py' ? '🐍 Python' : '⚡ JS'}</span>
+                      <span className="flex-1 min-w-0">
+                        <span className="block font-semibold truncate">{x.titre}</span>
+                        <span className="block text-xs text-ink/55">☁ {new Date(x.updated_at).toLocaleString(lang === 'fr' ? 'fr-FR' : 'en-GB')}</span>
+                      </span>
+                      <button className="btn" onClick={() => ouvrirCompte(x)}>{t.open}</button>
+                      <button className="icon-btn" aria-label={t.cloudDel + ' ' + x.titre} onClick={async () => {
+                        if (!confirm(t.confirmCloudDel)) return
+                        try {
+                          await supprimerCompte(x.id)
+                          const loc = (await listeProjets()).find((l) => l.compteId === x.id)
+                          if (loc) await sauverProjet({ ...loc, compteId: undefined, compteSnap: undefined, compteMaj: undefined })
+                          setCompte(await listeCompte()); setListe(await listeProjets())
+                        } catch { setCompteErr(t.cloudErr) }
+                      }}>🗑</button>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </section>
+        )}
         <section>
           <h3 className="font-display text-xl mb-3">{t.mine}</h3>
           {liste && !liste.length && <p className="text-sm text-ink/60">{t.none}</p>}
           <ul className="grid gap-2">
             {(liste ?? []).map((x) => (
-              <li key={x.id} className="card p-3 flex items-center gap-3">
-                <span aria-hidden="true" className="chip">{x.lang === 'py' ? '🐍 Python' : '⚡ JS'}</span>
+              <li key={x.id} className="card p-3 flex items-center gap-2 sm:gap-3 min-w-0">
+                <span aria-hidden="true" className="chip hidden sm:inline-flex">{x.lang === 'py' ? '🐍 Python' : '⚡ JS'}</span>
                 <span className="flex-1 min-w-0">
-                  <span className="block font-semibold truncate">{x.titre}</span>
+                  <span className="block font-semibold truncate">{x.titre}{x.compteId && <span className="ml-1 text-xs text-ink/55" title={t.cloud}>☁</span>}</span>
                   <span className="block text-xs text-ink/55">{x.fichiers.length} {lang === 'fr' ? (x.fichiers.length > 1 ? 'fichiers' : 'fichier') : 'file(s)'} · {new Date(x.maj).toLocaleString(lang === 'fr' ? 'fr-FR' : 'en-GB')}</span>
                 </span>
                 <button className="btn" onClick={() => onOpen(x.id)}>{t.open}</button>
@@ -154,6 +238,7 @@ export default function Atelier({ lang, id, ai, signedIn, onOpen, onBack }: { la
     }, 60)
   }
   const simple = res?.error ? expliqueErreur(res.error, lang) : null
+  const dirty = nonEnregistre(p)
 
   return (
     <div className="space-y-4">
@@ -161,6 +246,8 @@ export default function Atelier({ lang, id, ai, signedIn, onOpen, onBack }: { la
         <button className="btn px-3" onClick={onBack} aria-label={(lang === 'fr' ? 'Retour à l’' : 'Back to ') + t.back}>← <span className="hidden sm:inline">{t.back}</span></button>
         <input value={p.titre} onChange={(e) => setP({ ...p, titre: e.target.value.slice(0, 80) })} aria-label="titre"
           className="flex-1 min-w-0 min-h-11 rounded-xl border border-transparent hover:border-brass focus:border-brass bg-transparent px-2 font-display text-lg font-bold" />
+        {supabase && <button className="btn hidden md:inline-flex" onClick={enregistrer} disabled={envoi === 'envoi'}>☁ {envoi === 'envoi' ? t.cloudSaving : t.cloudSave}</button>}
+        {supabase && <button className="icon-btn md:hidden" onClick={enregistrer} disabled={envoi === 'envoi'} aria-label={t.cloudSave}>☁</button>}
         <button className="btn hidden sm:inline-flex" onClick={() => exporter(p)}>⤓ {t.export}</button>
         <button className="icon-btn sm:hidden" onClick={() => exporter(p)} aria-label={t.export}>⤓</button>
         <button className="btn btn-primary" onClick={lancer} disabled={!!running}>{running ? '⏳' : '▶'} {t.run}</button>
@@ -228,7 +315,11 @@ export default function Atelier({ lang, id, ai, signedIn, onOpen, onBack }: { la
               {simple && <details><summary className="cursor-pointer text-xs text-ink/65">{lang === 'fr' ? 'Détail technique' : 'Technical detail'}</summary><pre className="mt-1 text-xs font-mono whitespace-pre-wrap">{res.error}</pre></details>}
             </div>
           )}
-          <p className="text-xs text-ink/50">✓ {t.lastSave}</p>
+          <p className="text-xs text-ink/50" aria-live="polite">✓ {t.lastSave}
+            {p.compteId && !dirty && <> · ☁ {t.cloudSaved}{p.compteMaj && ' (' + new Date(p.compteMaj).toLocaleTimeString(lang === 'fr' ? 'fr-FR' : 'en-GB', { hour: '2-digit', minute: '2-digit' }) + ')'}</>}
+            {dirty && <> · <button className="underline text-terracotta-dark" onClick={enregistrer}>☁ {t.cloudDirty}</button></>}
+          </p>
+          {envoiErr && <p className="text-sm text-terracotta-dark rounded-xl bg-terracotta/10 border border-terracotta/40 p-3" role="alert">{envoiErr}</p>}
         </div>
       </div>
     </div>

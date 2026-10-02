@@ -1,7 +1,12 @@
-// Atelier V1 : les projets restent SUR L'APPAREIL (IndexedDB). Rien n'est envoyé.
+// Atelier : la copie de travail des projets reste SUR L'APPAREIL (IndexedDB). La V2 (atelierCompte.ts) ajoute une sauvegarde
+// dans le compte, seulement quand la personne la demande.
 
 export interface Fichier { chemin: string; contenu: string }
-export interface Projet { id: string; titre: string; lang: 'py' | 'js'; principal: string; fichiers: Fichier[]; maj: string }
+export interface Projet {
+  id: string; titre: string; lang: 'py' | 'js'; principal: string; fichiers: Fichier[]; maj: string
+  /** Sauvegarde dans le compte (V2) : identifiant côté base, empreinte de chaque fichier envoyé, date de la sauvegarde. */
+  compteId?: string; compteSnap?: Record<string, string>; compteMaj?: string
+}
 
 const DB = 'learn-atelier'
 const STORE = 'projets'
@@ -33,7 +38,8 @@ export const nouvelId = () => 'p' + Date.now().toString(36) + Math.random().toSt
 
 /** Fichier d'export : un JSON lisible, réimportable. */
 export function exporter(p: Projet) {
-  const blob = new Blob([JSON.stringify({ format: 'finjaro-learn-atelier', version: 1, projet: p }, null, 2)], { type: 'application/json' })
+  const { compteId: _c, compteSnap: _s, compteMaj: _m, ...projet } = p
+  const blob = new Blob([JSON.stringify({ format: 'finjaro-learn-atelier', version: 1, projet }, null, 2)], { type: 'application/json' })
   const a = document.createElement('a')
   a.href = URL.createObjectURL(blob)
   a.download = p.titre.replace(/[^\p{L}\p{N}_-]+/gu, '-').replace(/^-+|-+$/g, '') + '.finjaro.json'

@@ -31,4 +31,4 @@ Faire un **vrai projet**, avec plusieurs fichiers, aidé par des **agents**. Pou
   3. Faut-il afficher l'accord de la personne avant chaque import ?
 
 ## Ordre proposé
-La V1 tout de suite (aucun risque pour la base). La V2 après relecture du SQL. La V3 quand Léo a validé ses RPC.
+La V1 tout de suite (aucun risque pour la base). La V2 après relecture du SQL — ✅ 02/10 : SQL appliqué par Alpha, écran livré (partage avec un espace et historique des versions : pas encore). La V3 quand Léo a validé ses RPC.
