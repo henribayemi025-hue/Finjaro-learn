@@ -16,6 +16,8 @@ export const TRACKS: { key: string; name: L2; groups: Group[]; groupName: Partia
     groupName: { pe: { fr: 'Prompt engineering', en: 'Prompt engineering' } } },
   { key: 'compil', name: { fr: 'Compilateurs', en: 'Compilers' }, groups: ['compil'],
     groupName: { compil: { fr: 'Du texte au code exécuté', en: 'From text to running code' } } },
+  { key: 'nlp', name: { fr: 'NLP et Transformers', en: 'NLP and Transformers' }, groups: ['nlp'],
+    groupName: { nlp: { fr: 'Du texte au Transformer', en: 'From text to Transformer' } } },
   { key: 'archi', name: { fr: 'Ordinateurs', en: 'Computers' }, groups: ['archi'],
     groupName: { archi: { fr: 'Portes, additionneur, processeur', en: 'Gates, adder, processor' } } },
   { key: 'crypto', name: { fr: 'Cryptographie', en: 'Cryptography' }, groups: ['crypto'],

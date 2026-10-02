@@ -49,6 +49,7 @@ const GROUPS = {
   'ai-agents': { fr: 'AI engineering · agents et production', en: 'AI engineering · agents and production' },
   pe: { fr: 'Prompt engineering', en: 'Prompt engineering' },
   compil: { fr: 'Compilateurs', en: 'Compilers' },
+  nlp: { fr: 'NLP et Transformers', en: 'NLP and Transformers' },
   archi: { fr: 'Ordinateurs', en: 'Computers' },
   crypto: { fr: 'Cryptographie', en: 'Cryptography' },
   maths: { fr: 'Maths pour l\'IA', en: 'Maths for AI' },

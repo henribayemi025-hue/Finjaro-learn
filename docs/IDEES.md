@@ -23,7 +23,7 @@ Règles qui filtrent : aucun chiffre ou diplôme inventé, aucune affiliation à
 | 12 | Mini-OS | 🔜 ordonnanceur, pagination simulés |
 | 13 | Compilateurs / langage | ✅ piste « Compilateurs » (02/10) : 7 leçons (lexeur, NPI, gare de triage, parseur récursif, interpréteur, machine à pile, calculatrice) |
 | 14 | Réseaux de zéro | 🔜 paquets, somme de contrôle, retransmission simulés |
-| 15 | NLP profond, Transformers | ✅ attention · 🔜 tokenisation BPE, n-grammes, bloc Transformer |
+| 15 | NLP profond, Transformers | ✅ attention + piste « NLP et Transformers » (02/10) : 7 leçons (normaliser, n-grammes, TF-IDF, BPE, plongements, Bayes naïf, bloc Transformer) |
 
 ### Tuteurs IA (16–30)
 | # | Idée | État |
