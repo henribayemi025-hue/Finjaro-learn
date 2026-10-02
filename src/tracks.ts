@@ -18,6 +18,8 @@ export const TRACKS: { key: string; name: L2; groups: Group[]; groupName: Partia
     groupName: { compil: { fr: 'Du texte au code exécuté', en: 'From text to running code' } } },
   { key: 'nlp', name: { fr: 'NLP et Transformers', en: 'NLP and Transformers' }, groups: ['nlp'],
     groupName: { nlp: { fr: 'Du texte au Transformer', en: 'From text to Transformer' } } },
+  { key: 'quant', name: { fr: 'Informatique quantique', en: 'Quantum computing' }, groups: ['quant'],
+    groupName: { quant: { fr: 'Qubits simulés', en: 'Simulated qubits' } } },
   { key: 'archi', name: { fr: 'Ordinateurs', en: 'Computers' }, groups: ['archi'],
     groupName: { archi: { fr: 'Portes, additionneur, processeur', en: 'Gates, adder, processor' } } },
   { key: 'crypto', name: { fr: 'Cryptographie', en: 'Cryptography' }, groups: ['crypto'],

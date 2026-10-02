@@ -14,7 +14,7 @@ Règles qui filtrent : aucun chiffre ou diplôme inventé, aucune affiliation à
 | 3 | Maths pour le machine learning | ✅ piste « Maths pour l'IA » (01/10) : 10 leçons (vecteurs, cosinus, matrices, dérivée, gradient, moyenne/variance, Bayes, espérance, entropie, softmax) · 🔜 PCA |
 | 4 | Théorie de l'information, cryptographie | ✅ entropie + piste « Cryptographie » (02/10) : 8 leçons (César, Vigenère, fréquences, hachage, PGCD, exponentiation, RSA jouet, Diffie–Hellman) ; jouets, jamais pour de vraies données |
 | 5 | Systèmes distribués | 🔜 simulations en Python (réplication, consensus simplifié) |
-| 6 | Informatique quantique | 🔜 piste « Quantique » : qubits simulés avec NumPy (Hadamard, intrication, Grover) |
+| 6 | Informatique quantique | ✅ piste « Informatique quantique » (02/10) : 6 leçons (qubit, portes, mesures, deux qubits, Bell, Grover) |
 | 7 | Neurosciences computationnelles | 🔜 neurone à impulsions (LIF) en Python |
 | 8 | Bio-informatique | 🔜 séquences ADN, alignement (jeux de données écrits à la main, pas de données réelles inventées) |
 | 9 | Théorie des jeux | 🔜 dilemme du prisonnier, équilibre de Nash 2×2 |

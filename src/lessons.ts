@@ -9,11 +9,12 @@ import { peLessons } from './lessonsPE'
 import { mathsLessons } from './lessonsMaths'
 import { cryptoLessons } from './lessonsCrypto'
 import { archiLessons } from './lessonsArchi'
+import { quantLessons } from './lessonsQuant'
 import { nlpLessons } from './lessonsNLP'
 import { compilLessons } from './lessonsCompil'
 
 type T = Record<Lang, string>
-export type Group = 'js' | 'py-bases' | 'py-algo' | 'py-lecture' | 'py-projets' | 'ds-numpy' | 'ds-pandas' | 'ds-ml' | 'ds-viz' | 'dl' | 'dl-reseaux' | 'ai-rag' | 'ai-agents' | 'pe' | 'maths' | 'crypto' | 'archi' | 'nlp' | 'compil'
+export type Group = 'js' | 'py-bases' | 'py-algo' | 'py-lecture' | 'py-projets' | 'ds-numpy' | 'ds-pandas' | 'ds-ml' | 'ds-viz' | 'dl' | 'dl-reseaux' | 'ai-rag' | 'ai-agents' | 'pe' | 'maths' | 'crypto' | 'archi' | 'quant' | 'nlp' | 'compil'
 
 export interface Lesson {
   id: string
@@ -119,8 +120,8 @@ const jsLessons: Lesson[] = [
   },
 ]
 
-const ORDER: Group[] = ['js', 'py-bases', 'py-algo', 'py-lecture', 'py-projets', 'ds-numpy', 'ds-pandas', 'ds-ml', 'ds-viz', 'dl', 'dl-reseaux', 'ai-rag', 'ai-agents', 'pe', 'maths', 'crypto', 'archi', 'nlp', 'compil']
-export const lessons: Lesson[] = [...jsLessons.map((l) => ({ ...l, lang: 'js' as const, group: 'js' as const })), ...pyLessons, ...readLessons, ...dataLessons, ...vizLessons, ...dlLessons, ...aiLessons, ...peLessons, ...mathsLessons, ...cryptoLessons, ...archiLessons, ...compilLessons, ...nlpLessons]
+const ORDER: Group[] = ['js', 'py-bases', 'py-algo', 'py-lecture', 'py-projets', 'ds-numpy', 'ds-pandas', 'ds-ml', 'ds-viz', 'dl', 'dl-reseaux', 'ai-rag', 'ai-agents', 'pe', 'maths', 'crypto', 'archi', 'quant', 'nlp', 'compil']
+export const lessons: Lesson[] = [...jsLessons.map((l) => ({ ...l, lang: 'js' as const, group: 'js' as const })), ...pyLessons, ...readLessons, ...dataLessons, ...vizLessons, ...dlLessons, ...aiLessons, ...peLessons, ...mathsLessons, ...cryptoLessons, ...archiLessons, ...compilLessons, ...nlpLessons, ...quantLessons]
   .map((l, i) => ({ l, i }))
   .sort((a, b) => ORDER.indexOf(a.l.group ?? 'js') - ORDER.indexOf(b.l.group ?? 'js') || a.i - b.i)
   .map((x) => x.l)
