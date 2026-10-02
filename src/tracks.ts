@@ -37,3 +37,11 @@ export const TRACKS: { key: string; name: L2; groups: Group[]; groupName: Partia
   { key: 'maths', name: { fr: "Maths pour l'IA", en: 'Maths for AI' }, groups: ['maths'],
     groupName: { maths: { fr: 'Vecteurs, gradient, probabilités', en: 'Vectors, gradient, probability' } } },
 ]
+
+/** Adresse lisible d'un parcours : son nom français sans accents (ex. « programmation », « ia-et-deep-learning »). */
+export const trackSlug = (key: string) => {
+  const t = TRACKS.find((x) => x.key === key)
+  return t ? t.name.fr.replace(/\+\+/g, 'pp').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') : key
+}
+/** Retrouve un parcours depuis son adresse lisible ou sa clé interne. */
+export const trackFromSlug = (s: string) => TRACKS.find((x) => x.key === s || trackSlug(x.key) === s)?.key ?? null

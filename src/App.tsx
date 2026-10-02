@@ -9,7 +9,7 @@ import { nouvelId, sauverProjet } from './atelierStore'
 import Lettre from './Lettre'
 import LoginGate from './LoginGate'
 import Chrono from './Chrono'
-import { TRACKS } from './tracks'
+import { TRACKS, trackSlug, trackFromSlug } from './tracks'
 import Progress, { recordDay, loadDays, streaks } from './Progress'
 import Outils from './outils/Outils'
 import Entraide from './entraide/Entraide'
@@ -67,7 +67,7 @@ function lireRoute(): Route {
   const h = decodeURIComponent(window.location.hash.replace(/^#\/?/, ''))
   const [a, b] = h.split('/')
   if (a === 'lettre') return { v: 'lettre', date: /^\d{4}-\d{2}-\d{2}$/.test(b ?? '') ? b : null }
-  if (a === 'parcours' && b && TRACKS.some((t) => t.key === b)) return { v: 'parcours', k: b }
+  if (a === 'parcours' && b && trackFromSlug(b)) return { v: 'parcours', k: trackFromSlug(b)! }
   if (a === 'parcours') return { v: 'accueil' }
   if (a === 'lecon' && b && lessons.some((l) => l.id === b)) return { v: 'lecon', id: b }
   if (a === 'atelier') return { v: 'atelier', id: b && /^[a-z0-9]{4,40}$/.test(b) ? b : null }
@@ -326,7 +326,7 @@ export default function App() {
       {view === 'espaces' && <div className="max-w-6xl mx-auto px-4 py-6 outline-none">{session ? <Espaces lang={lang} session={session} /> : <LoginGate lang={lang} icon="👥" {...G.espaces} />}</div>}
       {route.v === 'accueil' && (
         <div className="max-w-6xl mx-auto px-4 py-5 outline-none">
-          <Accueil lang={lang} done={done} idx={idx} onOpen={ouvre} onTrack={(k) => nav('#/parcours/' + k)} onChrono={() => setChrono(true)} onLettre={() => nav('#/lettre')}
+          <Accueil lang={lang} done={done} idx={idx} onOpen={ouvre} onTrack={(k) => nav('#/parcours/' + trackSlug(k))} onChrono={() => setChrono(true)} onLettre={() => nav('#/lettre')}
             onResume={() => ouvre(idx)} />
         </div>
       )}
@@ -340,7 +340,7 @@ export default function App() {
       {route.v === 'lecon' && <div id="lecon" className="max-w-6xl mx-auto px-4 py-4">
         <div className="space-y-4 min-w-0">
           <div className="sticky top-16 z-20 -mx-4 px-4 py-2 bg-[color-mix(in_srgb,var(--color-cream)_88%,transparent)] backdrop-blur-xl border-b border-brass flex items-center gap-2">
-            <button className="btn px-3" onClick={() => nav('#/parcours/' + track)} aria-label={(lang === 'fr' ? 'Retour au parcours ' : 'Back to track ') + acuName(lang, track)}>←<span className="hidden sm:inline"> {TRACK_ICON[track]} {acuName(lang, track)}</span></button>
+            <button className="btn px-3" onClick={() => nav('#/parcours/' + trackSlug(track))} aria-label={(lang === 'fr' ? 'Retour au parcours ' : 'Back to track ') + acuName(lang, track)}>←<span className="hidden sm:inline"> {TRACK_ICON[track]} {acuName(lang, track)}</span></button>
             <span className="flex-1 text-center text-sm font-semibold text-ink/70 truncate">{lang === 'fr' ? 'Leçon' : 'Lesson'} {pos} / {trackLessons.length}</span>
             <button className="icon-btn" disabled={pos <= 1} onClick={() => ouvre(trackLessons[pos - 2].i)} aria-label={lang === 'fr' ? 'Leçon précédente' : 'Previous lesson'}>‹</button>
             <button className="icon-btn" disabled={pos >= trackLessons.length} onClick={() => ouvre(trackLessons[pos].i)} aria-label={lang === 'fr' ? 'Leçon suivante' : 'Next lesson'}>›</button>

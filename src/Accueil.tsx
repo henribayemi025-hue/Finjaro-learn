@@ -198,9 +198,12 @@ export default function Accueil({ lang, done, idx, onOpen, onTrack, onResume, on
                       </li>
                     ))}
                   </ul>
-                  <button onClick={() => next && onOpen(next.i)} className="btn mt-auto w-full bg-terracotta/10 border-transparent text-terracotta-dark">
-                    {fait === ls.length && ls.length ? t.review : fait > 0 ? t.cont : t.start} →
-                  </button>
+                  <div className="mt-auto grid grid-cols-2 gap-2">
+                    <button onClick={() => onTrack(key)} className="btn">{lang === 'fr' ? `Les ${ls.length} leçons` : `All ${ls.length} lessons`}</button>
+                    <button onClick={() => next && onOpen(next.i)} className="btn bg-terracotta/10 border-transparent text-terracotta-dark">
+                      {fait === ls.length && ls.length ? t.review : fait > 0 ? t.cont : t.start} →
+                    </button>
+                  </div>
                 </div>
               </li>
             )

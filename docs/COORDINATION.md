@@ -64,3 +64,5 @@ messages directs (create_trigger vers la session concernée).
 - 02/10 · Learn : écrans séparés (#/, #/parcours/<clé>, #/lecon/<id>, #/atelier[/<id>], #/progression…, #/lettre ; #lettre reste accepté) ; Atelier V1 (IndexedDB, rien en base) ; SQL Atelier V2 proposé à Alpha (non appliqué).
 
 - 02/10 · Learn : 4 pages séparées dans la navigation (Leçons, Atelier, Lettre IA, + Progression ; Espaces/Outils/Entraide sous « Plus » sur téléphone) ; « Ouvrir dans l'éditeur » depuis une leçon ; #/parcours = page pour choisir.
+
+- 02/10 · Learn : adresses de parcours lisibles (#/parcours/programmation, data-science, c-et-cpp…, anciennes clés acceptées) ; bouton « Les N leçons » sur chaque carte ; SQL Atelier V2 corrigé (30 projets, 100 000 car./fichier, 5 Mo/personne en insert ET update, grant explicite, drop policy if exists, updated_at) et TESTÉ sur un Postgres 16 local jetable (double application, RLS entre 2 comptes, les 3 plafonds).
