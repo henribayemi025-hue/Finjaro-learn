@@ -23,9 +23,9 @@ export default function Access({ lang }: { lang: Lang }) {
 
   return (
     <div className="relative">
-      <button onClick={() => setOpen(!open)} aria-expanded={open} aria-label={t.btn} title={t.btn} className="text-sm border border-ink/30 rounded-md px-2.5 py-1.5 font-semibold">Aa</button>
+      <button onClick={() => setOpen(!open)} aria-expanded={open} aria-label={t.btn} title={t.btn} className="icon-btn">Aa</button>
       {open && (
-        <div role="dialog" aria-label={t.btn} className="fixed left-3 right-3 top-24 sm:absolute sm:left-auto sm:right-0 sm:top-11 sm:w-64 z-20 rounded-xl border-2 border-brass bg-paper p-3 space-y-2 shadow-lg text-sm">
+        <div role="dialog" aria-label={t.btn} className="card fixed left-3 right-3 top-20 sm:absolute sm:left-auto sm:right-0 sm:top-12 sm:w-72 z-40 p-4 space-y-2.5 shadow-2xl text-sm rise">
           {(['lisible', 'contraste', 'grand'] as const).map((k) => (
             <label key={k} className="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" checked={prefs[k]} onChange={(e) => setPrefs({ ...prefs, [k]: e.target.checked })} className="size-4 accent-[var(--color-terracotta)]" />

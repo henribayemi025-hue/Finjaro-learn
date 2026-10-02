@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { supabase, redirectTo } from './supabase'
 import { ui, type Lang } from './i18n'
@@ -9,18 +9,24 @@ export function AuthBox({ lang, session }: { lang: Lang; session: Session | null
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [msg, setMsg] = useState('')
+  // Les autres écrans (espaces, outils, entraide) peuvent ouvrir ce formulaire.
+  useEffect(() => {
+    const h = () => setOpen(true)
+    window.addEventListener('learn:login', h)
+    return () => window.removeEventListener('learn:login', h)
+  }, [])
   if (!supabase) return null
 
   if (session) {
     return (
-      <button className="text-sm underline" onClick={() => supabase!.auth.signOut({ scope: 'local' })} title={session.user.email ?? ''}>
+      <button className="btn" onClick={() => supabase!.auth.signOut({ scope: 'local' })} title={session.user.email ?? ''}>
         {t.signOut}
       </button>
     )
   }
   if (!open) {
     return (
-      <button className="text-sm border border-ink/30 rounded-md px-3 py-1.5" onClick={() => setOpen(true)}>
+      <button className="btn btn-dark" onClick={() => setOpen(true)}>
         {t.signIn}
       </button>
     )
@@ -36,18 +42,19 @@ export function AuthBox({ lang, session }: { lang: Lang; session: Session | null
   }
 
   return (
-    <div className="absolute right-4 top-16 z-10 w-72 rounded-xl border-2 border-brass bg-paper p-3 space-y-2 shadow-lg">
+    <div role="dialog" aria-label={t.signIn} className="card fixed left-3 right-3 top-20 sm:left-auto sm:right-6 sm:w-80 z-40 p-4 space-y-2.5 shadow-2xl rise">
+      <p className="font-bold">{t.signIn}</p>
       <p className="text-xs text-ink/70">{t.accountHelp}</p>
       <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email" aria-label="email"
-        className="w-full rounded-md border border-ink/30 bg-white/60 px-2 py-1.5 text-sm" />
+        className="w-full rounded-lg border border-ink/30 px-3 py-2 text-sm" />
       <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder={t.password} aria-label={t.password}
-        className="w-full rounded-md border border-ink/30 bg-white/60 px-2 py-1.5 text-sm" />
+        className="w-full rounded-lg border border-ink/30 px-3 py-2 text-sm" />
       <div className="flex gap-2">
-        <button onClick={withPassword} disabled={!email || !password} className="flex-1 rounded-md bg-terracotta text-white text-sm py-1.5 disabled:opacity-40">{t.signIn}</button>
-        <button onClick={magic} disabled={!email} className="flex-1 rounded-md border border-ink/30 text-sm py-1.5 disabled:opacity-40">{t.magicLink}</button>
+        <button onClick={withPassword} disabled={!email || !password} className="btn btn-primary flex-1">{t.signIn}</button>
+        <button onClick={magic} disabled={!email} className="btn flex-1">{t.magicLink}</button>
       </div>
       {msg && <p className="text-xs" role="status">{msg}</p>}
-      <button className="text-xs underline" onClick={() => setOpen(false)}>{t.close}</button>
+      <button className="text-xs underline text-ink/70" onClick={() => setOpen(false)}>{t.close}</button>
     </div>
   )
 }

@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import Espaces from './Espaces'
-import Curriculum from './Curriculum'
+import Curriculum, { TRACK_ICON } from './Curriculum'
+import LoginGate from './LoginGate'
+import { TRACKS } from './tracks'
 import Progress, { recordDay } from './Progress'
 import Outils from './outils/Outils'
 import Entraide from './entraide/Entraide'
@@ -26,7 +28,10 @@ import { agents } from './agents'
 import AgentFace from './AgentFace'
 import { runLesson, type RunResult } from './runner'
 
-const pre = 'rounded-lg bg-code text-code-fg p-3 text-sm overflow-x-auto whitespace-pre-wrap font-mono'
+const pre = 'rounded-xl bg-code text-code-fg p-4 text-sm overflow-x-auto whitespace-pre-wrap font-mono'
+const trackOf = (g: string | undefined) => TRACKS.find((tr) => (tr.groups as string[]).includes(g ?? 'js'))?.key ?? 'prog'
+const VIEWS = ['lecons', 'progression', 'espaces', 'outils', 'entraide'] as const
+const VIEW_ICON = { lecons: '📚', progression: '📈', espaces: '👥', outils: '🧰', entraide: '🤝' } as const
 
 const GROUPS = {
   js: { fr: 'JavaScript', en: 'JavaScript' },
@@ -47,6 +52,10 @@ const GROUPS = {
   crypto: { fr: 'Cryptographie', en: 'Cryptography' },
   maths: { fr: 'Maths pour l\'IA', en: 'Maths for AI' },
 } as const
+
+function acuName(lang: Lang, key: string) {
+  return TRACKS.find((tr) => tr.key === key)?.name[lang] ?? ''
+}
 
 function getLang(): Lang {
   try {
@@ -70,7 +79,7 @@ export default function App() {
   const [theme, setTheme] = useState<'finjaro' | 'noir'>(() => (load('theme', 'finjaro') === 'noir' ? 'noir' : 'finjaro'))
   useEffect(() => { document.documentElement.dataset.theme = theme }, [theme])
   const [ai, setAi] = useState(() => load('ai', '0') === '1')
-  const [idx, setIdx] = useState(0)
+  const [idx, setIdx] = useState(() => Math.max(0, lessons.findIndex((l) => l.id === load('last', ''))))
   const [done, setDone] = useState<string[]>(() => JSON.parse(load('done', '[]')))
   const lesson = lessons[idx]
   const [code, setCode] = useState(() => load('code:' + lesson.id, lesson.starter))
@@ -89,6 +98,8 @@ export default function App() {
   const [fixNote, setFixNote] = useState('')
   const [showHint, setShowHint] = useState(false)
   const t = ui[lang]
+  // Le débogueur s'ouvre sous l'exercice : on l'amène à l'écran, sinon on croit que le bouton ne fait rien.
+  useEffect(() => { if (debug) requestAnimationFrame(() => document.getElementById('debug')?.scrollIntoView({ behavior: 'smooth', block: 'start' })) }, [debug])
 
   useEffect(() => {
     if (!supabase) return
@@ -106,8 +117,10 @@ export default function App() {
     })
   }, [session])
 
-  const go = (i: number) => {
+  const go = (i: number, scroll = false) => {
     setIdx(i)
+    save('last', lessons[i].id)
+    if (scroll) requestAnimationFrame(() => document.getElementById('lecon')?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
     setCode(load('code:' + lessons[i].id, lessons[i].starter))
     setRes(null)
     setFails(0)
@@ -172,94 +185,124 @@ export default function App() {
     else setFixNote(r.error === 'quota' ? t.quota : t.aiError)
   }
 
+  const track = trackOf(lesson.group)
+  const trackLessons = lessons.map((l, i) => ({ l, i })).filter(({ l }) => trackOf(l.group) === track)
+  const pickTrack = (key: string) => {
+    const mine = lessons.map((l, i) => ({ l, i })).filter(({ l }) => trackOf(l.group) === key)
+    const next = mine.find(({ l }) => !done.includes(l.id)) ?? mine[0]
+    if (next) go(next.i, true)
+  }
+  const tabLabel = (v: typeof VIEWS[number]) => v === 'lecons' ? t.lessonsTab : v === 'progression' ? t.progressTab : v === 'espaces' ? t.spaces : v === 'entraide' ? entraideUi(lang).tab : outilsUi[lang].tab
+  const pct = Math.round((done.length / lessons.length) * 100)
+  const G = {
+    espaces: lang === 'fr'
+      ? { title: 'Apprendre à plusieurs', text: t.spacesLogin, points: ['Un salon de discussion par groupe', 'Coder ensemble en direct', 'Des défis de groupe'] }
+      : { title: 'Learn together', text: t.spacesLogin, points: ['A chat room per group', 'Code together live', 'Group challenges'] },
+    outils: lang === 'fr'
+      ? { title: 'Tes outils IA', text: outilsUi[lang].login, points: ['Fiches de révision et quiz', 'CV et lettres de motivation', 'Les nouveautés de l’IA'] }
+      : { title: 'Your AI tools', text: outilsUi[lang].login, points: ['Revision sheets and quizzes', 'CVs and cover letters', 'What’s new in AI'] },
+    entraide: lang === 'fr'
+      ? { title: 'Entraide', text: entraideUi(lang).login, points: ['Pose une question', 'Aide les autres', 'Modération bienveillante'] }
+      : { title: 'Help each other', text: entraideUi(lang).login, points: ['Ask a question', 'Help others', 'Kind moderation'] },
+  }
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen pb-20 md:pb-0">
       <a href="#contenu" className="skip-link">{t.skip}</a>
-      <header className="relative bg-paper border-b-2 border-brass">
-        <div className="max-w-5xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-          <div className="flex items-center gap-3 min-w-0 flex-1 basis-56">
-            <span aria-hidden="true" className="size-10 shrink-0 rounded-xl bg-terracotta text-white grid place-items-center font-serif font-bold text-xl shadow-md">F</span>
-            <div className="min-w-0">
-              <h1 className="font-bold text-2xl leading-tight">Finjaro Learn</h1>
-              <p className="text-sm text-ink/60 hidden sm:block">{t.tagline}</p>
-            </div>
+      <header className="sticky top-0 z-30 border-b border-brass bg-[color-mix(in_srgb,var(--color-cream)_82%,transparent)] backdrop-blur-xl">
+        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span aria-hidden="true" className="size-9 shrink-0 rounded-xl grad text-white grid place-items-center font-extrabold text-lg shadow-md">F</span>
+            <h1 className="text-lg font-extrabold whitespace-nowrap hidden sm:block md:hidden xl:block" title={t.tagline}>Finjaro <span className="grad-text">Learn</span></h1>
+            <h1 className="sr-only sm:hidden md:block md:sr-only xl:hidden">Finjaro Learn</h1>
           </div>
-          <div className="flex items-center gap-2 flex-wrap">
-          <AuthBox lang={lang} session={session} />
-          <Access lang={lang} />
-          <button
-            onClick={() => { const n = theme === 'noir' ? 'finjaro' : 'noir'; setTheme(n); save('theme', n) }}
-            aria-label={t.theme} title={t.theme}
-            className="text-sm border border-ink/30 rounded-md px-2.5 py-1.5"
-          >
-            {theme === 'noir' ? '☀' : '☾'}<span className="hidden sm:inline"> {theme === 'noir' ? 'Finjaro' : 'Noir'}</span>
-          </button>
-          <div role="group" aria-label={t.aiHelp} title={t.aiHelp} className="flex rounded-md border border-ink/30 overflow-hidden text-sm">
-            {[false, true].map((v) => (
-              <button
-                key={String(v)}
-                aria-pressed={ai === v}
-                onClick={() => { setAi(v); save('ai', v ? '1' : '0') }}
-                className={`px-3 py-1.5 ${ai === v ? 'bg-terracotta text-white' : ''}`}
-              >
-                {v ? t.aiOn : t.aiOff}
+          <nav aria-label={t.lessonsTab} className="hidden md:flex items-center gap-1 rounded-2xl bg-ink/5 p-1" role="tablist">
+            {VIEWS.map((v) => (
+              <button key={v} role="tab" aria-selected={view === v} onClick={() => setView(v)}
+                className={`whitespace-nowrap px-3 py-1.5 rounded-xl text-sm font-semibold ${view === v ? 'bg-paper shadow text-ink' : 'text-ink/60 hover:text-ink'}`}>
+                <span aria-hidden="true">{VIEW_ICON[v]}</span> {tabLabel(v)}
               </button>
             ))}
-          </div>
-          <button
-            className="text-sm border border-ink/30 rounded-md px-3 py-1.5"
-            onClick={() => { const l = lang === 'fr' ? 'en' : 'fr'; setLang(l); save('lang', l) }}
-          >
-            {lang === 'fr' ? 'EN' : 'FR'}
-          </button>
+          </nav>
+          <div className="flex items-center gap-1.5">
+            <button onClick={() => { setAi(!ai); save('ai', ai ? '0' : '1') }} aria-pressed={ai} title={t.aiHelp} aria-label={lang === 'fr' ? 'Tuteur IA' : 'AI tutor'}
+              className={`icon-btn ${ai ? 'grad text-white border-transparent' : ''}`}>🤖<span className="hidden xl:inline ml-1">{lang === 'fr' ? 'Tuteur IA' : 'AI tutor'}</span></button>
+            <Access lang={lang} />
+            <button onClick={() => { const n = theme === 'noir' ? 'finjaro' : 'noir'; setTheme(n); save('theme', n) }} aria-label={t.theme} title={t.theme} className="icon-btn">
+              {theme === 'noir' ? '☀' : '☾'}
+            </button>
+            <button className="icon-btn" aria-label={lang === 'fr' ? 'English' : 'Français'} onClick={() => { const l = lang === 'fr' ? 'en' : 'fr'; setLang(l); save('lang', l) }}>
+              {lang === 'fr' ? 'EN' : 'FR'}
+            </button>
+            <AuthBox lang={lang} session={session} />
           </div>
         </div>
       </header>
 
-      <div className="max-w-5xl mx-auto px-4 pt-3 flex gap-2 overflow-x-auto" role="tablist">
-        {(['lecons', 'progression', 'espaces', 'outils', 'entraide'] as const).map((v) => (
-          <button key={v} role="tab" aria-selected={view === v} onClick={() => setView(v)}
-            className={`shrink-0 px-4 py-1.5 rounded-md text-sm border ${view === v ? 'bg-ink text-cream border-ink' : 'border-ink/30'}`}>
-            {v === 'lecons' ? t.lessonsTab : v === 'progression' ? t.progressTab : v === 'espaces' ? t.spaces : v === 'entraide' ? entraideUi(lang).tab : outilsUi[lang].tab}
+      <nav className="bottom-nav md:hidden" role="tablist" aria-label={t.lessonsTab}>
+        {VIEWS.map((v) => (
+          <button key={v} role="tab" aria-selected={view === v} onClick={() => { setView(v); window.scrollTo({ top: 0 }) }}>
+            <span className="ico" aria-hidden="true">{VIEW_ICON[v]}</span>{tabLabel(v)}
           </button>
         ))}
-      </div>
-      {view === 'outils' && <div id="contenu" tabIndex={-1} className="max-w-5xl mx-auto px-4 py-4 outline-none"><Outils lang={lang} session={session} /></div>}
-      {view === 'progression' && <div id="contenu" tabIndex={-1} className="max-w-5xl mx-auto px-4 py-4 outline-none"><Progress lang={lang} done={done} onOpen={(id) => { go(lessons.findIndex((l) => l.id === id)); setView('lecons') }} /></div>}
-      {view === 'entraide' && <div id="contenu" tabIndex={-1} className="max-w-5xl mx-auto px-4 py-4 outline-none"><Entraide lang={lang} session={session} /></div>}
-      {view === 'espaces' && <div id="contenu" tabIndex={-1} className="max-w-5xl mx-auto px-4 py-4 outline-none"><Espaces lang={lang} session={session} /></div>}
-      {view === 'lecons' && <div className="max-w-5xl mx-auto px-4 pt-3"><Curriculum lang={lang} done={done} /></div>}
+      </nav>
+
+      {view === 'outils' && <div id="contenu" tabIndex={-1} className="max-w-6xl mx-auto px-4 py-6 outline-none">{session ? <Outils lang={lang} session={session} /> : <LoginGate lang={lang} icon="🧰" {...G.outils} />}</div>}
+      {view === 'progression' && <div id="contenu" tabIndex={-1} className="max-w-6xl mx-auto px-4 py-6 outline-none"><Progress lang={lang} done={done} onOpen={(id) => { go(lessons.findIndex((l) => l.id === id)); setView('lecons') }} /></div>}
+      {view === 'entraide' && <div id="contenu" tabIndex={-1} className="max-w-6xl mx-auto px-4 py-6 outline-none">{session ? <Entraide lang={lang} session={session} /> : <LoginGate lang={lang} icon="🤝" {...G.entraide} />}</div>}
+      {view === 'espaces' && <div id="contenu" tabIndex={-1} className="max-w-6xl mx-auto px-4 py-6 outline-none">{session ? <Espaces lang={lang} session={session} /> : <LoginGate lang={lang} icon="👥" {...G.espaces} />}</div>}
+      {view === 'lecons' && (
+        <div className="max-w-6xl mx-auto px-4 pt-5 space-y-5">
+          <section className="card overflow-hidden relative p-5 sm:p-7 rise">
+            <div aria-hidden="true" className="absolute -right-16 -top-20 size-64 rounded-full grad opacity-15 blur-2xl" />
+            <div className="relative flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
+              <div className="min-w-0">
+                <p className="chip">{TRACK_ICON[track]} {lang === 'fr' ? 'Ta prochaine leçon' : 'Your next lesson'}</p>
+                <h2 className="text-2xl sm:text-3xl mt-2 leading-tight">{lesson.title[lang]}</h2>
+                <p className="text-sm text-ink/65 mt-1">{lang === 'fr' ? `${done.length} leçon(s) réussie(s) sur ${lessons.length}` : `${done.length} of ${lessons.length} lessons passed`}</p>
+              </div>
+              <div className="flex items-center gap-4 shrink-0">
+                <div className="relative size-16" role="img" aria-label={pct + '%'}>
+                  <svg viewBox="0 0 36 36" className="size-16 -rotate-90"><circle cx="18" cy="18" r="15.5" fill="none" stroke="currentColor" strokeOpacity=".1" strokeWidth="4" />
+                    <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--color-terracotta)" strokeWidth="4" strokeLinecap="round" strokeDasharray={`${(pct / 100) * 97.4} 97.4`} /></svg>
+                  <span className="absolute inset-0 grid place-items-center text-sm font-bold">{pct}%</span>
+                </div>
+                <button className="btn btn-primary px-5 py-3" onClick={() => document.getElementById('lecon')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>
+                  {lang === 'fr' ? 'Reprendre' : 'Continue'} →
+                </button>
+              </div>
+            </div>
+          </section>
+          <Curriculum lang={lang} done={done} current={track} onPick={pickTrack} />
+        </div>
+      )}
       {burst > 0 && <Burst key={burst} />}
-      <div className={`max-w-5xl mx-auto px-4 py-4 grid gap-4 md:grid-cols-[220px_1fr] ${view !== 'lecons' ? 'hidden' : ''}`}>
-        <nav aria-label={t.lessons} className="min-w-0 md:sticky md:top-4 md:self-start md:max-h-[calc(100vh-2rem)] md:overflow-y-auto md:pr-1">
-          <h2 className="text-xs uppercase tracking-wide text-ink/60 mb-2">{t.lessons}</h2>
+      <div id="lecon" className={`scroll-mt-20 max-w-6xl mx-auto px-4 py-5 grid gap-5 md:grid-cols-[250px_1fr] ${view !== 'lecons' ? 'hidden' : ''}`}>
+        <nav aria-label={t.lessons} className="min-w-0 md:sticky md:top-20 md:self-start md:max-h-[calc(100vh-6rem)] md:overflow-y-auto md:pr-1">
+          <h2 className="text-xs uppercase tracking-wider text-ink/55 mb-2 font-bold">{TRACK_ICON[track]} {acuName(lang, track)}</h2>
           <select
-            className="md:hidden w-full rounded-md border border-ink/30 bg-paper px-3 py-2 text-sm"
+            className="md:hidden w-full rounded-xl border border-ink/30 px-3 py-2.5 text-sm font-medium"
             aria-label={t.lessons}
             value={idx}
             onChange={(e) => go(Number(e.target.value))}
           >
-            {Object.keys(GROUPS).map((g) => (
-              <optgroup key={g} label={GROUPS[g as keyof typeof GROUPS][lang]}>
-                {lessons.map((l, i) => (l.group ?? 'js') === g ? <option key={l.id} value={i}>{i + 1}. {l.title[lang]}{done.includes(l.id) ? ' ✓' : ''}</option> : null)}
-              </optgroup>
-            ))}
+            {trackLessons.map(({ l, i }) => <option key={l.id} value={i}>{i + 1}. {l.title[lang]}{done.includes(l.id) ? ' ✓' : ''}</option>)}
           </select>
-          <ol className="hidden md:flex md:flex-col gap-2">
-            {lessons.map((l, i) => (
-              <li key={l.id} className="shrink-0 flex md:block items-center gap-2">
-                {(i === 0 || lessons[i - 1].group !== l.group) && (
-                  <span className="text-[11px] uppercase tracking-wide text-ink/50 md:block md:mt-2 md:mb-1 whitespace-nowrap md:whitespace-normal">
-                    {GROUPS[l.group ?? 'js'][lang]}
-                  </span>
+          <ol className="hidden md:flex md:flex-col gap-1">
+            {trackLessons.map(({ l, i }, k) => (
+              <li key={l.id}>
+                {(k === 0 || trackLessons[k - 1].l.group !== l.group) && (
+                  <span className="block text-[11px] uppercase tracking-wide text-ink/45 mt-3 mb-1 font-semibold">{GROUPS[l.group ?? 'js'][lang]}</span>
                 )}
                 <button
                   onClick={() => go(i)}
-                  className={`w-full text-left rounded-md px-3 py-2 text-sm border ${
-                    i === idx ? 'bg-terracotta text-white border-terracotta' : 'bg-paper border-brass/50'
-                  }`}
+                  aria-current={i === idx ? 'step' : undefined}
+                  className={`w-full text-left rounded-xl px-2.5 py-2 text-sm flex items-start gap-2 ${i === idx ? 'bg-paper shadow-sm ring-1 ring-terracotta/50 font-semibold' : 'hover:bg-ink/5 text-ink/80'}`}
                 >
-                  {i + 1}. {l.title[lang]} {done.includes(l.id) && <span aria-label={t.done}>✓</span>}
+                  <span className={`shrink-0 size-5 mt-px rounded-full grid place-items-center text-[10px] font-bold ${done.includes(l.id) ? 'grad text-white' : i === idx ? 'bg-terracotta/15 text-terracotta-dark' : 'bg-ink/8 text-ink/55'}`}>
+                    {done.includes(l.id) ? <span aria-label={t.done}>✓</span> : i + 1}
+                  </span>
+                  <span className="min-w-0">{l.title[lang]}</span>
                 </button>
               </li>
             ))}
@@ -267,59 +310,79 @@ export default function App() {
         </nav>
 
         <main id="contenu" tabIndex={-1} className="space-y-4 min-w-0 outline-none">
-          <h2 className="text-xl font-bold">{lesson.title[lang]} <span className="text-xs font-sans font-normal text-ink/50">{lesson.lang === 'py' ? 'Python' : 'JavaScript'}</span></h2>
+          <div className="card p-5 sm:p-6 space-y-4">
+          <div className="flex items-start justify-between gap-3">
+            <h2 className="text-xl sm:text-2xl leading-tight">{lesson.title[lang]}</h2>
+            <span className="chip shrink-0">{lesson.lang === 'py' ? '🐍 Python' : '⚡ JavaScript'}</span>
+          </div>
           {ai && <AgentPanel lang={lang} signedIn={!!session} ctx={{ title: (lesson.lang === 'py' ? '[Python] ' : '[JavaScript] ') + lesson.title[lang], code, output: res?.output.join('\n') ?? '' }} />}
           <section>
-            <h3 className="font-semibold mb-1">{t.explain}</h3>
-            <p>{lesson.explain[lang]}</p>
+            <h3 className="text-sm uppercase tracking-wide text-ink/55 mb-1.5">{t.explain}</h3>
+            <p className="leading-relaxed text-[15px]">{lesson.explain[lang]}</p>
           </section>
           {lesson.example && (
             <section>
-              <h3 className="font-semibold mb-1">{t.example}</h3>
+              <h3 className="text-sm uppercase tracking-wide text-ink/55 mb-1.5">{t.example}</h3>
               <pre className={pre}>{lesson.example}</pre>
             </section>
           )}
+          </div>
           {lesson.predict && (
+            <div className="card p-5 sm:p-6">
             <Predict key={lesson.id} lesson={lesson} lang={lang} hasNext={idx < lessons.length - 1}
               onCorrect={() => { if (sound) playSuccess(); void markPassed(lesson.predict!.answer) }} onNext={() => go(idx + 1)} />
+            </div>
           )}
-          {!lesson.predict && <section className="space-y-2">
-            <h3 className="font-semibold">{t.exercise}</h3>
-            <p className="font-medium text-terracotta-dark">{lesson.task[lang]}</p>
-            <div className="grid gap-3 lg:grid-cols-2 items-start">
-            <div className="space-y-2 min-w-0">
-            <textarea
-              value={code}
-              onChange={(e) => { setCode(e.target.value); save('code:' + lesson.id, e.target.value) }}
-              spellCheck={false}
-              autoCapitalize="off"
-              autoCorrect="off"
-              rows={8}
-              className="w-full rounded-lg border border-ink/30 bg-paper p-3 font-mono text-sm"
-              aria-label={t.exercise}
-            />
+          {!lesson.predict && <section className="card p-5 sm:p-6 space-y-3">
+            <h3 className="text-sm uppercase tracking-wide text-ink/55">{t.exercise}</h3>
+            <p className="font-semibold text-[15px] rounded-xl border-l-4 border-terracotta bg-terracotta/8 px-3 py-2">{lesson.task[lang]}</p>
+            <div className="grid gap-3 xl:grid-cols-2 items-start">
+            <div className="space-y-3 min-w-0">
+            <div className="ide">
+              <div className="ide-bar">
+                <span className="ide-dot bg-[#ff5f57]" /><span className="ide-dot bg-[#febc2e]" /><span className="ide-dot bg-[#28c840]" />
+                <span className="ml-2 font-mono">{lesson.lang === 'py' ? 'main.py' : 'main.js'}</span>
+                <button onClick={run} className="ml-auto btn btn-primary py-1 px-3 text-xs">▶ {t.run}</button>
+              </div>
+              <textarea
+                value={code}
+                onChange={(e) => { setCode(e.target.value); save('code:' + lesson.id, e.target.value) }}
+                onKeyDown={(e) => {
+                  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); void run() }
+                  if (e.key === 'Tab' && !e.shiftKey) {
+                    e.preventDefault()
+                    const el = e.currentTarget, a = el.selectionStart, b = el.selectionEnd
+                    const v = code.slice(0, a) + '    ' + code.slice(b)
+                    setCode(v); save('code:' + lesson.id, v)
+                    requestAnimationFrame(() => { el.selectionStart = el.selectionEnd = a + 4 })
+                  }
+                }}
+                spellCheck={false}
+                autoCapitalize="off"
+                autoCorrect="off"
+                rows={10}
+                className="p-4 font-mono text-sm leading-6"
+                aria-label={t.exercise}
+              />
+            </div>
             <div className="flex flex-wrap gap-2">
-              <button onClick={run} className="bg-terracotta hover:bg-terracotta-dark text-white rounded-md px-4 py-2 text-sm font-medium">
-                {t.run}
-              </button>
-              <button onClick={() => setShowHint(true)} className="border border-ink/30 rounded-md px-4 py-2 text-sm">
-                {t.hint}
-              </button>
+              <button onClick={run} className="btn btn-primary">▶ {t.run}</button>
+              <button onClick={() => setShowHint(true)} className="btn">💡 {t.hint}</button>
               <button
                 onClick={() => { setCode(lesson.solution); save('code:' + lesson.id, lesson.solution) }}
-                className="border border-ink/30 rounded-md px-4 py-2 text-sm"
+                className="btn"
               >
                 {t.solution}
               </button>
               {lesson.lang === 'py' && (
-                <button onClick={() => setDebug(!debug)} aria-pressed={debug} className="border border-ink/30 rounded-md px-4 py-2 text-sm">🕰 {t.debug}</button>
+                <button onClick={() => setDebug(!debug)} aria-pressed={debug} className="btn">🕰 {t.debug}</button>
               )}
               {ai && session && (
-                <button onClick={proposeFix} disabled={fixBusy || !code.trim()} className="border border-terracotta text-terracotta-dark rounded-md px-4 py-2 text-sm disabled:opacity-40">
+                <button onClick={proposeFix} disabled={fixBusy || !code.trim()} className="btn border-terracotta text-terracotta-dark">
                   {fixBusy ? t.thinking : '✨ ' + t.aiFix}
                 </button>
               )}
-              <button onClick={() => { setSound(!sound); save('sound', sound ? '0' : '1') }} aria-pressed={sound} className="border border-ink/30 rounded-md px-3 py-2 text-sm" title={t.sound}>
+              <button onClick={() => { setSound(!sound); save('sound', sound ? '0' : '1') }} aria-pressed={sound} className="icon-btn" title={t.sound} aria-label={t.sound}>
                 {sound ? '🔊' : '🔇'}
               </button>
             </div>
@@ -329,9 +392,9 @@ export default function App() {
                 <div className="space-y-2 min-w-0">
                   <p className="text-sm"><strong>{helper.name} :</strong> {t.stuck}</p>
                   <div className="flex gap-2 flex-wrap">
-                    <button className="rounded-md border border-ink/30 px-3 py-1.5 text-sm" onClick={() => { setShowHint(true); setStuckHint(true) }}>{t.hint}</button>
+                    <button className="btn py-1.5" onClick={() => { setShowHint(true); setStuckHint(true) }}>{t.hint}</button>
                     {ai && session && lesson.lang === 'py' && (
-                      <button disabled={exoBusy} className="rounded-md bg-terracotta text-white px-3 py-1.5 text-sm disabled:opacity-40" onClick={makeExo}>{exoBusy ? t.thinking : '✨ ' + t.exoAsk}</button>
+                      <button disabled={exoBusy} className="btn btn-primary py-1.5" onClick={makeExo}>{exoBusy ? t.thinking : '✨ ' + t.exoAsk}</button>
                     )}
                   </div>
                   {exoNote && <p className="text-sm text-terracotta-dark">{exoNote}</p>}
@@ -340,30 +403,36 @@ export default function App() {
               </div>
             )}
             {fixNote && <p className="text-sm text-terracotta-dark" role="status">{fixNote}</p>}
-            {showHint && <p className="rounded-md bg-brass/15 border border-brass p-3 text-sm">💡 {lesson.hint[lang]}</p>}
+            {showHint && <p className="rounded-xl bg-amber/12 border border-amber/50 p-3 text-sm">💡 {lesson.hint[lang]}</p>}
             </div>
             <div className="min-w-0">
-            {res && (
+            {res ? (
               <div className="space-y-2" aria-live="polite">
-                <h4 className="text-sm font-semibold">{t.output}</h4>
-                <pre className={pre}>{res.output.length ? res.output.join('\n') : t.noOutput}</pre>
+                <div className="ide">
+                  <div className="ide-bar"><span>›_ {t.output}</span></div>
+                  <pre className="p-4 text-sm whitespace-pre-wrap font-mono overflow-x-auto">{res.output.length ? res.output.join('\n') : t.noOutput}</pre>
+                </div>
                 {res.figures?.map((f, i) => <Chart key={i} fig={f} />)}
-                {res.error && <p className="text-terracotta-dark text-sm">{t.error} {res.error}</p>}
-                {res.passed === true && <p className="text-ink font-medium">✅ {t.ok}</p>}
+                {res.error && <p className="rounded-xl bg-terracotta/10 border border-terracotta/40 p-3 text-sm text-terracotta-dark">{t.error} {res.error}</p>}
+                {res.passed === true && <p className="rounded-xl p-3 font-semibold bg-[color-mix(in_srgb,#22c55e_14%,transparent)] border border-[color-mix(in_srgb,#22c55e_45%,transparent)]">✅ {t.ok}</p>}
                 {res.passed === true && golf && <p className="text-xs text-ink/70">⛳ {t.golf} : {golf.n} {t.chars} · {t.bestGolf} : {golf.best}</p>}
-                {res.passed === false && !res.error && <p className="text-terracotta-dark">{t.ko}</p>}
+                {res.passed === false && !res.error && <p className="rounded-xl bg-terracotta/10 border border-terracotta/40 p-3 text-sm text-terracotta-dark">{t.ko}</p>}
                 {res.passed && idx < lessons.length - 1 && (
-                  <button onClick={() => go(idx + 1)} className="bg-ink text-cream rounded-md px-4 py-2 text-sm font-medium">
+                  <button onClick={() => go(idx + 1, true)} className="btn btn-dark">
                     {t.next} →
                   </button>
                 )}
+              </div>
+            ) : (
+              <div className="hidden xl:grid place-items-center rounded-2xl border border-dashed border-ink/20 p-8 text-center text-sm text-ink/55 min-h-48">
+                <p>▶ {lang === 'fr' ? 'Lance ton code : le résultat et la correction s’affichent ici.' : 'Run your code: output and checks appear here.'}<br /><span className="text-xs">Ctrl + Entrée</span></p>
               </div>
             )}
             </div>
             </div>
           </section>}
           {exo && <ExoGenereModal lang={lang} exo={exo} packages={lesson.packages} onClose={() => setExo(null)} />}
-          {debug && lesson.lang === 'py' && <StepDebugger lang={lang} code={code} packages={lesson.packages} onClose={() => setDebug(false)} />}
+          {debug && lesson.lang === 'py' && <div id="debug" className="scroll-mt-20"><StepDebugger lang={lang} code={code} packages={lesson.packages} onClose={() => setDebug(false)} /></div>}
           {fix && (
             <DiffModal lang={lang} original={code} fix={fix} onClose={() => setFix(null)}
               onAccept={() => { setCode(fix.fixed_code); save('code:' + lesson.id, fix.fixed_code); setFix(null); setRes(null) }} />

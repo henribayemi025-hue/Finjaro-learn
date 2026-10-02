@@ -116,12 +116,12 @@ export default function AgentPanel({ lang, signedIn, ctx }: { lang: Lang; signed
         <span><strong>{a.voiceAI}</strong> — {a.voiceAIHelp}</span>
       </label>
       <p className="text-sm text-ink/70">{agent.personality}</p>
-      <div className="flex gap-2">
+      <div className="flex flex-wrap sm:flex-nowrap gap-2">
         <input
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
           placeholder={t.askPlaceholder.replace('{name}', agent.name)}
-          className="flex-1 min-w-0 rounded-lg border border-ink/30 bg-white/60 px-3 py-2 text-sm"
+          className="basis-full sm:basis-auto flex-1 min-w-0 rounded-lg border border-ink/30 bg-white/60 px-3 py-2 text-sm"
           aria-label={t.ask}
         />
         <button onClick={() => setCalling(true)} disabled={!signedIn} className="rounded-md px-3 text-sm border border-ink/30 disabled:opacity-40">
