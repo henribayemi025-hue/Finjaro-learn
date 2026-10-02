@@ -32,6 +32,8 @@ export const TRACKS: { key: string; name: L2; groups: Group[]; groupName: Partia
     groupName: { 'ia-api': { fr: 'API et agents', en: 'APIs and agents' }, git: { fr: 'Git et GitHub', en: 'Git and GitHub' } } },
   { key: 'ethique', name: { fr: "Éthique de l'IA", en: 'AI ethics' }, groups: ['ethique'],
     groupName: { ethique: { fr: 'Biais, équité, vie privée, explicabilité', en: 'Bias, fairness, privacy, explainability' } } },
+  { key: 'systemes', name: { fr: 'Systèmes et réseaux', en: 'Systems and networks' }, groups: ['systemes'],
+    groupName: { systemes: { fr: 'Ordonnanceur, cache, transmission, consensus', en: 'Scheduler, cache, transmission, consensus' } } },
   { key: 'archi', name: { fr: 'Ordinateurs', en: 'Computers' }, groups: ['archi'],
     groupName: { archi: { fr: 'Portes, additionneur, processeur', en: 'Gates, adder, processor' } } },
   { key: 'crypto', name: { fr: 'Cryptographie', en: 'Cryptography' }, groups: ['crypto'],

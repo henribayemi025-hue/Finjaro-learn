@@ -13,7 +13,7 @@ Règles qui filtrent : aucun chiffre ou diplôme inventé, aucune affiliation à
 | 2 | Architecture des ordinateurs | ✅ piste « Ordinateurs » (02/10) : 7 leçons (NAND, XOR, additionneur, n bits, complément à deux, UAL, mini-processeur) |
 | 3 | Maths pour le machine learning | ✅ piste « Maths pour l'IA » (01/10) : 10 leçons (vecteurs, cosinus, matrices, dérivée, gradient, moyenne/variance, Bayes, espérance, entropie, softmax) · 🔜 PCA |
 | 4 | Théorie de l'information, cryptographie | ✅ entropie + piste « Cryptographie » (02/10) : 8 leçons (César, Vigenère, fréquences, hachage, PGCD, exponentiation, RSA jouet, Diffie–Hellman) ; jouets, jamais pour de vraies données |
-| 5 | Systèmes distribués | 🔜 simulations en Python (réplication, consensus simplifié) |
+| 5 | Systèmes distribués | ✅ 02/10 : parcours « Systèmes et réseaux » (ordonnanceur, cache LRU, Fletcher, retransmission, quorum, pagination) |
 | 6 | Informatique quantique | ✅ piste « Informatique quantique » (02/10) : 6 leçons (qubit, portes, mesures, deux qubits, Bell, Grover) |
 | 7 | Neurosciences computationnelles | 🔜 neurone à impulsions (LIF) en Python |
 | 8 | Bio-informatique | 🔜 séquences ADN, alignement (jeux de données écrits à la main, pas de données réelles inventées) |

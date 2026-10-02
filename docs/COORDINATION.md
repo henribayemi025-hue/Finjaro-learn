@@ -70,3 +70,5 @@ messages directs (create_trigger vers la session concernée).
 - 02/10 · Learn : programme de Mentor (robotique par trace, page des limites, C/C++ en plus, suiveur de ligne en 7 étapes), nouveau type « page à lire » (validation seulement quand chaque point est coché). Pas de compilation serveur, pas de simulateur tiers.
 
 - 02/10 · Learn : parcours « Éthique de l'IA » (#/parcours/ethique), 4 leçons Python vérifiées, exemples sans pays.
+
+- 02/10 · Learn : parcours « Systèmes et réseaux » (#/parcours/systemes), 6 leçons Python vérifiées.
