@@ -5,6 +5,7 @@ import { TRACKS } from './tracks'
 import { TRACK_ICON } from './Curriculum'
 import type { Lang } from './i18n'
 import { chargerIndex, type Numero } from './Lettre'
+import Carrousel, { type Diapo } from './Carrousel'
 
 type Niveau = 'debutant' | 'intermediaire' | 'avance'
 /** Niveau conseillé de chaque parcours (une indication de difficulté, pas une note). */
@@ -23,12 +24,12 @@ const CLES = [
 
 const T = {
   fr: {
-    resume: 'Reprendre la leçon', chrono: 'Défi chrono', projets: 'Projets guidés', lesson: 'Leçon', global: 'Progression globale', done: 'réussies',
+    resume: 'Reprendre la leçon', mine: 'Reprendre où je me suis arrêté', next: 'À découvrir', chrono: 'Défi chrono', projets: 'Projets guidés', lesson: 'Leçon', global: 'Progression globale', done: 'réussies',
     key: 'Projet clé', search: 'Rechercher une notion, un code, un algo…', all: 'Tous', debutant: 'Débutant', intermediaire: 'Intermédiaire', avance: 'Avancé',
     lessons: 'leçons', verified: 'Progression vérifiée', cont: 'Continuer', start: 'Commencer', review: 'Revoir', none: 'Aucune leçon ne correspond.', tracks: 'Tes parcours',
   },
   en: {
-    resume: 'Resume the lesson', chrono: 'Speed challenge', projets: 'Guided projects', lesson: 'Lesson', global: 'Overall progress', done: 'passed',
+    resume: 'Resume the lesson', mine: 'Pick up where I left off', next: 'To explore', chrono: 'Speed challenge', projets: 'Guided projects', lesson: 'Lesson', global: 'Overall progress', done: 'passed',
     key: 'Key project', search: 'Search a concept, some code, an algorithm…', all: 'All', debutant: 'Beginner', intermediaire: 'Intermediate', avance: 'Advanced',
     lessons: 'lessons', verified: 'Verified progress', cont: 'Continue', start: 'Start', review: 'Review', none: 'No lesson matches.', tracks: 'Your tracks',
   },
@@ -37,17 +38,6 @@ const T = {
 const sansAccents = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
 const trackOf = (l: Lesson) => TRACKS.find((tr) => tr.groups.includes(l.group ?? 'js'))?.key ?? 'prog'
 
-/** Petit réseau décoratif (pas une donnée). */
-function MiniReseau() {
-  const a = [[24, 30], [24, 70]], b = [[100, 22], [100, 50], [100, 78]], c = [[176, 50]]
-  return (
-    <svg viewBox="0 0 200 100" className="w-full h-20" aria-hidden="true">
-      {a.flatMap(([x1, y1]) => b.map(([x2, y2]) => <line key={`${x1}${y1}${x2}${y2}`} x1={x1} y1={y1} x2={x2} y2={y2} stroke="var(--color-terracotta)" strokeOpacity=".35" />))}
-      {b.map(([x1, y1]) => <line key={`o${y1}`} x1={x1} y1={y1} x2={176} y2={50} stroke="var(--color-amber)" strokeOpacity=".5" />)}
-      {[...a, ...b, ...c].map(([x, y], i) => <circle key={i} cx={x} cy={y} r="9" fill="var(--color-paper)" stroke={i >= 5 ? 'var(--color-amber)' : 'var(--color-terracotta)'} strokeWidth="2.5" />)}
-    </svg>
-  )
-}
 
 export default function Accueil({ lang, done, idx, onOpen, onTrack, onResume, onChrono, onLettre }: {
   lang: Lang; done: string[]; idx: number
@@ -64,6 +54,26 @@ export default function Accueil({ lang, done, idx, onOpen, onTrack, onResume, on
   const mine = lessons.filter((l) => trackOf(l) === tr.key)
   const pos = mine.findIndex((l) => l.id === lesson.id) + 1
   const pct = Math.round((done.length / lessons.length) * 100)
+  const img = (k: string) => import.meta.env.BASE_URL + 'images/parcours/' + k + '.jpg'
+  const diapos: Diapo[] = useMemo(() => {
+    const liste: Diapo[] = [{
+      key: 'courant', image: img(tr.key), badge: t.resume, titre: `${t.lesson} ${pos} : ${lesson.title[lang]}`,
+      sousTitre: `${TRACK_ICON[tr.key] ?? ''} ${tr.name[lang]}`, action: t.resume, onClick: onResume,
+    }]
+    for (const x of TRACKS) {
+      if (x.key === tr.key || liste.length >= 9) continue
+      const ls = lessons.map((l, i) => ({ l, i })).filter(({ l }) => trackOf(l) === x.key)
+      const suite = ls.find(({ l }) => !done.includes(l.id))
+      if (!suite) continue
+      const n = ls.indexOf(suite) + 1
+      liste.push({
+        key: x.key, image: img(x.key), badge: `${TRACK_ICON[x.key] ?? ''} ${x.name[lang]}`, titre: `${t.lesson} ${n} : ${suite.l.title[lang]}`,
+        sousTitre: n > 1 ? t.cont : t.next, action: n > 1 ? t.cont : t.start, onClick: () => onOpen(suite.i),
+      })
+    }
+    return liste
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lang, idx, done])
   const resultats = useMemo(() => {
     const s = sansAccents(q.trim())
     if (s.length < 2) return []
@@ -72,31 +82,19 @@ export default function Accueil({ lang, done, idx, onOpen, onTrack, onResume, on
 
   return (
     <div className="space-y-6">
-      {/* Reprendre la leçon */}
-      <section className="card hero-glow relative overflow-hidden p-5 sm:p-8 rise">
-        <div className="relative grid gap-6 lg:grid-cols-[1fr_300px] items-center">
-          <div className="min-w-0 space-y-3">
-            <p className="text-xs font-mono font-semibold uppercase tracking-[.18em] text-terracotta-dark flex items-center gap-2">
-              <span className="size-2 rounded-full bg-terracotta animate-pulse" aria-hidden="true" />{TRACK_ICON[tr.key]} {tr.name[lang]}
-            </p>
-            <h2 className="font-display text-3xl sm:text-4xl leading-[1.1]">{t.lesson} {pos} : {lesson.title[lang]}</h2>
-            <p className="text-ink/65 line-clamp-2 max-w-2xl">{lesson.explain[lang]}</p>
-            <div className="max-w-md">
-              <div className="flex justify-between text-sm font-semibold mb-1.5"><span>{t.global}</span><span className="font-mono text-terracotta-dark">{done.length}/{lessons.length} {t.done}</span></div>
-              <div className="h-2 rounded-full bg-ink/10 overflow-hidden" role="progressbar" aria-label={t.global} aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
-                <div className="h-full grad rounded-full" style={{ width: pct + '%' }} />
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-2 pt-1">
-              <button className="btn btn-primary text-base px-6 py-3.5" onClick={onResume}>▶ {t.resume} →</button>
-              <button className="btn px-4" onClick={onChrono}>⚡ {t.chrono}</button>
-              <button className="btn px-4" onClick={() => onTrack('projets')}>🏗️ {t.projets}</button>
-            </div>
+      {/* Carrousel : la leçon en cours d'abord, puis la prochaine leçon de chaque autre parcours. */}
+      <Carrousel lang={lang} diapos={diapos} />
+      <section className="card p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center gap-4">
+        <div className="flex-1 min-w-0">
+          <div className="flex justify-between text-sm font-semibold mb-1.5"><span>{t.global}</span><span className="font-mono text-terracotta-dark">{done.length}/{lessons.length} {t.done}</span></div>
+          <div className="h-2 rounded-full bg-ink/10 overflow-hidden" role="progressbar" aria-label={t.global} aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
+            <div className="h-full grad rounded-full" style={{ width: pct + '%' }} />
           </div>
-          <div className="hidden lg:block rounded-2xl border border-brass bg-cream/60 p-4">
-            <p className="text-xs font-mono text-ink/60 mb-1">{tr.name[lang]}</p>
-            <MiniReseau />
-          </div>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button className="btn btn-primary" onClick={onResume}>▶ {t.mine}</button>
+          <button className="btn px-4" onClick={onChrono}>⚡ {t.chrono}</button>
+          <button className="btn px-4" onClick={() => onTrack('projets')}>🏗️ {t.projets}</button>
         </div>
       </section>
 
@@ -171,18 +169,18 @@ export default function Accueil({ lang, done, idx, onOpen, onTrack, onResume, on
             const next = ls.find(({ l }) => !done.includes(l.id)) ?? ls[0]
             return (
               <li key={key} className="snap-start shrink-0 w-[85%] sm:w-[60%] md:w-auto">
-                <div className="card h-full p-4 sm:p-5 flex flex-col gap-3">
-                  <button onClick={() => onTrack(key)} className="flex items-start gap-3 text-left rounded-xl -m-1 p-1 hover:bg-ink/5" aria-label={(lang === 'fr' ? 'Ouvrir le parcours ' : 'Open track ') + name[lang]}>
-                    <span aria-hidden="true" className="size-12 shrink-0 rounded-2xl grad grid place-items-center text-xl shadow-md">{TRACK_ICON[key]}</span>
-                    <span className="min-w-0 flex-1">
-                      <h3 className="font-display text-lg leading-tight">{name[lang]} <span aria-hidden="true" className="text-terracotta-dark">›</span></h3>
-                      <span className="text-xs text-ink/60 mt-1 flex flex-wrap gap-x-2 items-center">
-                        <span>{ls.length} {t.lessons}</span><span aria-hidden="true">·</span>
-                        <span className="uppercase tracking-wide font-semibold text-[10px] rounded-md bg-ink/6 px-1.5 py-0.5">{t[NIVEAU[key] ?? 'intermediaire']}</span>
-                      </span>
+                <div className="card h-full overflow-hidden flex flex-col">
+                  <button onClick={() => onTrack(key)} className="group relative block h-36 text-left overflow-hidden" aria-label={(lang === 'fr' ? 'Ouvrir le parcours ' : 'Open track ') + name[lang]}>
+                    <img src={import.meta.env.BASE_URL + 'images/parcours/sm/' + key + '.jpg'} alt="" loading="lazy" decoding="async" className="absolute inset-0 size-full object-cover transition duration-500 group-hover:scale-105" />
+                    <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
+                    <span className="absolute top-3 left-3 uppercase tracking-wide font-bold text-[10px] rounded-full bg-white/90 text-ink px-2 py-0.5">{t[NIVEAU[key] ?? 'intermediaire']}</span>
+                    {fait > 0 && <span className="absolute top-3 right-3 rounded-full bg-[#22c55e] text-white text-xs font-bold px-2 py-0.5">✓ {fait}/{ls.length}</span>}
+                    <span className="absolute inset-x-0 bottom-0 p-3.5 text-white">
+                      <h3 className="font-display text-xl leading-tight drop-shadow">{name[lang]} <span aria-hidden="true">›</span></h3>
+                      <span className="text-xs text-white/85">{ls.length} {t.lessons}</span>
                     </span>
-                    {fait > 0 && <span className="chip shrink-0">✓ {fait}/{ls.length}</span>}
                   </button>
+                  <div className="p-4 sm:p-5 pt-3 sm:pt-4 flex flex-col gap-3 flex-1">
                   <p className="text-sm text-ink/70 line-clamp-2">{desc}</p>
                   <div>
                     <div className="flex justify-between text-xs mb-1"><span className="text-ink/60">{t.verified}</span><span className="font-bold">{p}%</span></div>
@@ -203,6 +201,7 @@ export default function Accueil({ lang, done, idx, onOpen, onTrack, onResume, on
                     <button onClick={() => next && onOpen(next.i)} className="btn bg-terracotta/10 border-transparent text-terracotta-dark">
                       {fait === ls.length && ls.length ? t.review : fait > 0 ? t.cont : t.start} →
                     </button>
+                  </div>
                   </div>
                 </div>
               </li>

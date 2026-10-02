@@ -45,6 +45,7 @@ const VIEW_ICON = { lecons: '📚', atelier: '🛠️', lettre: '📰', progress
 /** Vignettes de la barre des rubriques : photo si fournie (public/onglets/…, droits vérifiés), sinon pictogramme sur dégradé. */
 const VIEW_IMG: Partial<Record<keyof typeof VIEW_ICON, string>> = {
   lecons: import.meta.env.BASE_URL + 'visages/02.jpg',
+  ...Object.fromEntries((['atelier', 'lettre', 'progression', 'espaces', 'outils', 'entraide'] as const).map((v) => [v, import.meta.env.BASE_URL + 'images/onglets/' + v + '.jpg'])),
 }
 
 

@@ -23,19 +23,22 @@ export default function Parcours({ lang, k, done, current, onOpen, onBack }: { l
   return (
     <div className="space-y-5">
       <button className="btn px-3" onClick={onBack}>← {t.back}</button>
-      <header className="card hero-glow p-5 sm:p-7 space-y-4 rise">
-        <div className="flex items-center gap-4">
-          <span aria-hidden="true" className="size-14 shrink-0 rounded-2xl grad grid place-items-center text-2xl shadow-md">{TRACK_ICON[k]}</span>
-          <div className="min-w-0">
-            <h2 className="font-display text-2xl sm:text-3xl leading-tight break-words">{tr.name[lang]}</h2>
-            <p className="text-sm text-ink/65">{ls.length} {t.lessons} · {fait} {t.done}</p>
+      <header className="card overflow-hidden rise">
+        <div className="relative h-44 sm:h-56">
+          <img src={import.meta.env.BASE_URL + 'images/parcours/' + k + '.jpg'} alt="" className="absolute inset-0 size-full object-cover" />
+          <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 p-5 sm:p-7 text-white">
+            <h2 className="font-display text-2xl sm:text-4xl leading-tight break-words drop-shadow"><span aria-hidden="true">{TRACK_ICON[k]} </span>{tr.name[lang]}</h2>
+            <p className="text-sm text-white/85">{ls.length} {t.lessons} · {fait} {t.done}</p>
           </div>
         </div>
+        <div className="p-5 sm:p-7 space-y-4">
         <p className="text-ink/75">{desc}</p>
         <div className="h-2 rounded-full bg-ink/10 overflow-hidden" role="progressbar" aria-label={tr.name[lang]} aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
           <div className="h-full grad rounded-full" style={{ width: pct + '%' }} />
         </div>
         {next && <button className="btn btn-primary px-6 py-3 text-base w-full sm:w-auto justify-start text-left" onClick={() => onOpen(next.i)}>▶ {fait === ls.length ? t.review : fait ? t.cont : t.start} : {next.l.title[lang]}</button>}
+        </div>
       </header>
       {tr.groups.map((g) => {
         const items = ls.filter(({ l }) => groupe(l) === g)
