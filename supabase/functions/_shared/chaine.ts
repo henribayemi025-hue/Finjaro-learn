@@ -5,9 +5,12 @@
 //
 // L'ordre, du gratuit au payant, comme dans le moteur de Léo :
 //   1. Gemini gratuit (secret GEMINI_API_KEY_GRATUIT), modèles de LEARN_MODELES_GRATUITS ;
-//   2. l'IA gratuite de Cloudflare par le Worker de finjaro.net, sur la part
+//   2. Groq gratuit (secret GROQ_API_KEY, créé par Beau le 07/10 ; commun au
+//      projet Supabase) : gpt-oss-120b, Qwen, gpt-oss-20b, 1 000 réponses par
+//      jour chacun ;
+//   3. l'IA gratuite de Cloudflare par le Worker de finjaro.net, sur la part
 //      « learn » du jour (migration 0238 de la place de marché) ;
-//   3. Gemini payant (GEMINI_API_KEY), le moteur d'origine de Learn.
+//   4. Gemini payant (GEMINI_API_KEY), le moteur d'origine de Learn.
 // Pas d'autre moteur payant ici : Learn n'a pas de compteur de dépense, en
 // ajouter un est une décision de Beau.
 
@@ -56,6 +59,39 @@ async function viaGemini(cle: string, model: string, d: Demande, delaiMs: number
     .map((p: { text?: string }) => p.text ?? '')
     .join('')
   if (!txt.trim()) throw new Error(`réponse vide (${body?.candidates?.[0]?.finishReason ?? '?'})`)
+  return txt
+}
+
+const GROQ = () =>
+  (Deno.env.get('LEGION_MODELES_GROQ') || 'openai/gpt-oss-120b,qwen/qwen3.8-27b,openai/gpt-oss-20b').split(',').map((m) => m.trim()).filter(Boolean)
+
+async function viaGroq(cle: string, model: string, d: Demande): Promise<string> {
+  const consigneJson = d.schema
+    ? `\nRéponds UNIQUEMENT par un objet JSON conforme à ce schéma, sans texte autour ni balises de code :\n${JSON.stringify(d.schema)}`
+    : ''
+  const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${cle}` },
+    body: JSON.stringify({
+      model,
+      temperature: d.temperature,
+      // Sa limite par minute compte la sortie demandée : bornée.
+      max_tokens: Math.min(4096, d.maxSortie + 1024),
+      ...(/gpt-oss/.test(model) ? { reasoning_effort: 'low' } : {}),
+      ...(d.schema ? { response_format: { type: 'json_object' } } : {}),
+      messages: [
+        { role: 'system', content: d.system + consigneJson },
+        ...d.tours.map((t) => ({ role: t.role === 'model' ? 'assistant' : 'user', content: t.text })),
+      ],
+    }),
+    signal: AbortSignal.timeout(DELAI_GRATUIT_MS),
+  })
+  if (!r.ok) throw new Error(`HTTP ${r.status} ${(await r.text()).slice(0, 160)}`)
+  const body = await r.json()
+  const choix = body?.choices?.[0]
+  if (choix?.finish_reason === 'length' && d.schema) throw new Error('réponse coupée (trop longue)')
+  const txt = String(choix?.message?.content ?? '').trim()
+  if (!txt) throw new Error('réponse vide')
   return txt
 }
 
@@ -131,6 +167,16 @@ export async function ecrire(d: Demande): Promise<Reponse> {
         return { texte: await viaGemini(gratuite, m, d, DELAI_GRATUIT_MS), moteur: `gg:${m}` }
       } catch (e) {
         note(`gg:${m}`, e)
+      }
+    }
+  }
+  const groq = Deno.env.get('GROQ_API_KEY')
+  if (groq) {
+    for (const m of GROQ()) {
+      try {
+        return { texte: await viaGroq(groq, m, d), moteur: `gq:${m}` }
+      } catch (e) {
+        note(`gq:${m}`, e)
       }
     }
   }
