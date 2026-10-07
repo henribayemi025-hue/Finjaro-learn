@@ -4,7 +4,7 @@
 // payante, à sec : la question de Beau est restée sans réponse (502).
 //
 // L'ordre, du gratuit au payant, comme dans le moteur de Léo :
-//   1. Gemini gratuit (secret GEMINI_API_KEY_GRATUIT), modèles de LEGION_MODELES_GRATUITS ;
+//   1. Gemini gratuit (secret GEMINI_API_KEY_GRATUIT), modèles de LEARN_MODELES_GRATUITS ;
 //   2. l'IA gratuite de Cloudflare par le Worker de finjaro.net, sur la part
 //      « learn » du jour (migration 0238 de la place de marché) ;
 //   3. Gemini payant (GEMINI_API_KEY), le moteur d'origine de Learn.
@@ -23,8 +23,12 @@ export type Demande = {
 }
 export type Reponse = { texte: string; moteur: string } | { erreur: string; essais: string[] }
 
+// Le rapide d'abord : le 07/10, gemini-3.8-flash a laissé Beau attendre 20 s sans
+// rien rendre, puis gemini-3.5-flash a répondu en 3 s. Un élève attend une
+// réponse courte, pas une réflexion longue.
 const GRATUITS = () =>
-  (Deno.env.get('LEGION_MODELES_GRATUITS') || 'gemini-3.8-flash,gemini-3.5-flash').split(',').map((m) => m.trim()).filter(Boolean)
+  (Deno.env.get('LEARN_MODELES_GRATUITS') || 'gemini-3.5-flash,gemini-3.8-flash').split(',').map((m) => m.trim()).filter(Boolean)
+const DELAI_GRATUIT_MS = 12_000
 const PAYANT = 'gemini-2.5-flash'
 
 async function viaGemini(cle: string, model: string, d: Demande, delaiMs: number): Promise<string> {
@@ -124,7 +128,7 @@ export async function ecrire(d: Demande): Promise<Reponse> {
   if (gratuite) {
     for (const m of GRATUITS()) {
       try {
-        return { texte: await viaGemini(gratuite, m, d, 20_000), moteur: `gg:${m}` }
+        return { texte: await viaGemini(gratuite, m, d, DELAI_GRATUIT_MS), moteur: `gg:${m}` }
       } catch (e) {
         note(`gg:${m}`, e)
       }

@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { agents } from './agents'
 import AgentFace from './AgentFace'
-import { askTutor } from './tutor'
+import { askTutor, type Orientation } from './tutor'
+import { lessons } from './lessons'
+import { TRACKS } from './tracks'
 import { supabase } from './supabase'
 import type { Lang } from './i18n'
 
@@ -15,6 +17,13 @@ import type { Lang } from './i18n'
 export type Etat = 'rien' | 'ok' | 'ko' | 'erreur'
 const lire = (k: string) => { try { return localStorage.getItem(k) ?? '' } catch { return '' } }
 const ecrire = (k: string, v: string) => { try { localStorage.setItem(k, v) } catch { /* ignoré */ } }
+type Echange = { q: string; a: string; prof: string; ok?: boolean; orienter?: Orientation }
+const lireFil = (k: string): Echange[] => {
+  try {
+    const v = JSON.parse(lire(k) || '[]')
+    return Array.isArray(v) ? v.filter((e) => e && typeof e.q === 'string' && typeof e.a === 'string' && typeof e.prof === 'string').slice(-20) : []
+  } catch { return [] }
+}
 
 /** Le prof de la matière : Maya pour JavaScript, Idris pour l'IA et Python, Finia ailleurs. */
 export function profDe(track: string, langage: 'js' | 'py') {
@@ -38,7 +47,12 @@ export default function Classe({ lang, titre, pos, total, parcours, track, langa
   const [voirIndice, setVoirIndice] = useState(false)
   const [question, setQuestion] = useState('')
   const [parQuestions, setParQuestions] = useState(() => lire('learn:socratique') === '1')
-  const [reponse, setReponse] = useState('')
+  // La conversation avec le prof reste affichée et gardée par leçon (Beau, 07/10 : « il m'a répondu,
+  // mais dès que je suis revenu écrire, ça avait disparu »). Le prof la reçoit aussi : il s'en souvient.
+  const cleFil = `learn:fil:${track}:${titre}`
+  const [fil, setFil] = useState<Echange[]>(() => lireFil(cleFil))
+  useEffect(() => { setFil(lireFil(cleFil)) }, [cleFil])
+  const [attente, setAttente] = useState('')
   const [busy, setBusy] = useState(false)
   const rangee = useRef<HTMLUListElement>(null)
   // Au téléphone, la rangée des profs défile : on montre le prof de la leçon.
@@ -97,11 +111,17 @@ export default function Classe({ lang, titre, pos, total, parcours, track, langa
   const poser = async () => {
     const q = question.trim()
     if (!q || busy) return
-    setBusy(true); setReponse('')
-    const r = await askTutor({ question: q, code, lesson: `[${langage === 'py' ? 'Python' : 'JavaScript'}] ${titre}`, output: sortie, lang, agentId: prof.id, socratique: parQuestions })
-    setBusy(false)
-    setReponse(r.answer ?? (r.error === 'quota' ? (fr ? 'Limite de questions atteinte pour aujourd’hui.' : 'Question limit reached for today.') : (fr ? `${nom} est indisponible pour l’instant, réessaie plus tard.` : `${nom} is unavailable right now, try again later.`)))
-    setQuestion('')
+    setBusy(true); setAttente(q); setQuestion('')
+    const history = fil.filter((e) => e.prof === prof.id).slice(-3).flatMap((e) => [{ role: 'user' as const, text: e.q }, { role: 'model' as const, text: e.a }])
+    const r = await askTutor({ question: q, code, lesson: `[${langage === 'py' ? 'Python' : 'JavaScript'}] ${titre}`, output: sortie, lang, agentId: prof.id, socratique: parQuestions, history })
+    const a = r.answer ?? (r.error === 'quota' ? (fr ? 'Limite de questions atteinte pour aujourd’hui.' : 'Question limit reached for today.') : (fr ? `${nom} est indisponible pour l’instant, réessaie plus tard.` : `${nom} is unavailable right now, try again later.`))
+    setFil((f) => {
+      // Un refus (quota, panne) s'affiche mais ne se garde pas : il ne doit pas revenir au prof comme une vraie réponse.
+      const suite = [...f, { q, a, prof: prof.id, ok: !!r.answer, orienter: r.orienter }].slice(-20)
+      ecrire(cleFil, JSON.stringify(suite.filter((e) => e.ok)))
+      return suite
+    })
+    setAttente(''); setBusy(false)
   }
 
   return (
@@ -157,8 +177,43 @@ export default function Classe({ lang, titre, pos, total, parcours, track, langa
         ) : (
           <p className="text-sm text-ink/70">{fr ? 'Les réponses des profs sont désactivées : active « Finia » en haut de la page.' : 'Teacher answers are off: turn on “Finia” at the top of the page.'}</p>
         )}
-        {reponse && <div className="flex gap-2 items-start"><AgentFace src={prof.face} initial={prof.name[0]} size="sm" /><p className="rounded-2xl rounded-tl-sm bg-cream/60 border border-brass/60 px-3 py-2 text-sm whitespace-pre-wrap" role="status">{reponse}</p></div>}
+        {(fil.length > 0 || attente) && (
+          <div className="space-y-2.5 pt-1" aria-live="polite">
+            {fil.map((e, i) => {
+              const qui = agents.find((a) => a.id === e.prof) ?? prof
+              return (
+                <div key={i} className="space-y-2">
+                  <p className="ml-auto w-fit max-w-[85%] rounded-2xl rounded-tr-sm bg-terracotta/10 border border-terracotta/25 px-3 py-2 text-sm whitespace-pre-wrap">{e.q}</p>
+                  <div className="flex gap-2 items-start"><AgentFace src={qui.face} initial={qui.name[0]} size="sm" /><p className="min-w-0 rounded-2xl rounded-tl-sm bg-cream/60 border border-brass/60 px-3 py-2 text-sm whitespace-pre-wrap">{e.a}</p></div>
+                  {e.orienter && <Orienter o={e.orienter} lang={lang} />}
+                </div>
+              )
+            })}
+            {attente && (
+              <div className="space-y-2">
+                <p className="ml-auto w-fit max-w-[85%] rounded-2xl rounded-tr-sm bg-terracotta/10 border border-terracotta/25 px-3 py-2 text-sm whitespace-pre-wrap">{attente}</p>
+                <div className="flex gap-2 items-center"><AgentFace src={prof.face} initial={prof.name[0]} size="sm" /><p className="text-sm text-ink/65 italic" role="status">{fr ? `${nom} réfléchit…` : `${nom} is thinking…`}</p></div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </section>
+  )
+}
+
+/** Le bouton « va voir tel prof, telle leçon » : ouvre la leçon de départ avec le prof qui s'en occupe. */
+function Orienter({ o, lang }: { o: Orientation; lang: Lang }) {
+  const fr = lang === 'fr'
+  const lecon = lessons.find((l) => l.id === o.lesson)
+  const qui = agents.find((a) => a.id === o.prof && a.ready)
+  const track = lecon?.group && TRACKS.find((t) => t.groups.includes(lecon.group!))?.key
+  if (!lecon || !qui || !track) return null
+  return (
+    <div className="ml-10 flex flex-wrap items-center gap-2 rounded-xl border border-terracotta/40 bg-paper px-3 py-2">
+      <AgentFace src={qui.face} initial={qui.name[0]} size="sm" />
+      <span className="flex-1 min-w-0 text-sm">{fr ? 'Leçon proposée : ' : 'Suggested lesson: '}<strong>{lecon.title[lang]}</strong>{fr ? `, avec ${qui.name}` : `, with ${qui.name}`}</span>
+      <button className="btn btn-primary" onClick={() => { ecrire('learn:prof:' + track, qui.id); window.location.hash = '#/lecon/' + lecon.id }}>{fr ? 'J’y vais →' : 'Take me there →'}</button>
+    </div>
   )
 }

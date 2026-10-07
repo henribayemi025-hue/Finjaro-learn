@@ -21,6 +21,20 @@ const AGENTS: Record<string, string> = {
   fiches: 'Tu es Noé, rédacteur de fiches : clair, structuré, tu vas à l’essentiel.',
 }
 
+// Les leçons de départ où un prof peut envoyer un élève perdu, avec le prof qui s'en occupe
+// (Beau, 07/10 : « soit il m'apprend, soit il m'amène vers celui qui est spécialisé pour les
+// nouveaux, ou vers le cours spécialisé »). Liste fermée : le modèle ne peut citer qu'une de ces leçons.
+const DEPARTS: Record<string, { prof: string; fr: string; en: string }> = {
+  'afficher': { prof: 'js', fr: 'tout premier pas en code, en JavaScript (afficher un message)', en: 'very first step in code, in JavaScript (print a message)' },
+  'py-print': { prof: 'ia', fr: 'tout premier pas en Python (afficher du texte)', en: 'very first step in Python (print text)' },
+  'maths-dot': { prof: 'ia', fr: "maths pour l'IA depuis le début (vecteurs)", en: 'maths for AI from the start (vectors)' },
+  'ds-np-array': { prof: 'ia', fr: 'débuter en data science (NumPy)', en: 'starting data science (NumPy)' },
+  'dl-neuron': { prof: 'ia', fr: "débuter en IA (le neurone artificiel) ; suppose de savoir déjà écrire un peu de Python", en: 'starting AI (the artificial neuron); assumes a little Python' },
+  'pe-structure': { prof: 'ia', fr: 'parler à une IA, sans coder (structurer un prompt)', en: 'talking to an AI, no coding (structuring a prompt)' },
+  'git-hash': { prof: 'ia', fr: 'débuter avec Git et GitHub', en: 'starting with Git and GitHub' },
+}
+const NOMS: Record<string, string> = { finia: 'Finia', js: 'Maya', ia: 'Idris' }
+
 const clip = (v: unknown) => (typeof v === 'string' ? v.slice(0, MAX_FIELD) : '')
 
 Deno.serve(async (req) => {
@@ -110,6 +124,18 @@ Deno.serve(async (req) => {
       ? ' SOCRATIC MODE: never give the answer or the corrected code. Ask one or two short guiding questions, point to the line or idea to examine, and let the learner find it.'
       : ' MODE SOCRATIQUE : ne donne jamais la réponse ni le code corrigé. Pose une ou deux questions courtes qui guident, indique la ligne ou l\'idée à examiner, et laisse l\'élève trouver.'
   }
+  // Pas de LaTeX : la page affiche le texte tel quel, « $x$ » s'y lisait en clair (07/10).
+  system += lang === 'en'
+    ? ' Write formulas in plain text or in `code`, never LaTeX or $ signs.'
+    : ' Écris les formules en texte simple ou entre `backticks`, jamais en LaTeX ni avec des signes $.'
+  // Un vrai prof : il écoute d'abord, et il ne force pas une leçon trop avancée sur un débutant.
+  const orientable = !fixMode && !entraideId && !espaceId
+  if (orientable) {
+    const liste = Object.entries(DEPARTS).map(([id, d]) => `${id} = ${d[lang]} (prof : ${NOMS[d.prof]})`).join(' ; ')
+    system += lang === 'en'
+      ? ` BE A REAL HUMAN TEACHER: warm, you listen first and answer what the learner actually said. If they say they are a beginner, lost, or that this lesson is too advanced, do not push the lesson: reassure them, then either teach the very first idea in 2-3 simple lines, or send them to the starting lesson that fits, naming the teacher who handles it (if it is you, say you will see them there). The other teachers: Maya (JavaScript, beginners welcome), Idris (Python and AI), Finia (everything else). To send them, end your reply with one line on its own: [[ORIENT:id]] with an id from this list: ${liste}. Use that line only when the learner really needs it.`
+      : ` SOIS UN VRAI PROF HUMAIN : chaleureux, tu écoutes d'abord et tu réponds à ce que l'élève a vraiment dit. S'il dit qu'il débute, qu'il est perdu ou que la leçon est trop avancée pour lui, ne force pas la leçon : rassure-le, puis soit tu lui apprends la toute première notion en 2 ou 3 lignes simples, soit tu l'envoies vers la leçon de départ qui lui convient, en nommant le prof qui s'en occupe (si c'est toi, dis que tu l'y retrouves). Les autres profs : Maya (JavaScript, accueille les débutants), Idris (Python et IA), Finia (tout le reste). Pour l'envoyer, termine ta réponse par une ligne seule : [[ORIENT:id]] avec un id de cette liste : ${liste}. N'utilise cette ligne que si l'élève en a vraiment besoin.`
+  }
   system += fixHint
   const history = Array.isArray(body.history) ? body.history.slice(-MAX_HISTORY) : []
   // Les tours de la conversation, puis la question du moment. La chaîne
@@ -135,8 +161,11 @@ Deno.serve(async (req) => {
       : undefined,
   })
   if ('erreur' in rendu) return json({ error: 'ai', detail: rendu.essais.map((e) => e.split(' : ')[0]) }, 502)
-  const answer = rendu.texte
-  if (!answer.trim()) return json({ error: 'empty_answer' }, 502)
+  // La ligne [[ORIENT:id]] devient un bouton côté page ; elle n'est jamais montrée telle quelle.
+  const vise = rendu.texte.match(/\[\[ORIENT(?:ER)?:\s*([a-z0-9-]+)\s*\]\]/i)?.[1]?.toLowerCase()
+  const answer = rendu.texte.replace(/\[\[ORIENT(?:ER)?:[^\]]*\]\]/gi, '').trim()
+  const orienter = orientable && vise && DEPARTS[vise] ? { lesson: vise, prof: DEPARTS[vise].prof } : undefined
+  if (!answer) return json({ error: 'empty_answer' }, 502)
   if (fixMode) {
     // Correction proposée : l'élève la voit en différences et l'accepte ou la refuse côté client.
     try {
@@ -159,5 +188,5 @@ Deno.serve(async (req) => {
     const { data: posted } = await admin.rpc('learn_message_agent', { p_espace: espaceId, p_agent: agentLabel, p_texte: answer })
     if (!posted) return json({ error: 'quota_espace' }, 429)
   }
-  return json({ answer })
+  return json({ answer, ...(orienter ? { orienter } : {}) })
 })
