@@ -14,6 +14,8 @@ const NIVEAU: Record<string, Niveau> = {
   data: 'intermediaire', dl: 'intermediaire', maths: 'intermediaire', crypto: 'intermediaire', archi: 'intermediaire', ethique: 'intermediaire', systemes: 'avance', signal: 'intermediaire', bio: 'intermediaire', neuro: 'avance', jeux: 'intermediaire', ccpp: 'intermediaire', robo: 'intermediaire', outils: 'intermediaire',
   eng: 'avance', algo: 'avance', quant: 'avance', compil: 'avance', nlp: 'avance',
 }
+// Débutant d'abord dans la liste des parcours (audit du 07/10, L1 : 22 parcours au même niveau perdaient le nouveau).
+const ORDRE: Record<Niveau, number> = { debutant: 0, intermediaire: 1, avance: 2 }
 /** Projets phares : de vraies leçons de Learn. */
 const CLES = [
   { id: 'dl-xor', ico: '🧠', fr: 'Réseau de neurones', en: 'Neural network' },
@@ -27,11 +29,13 @@ const T = {
     resume: 'Reprendre la leçon', mine: 'Reprendre où je me suis arrêté', next: 'À découvrir', chrono: 'Défi chrono', projets: 'Projets guidés', lesson: 'Leçon', global: 'Progression globale', done: 'réussies',
     key: 'Projet clé', search: 'Rechercher une notion, un code, un algo…', all: 'Tous', debutant: 'Débutant', intermediaire: 'Intermédiaire', avance: 'Avancé',
     lessons: 'leçons', verified: 'Progression vérifiée', cont: 'Continuer', start: 'Commencer', review: 'Revoir', none: 'Aucune leçon ne correspond.', tracks: 'Tes parcours',
+    startHere: 'Commence ici', first: 'Commencer ma première leçon',
   },
   en: {
     resume: 'Resume the lesson', mine: 'Pick up where I left off', next: 'To explore', chrono: 'Speed challenge', projets: 'Guided projects', lesson: 'Lesson', global: 'Overall progress', done: 'passed',
     key: 'Key project', search: 'Search a concept, some code, an algorithm…', all: 'All', debutant: 'Beginner', intermediaire: 'Intermediate', avance: 'Advanced',
     lessons: 'lessons', verified: 'Verified progress', cont: 'Continue', start: 'Start', review: 'Review', none: 'No lesson matches.', tracks: 'Your tracks',
+    startHere: 'Start here', first: 'Start my first lesson',
   },
 } as const
 
@@ -54,14 +58,18 @@ export default function Accueil({ lang, done, idx, onOpen, onTrack, onResume, on
   const mine = lessons.filter((l) => trackOf(l) === tr.key)
   const pos = mine.findIndex((l) => l.id === lesson.id) + 1
   const pct = Math.round((done.length / lessons.length) * 100)
+  // Personne n'a « repris » une leçon à 0/237 : à l'arrivée, une seule porte, « Commencer » (audit du 07/10, L1).
+  const neuf = done.length === 0
   const img = (k: string) => import.meta.env.BASE_URL + 'images/parcours/' + k + '.jpg'
   const diapos: Diapo[] = useMemo(() => {
     const liste: Diapo[] = [{
-      key: 'courant', image: img(tr.key), badge: t.resume, titre: `${t.lesson} ${pos} : ${lesson.title[lang]}`,
-      sousTitre: `${TRACK_ICON[tr.key] ?? ''} ${tr.name[lang]}`, action: t.resume, onClick: onResume,
+      key: 'courant', image: img(tr.key), badge: neuf ? t.startHere : t.resume, titre: `${t.lesson} ${pos} : ${lesson.title[lang]}`,
+      sousTitre: `${TRACK_ICON[tr.key] ?? ''} ${tr.name[lang]}`, action: neuf ? t.start : t.resume, onClick: onResume,
     }]
     for (const x of TRACKS) {
       if (x.key === tr.key || liste.length >= 9) continue
+      // À 0 leçon, seulement les parcours débutants : neuf « Leçon 1 » différentes perdaient le nouveau (L5).
+      if (neuf && NIVEAU[x.key] !== 'debutant') continue
       const ls = lessons.map((l, i) => ({ l, i })).filter(({ l }) => trackOf(l) === x.key)
       const suite = ls.find(({ l }) => !done.includes(l.id))
       if (!suite) continue
@@ -92,7 +100,7 @@ export default function Accueil({ lang, done, idx, onOpen, onTrack, onResume, on
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button className="btn btn-primary" onClick={onResume}>▶ {t.mine}</button>
+          <button className="btn btn-primary" onClick={onResume}>▶ {neuf ? t.first : t.mine}</button>
           <button className="btn px-4" onClick={onChrono}>⚡ {t.chrono}</button>
           <button className="btn px-4" onClick={() => onTrack('projets')}>🏗️ {t.projets}</button>
         </div>
@@ -102,7 +110,7 @@ export default function Accueil({ lang, done, idx, onOpen, onTrack, onResume, on
       <button onClick={onLettre} className="card w-full p-4 text-left flex items-center gap-4 hover:-translate-y-0.5 transition">
         <span aria-hidden="true" className="size-12 shrink-0 rounded-2xl grad grid place-items-center text-2xl shadow-md">📰</span>
         <span className="min-w-0 flex-1">
-          <span className="block text-[10px] font-bold uppercase tracking-wider text-terracotta-dark">{lang === 'fr' ? 'Chaque matin' : 'Every morning'}</span>
+          <span className="block text-[11px] font-bold uppercase tracking-wider text-terracotta-dark">{lang === 'fr' ? 'Chaque matin' : 'Every morning'}</span>
           <span className="block font-display text-lg leading-tight">{lang === 'fr' ? 'La Lettre de l’IA' : 'The AI Letter'}</span>
           {dernier && <span className="block text-sm text-ink/65 truncate">{dernier.titre}</span>}
         </span>
@@ -118,7 +126,7 @@ export default function Accueil({ lang, done, idx, onOpen, onTrack, onResume, on
             <button key={c.id} onClick={() => onOpen(i)} className="card p-3 text-left flex items-center gap-3 hover:-translate-y-0.5 transition">
               <span aria-hidden="true" className="size-10 shrink-0 rounded-xl bg-terracotta/12 grid place-items-center text-lg">{c.ico}</span>
               <span className="min-w-0">
-                <span className="block text-[10px] font-bold uppercase tracking-wider text-ink/50">{t.key}{done.includes(c.id) ? ' · ✓' : ''}</span>
+                <span className="block text-[11px] font-bold uppercase tracking-wider text-ink/50">{t.key}{done.includes(c.id) ? ' · ✓' : ''}</span>
                 <span className="block text-sm font-bold truncate">{c[lang]}</span>
               </span>
             </button>
@@ -160,7 +168,7 @@ export default function Accueil({ lang, done, idx, onOpen, onTrack, onResume, on
       <section>
         <h2 className="font-display text-xl mb-3">{t.tracks} <span className="text-sm font-sans text-ink/50">({TRACKS.filter((x) => !niv || NIVEAU[x.key] === niv).length})</span></h2>
         <ul className="flex md:grid md:grid-cols-2 xl:grid-cols-3 gap-3 overflow-x-auto md:overflow-visible snap-x -mx-4 px-4 md:mx-0 md:px-0 pb-2">
-          {TRACKS.filter((x) => !niv || NIVEAU[x.key] === niv).map(({ key, name }) => {
+          {[...TRACKS].sort((x, y) => ORDRE[NIVEAU[x.key] ?? 'intermediaire'] - ORDRE[NIVEAU[y.key] ?? 'intermediaire']).filter((x) => !niv || NIVEAU[x.key] === niv).map(({ key, name }) => {
             const ls = lessons.map((l, i) => ({ l, i })).filter(({ l }) => trackOf(l) === key)
             const fait = ls.filter(({ l }) => done.includes(l.id)).length
             const p = ls.length ? Math.round((fait / ls.length) * 100) : 0
@@ -173,7 +181,7 @@ export default function Accueil({ lang, done, idx, onOpen, onTrack, onResume, on
                   <button onClick={() => onTrack(key)} className="group relative block h-36 text-left overflow-hidden" aria-label={(lang === 'fr' ? 'Ouvrir le parcours ' : 'Open track ') + name[lang]}>
                     <img src={import.meta.env.BASE_URL + 'images/parcours/sm/' + key + '.jpg'} alt="" loading="lazy" decoding="async" className="absolute inset-0 size-full object-cover transition duration-500 group-hover:scale-105" />
                     <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
-                    <span className="absolute top-3 left-3 uppercase tracking-wide font-bold text-[10px] rounded-full bg-white/90 text-ink px-2 py-0.5">{t[NIVEAU[key] ?? 'intermediaire']}</span>
+                    <span className="absolute top-3 left-3 uppercase tracking-wide font-bold text-[11px] rounded-full bg-white/90 text-ink px-2 py-0.5">{t[NIVEAU[key] ?? 'intermediaire']}</span>
                     {fait > 0 && <span className="absolute top-3 right-3 rounded-full bg-[#22c55e] text-white text-xs font-bold px-2 py-0.5">✓ {fait}/{ls.length}</span>}
                     <span className="absolute inset-x-0 bottom-0 p-3.5 text-white">
                       <h3 className="font-display text-xl leading-tight drop-shadow">{name[lang]} <span aria-hidden="true">›</span></h3>

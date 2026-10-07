@@ -270,7 +270,8 @@ export default function App() {
                 ? <img src={VIEW_IMG[v]} alt="" loading="lazy" className="size-full object-cover" />
                 : <span aria-hidden="true" className="size-full grid place-items-center text-2xl bg-gradient-to-br from-terracotta/20 to-amber/25">{VIEW_ICON[v]}</span>}
             </span>
-            <span className={`${compact ? 'text-[11px]' : 'text-xs sm:text-[13px]'} leading-tight text-center whitespace-nowrap ${view === v ? 'font-bold text-ink' : 'font-semibold text-ink/70'}`}>{tabLabel(v)}</span>
+            {/* 12 px au moins : à 11 px (10,56 mesurés), les libellés du menu étaient illisibles pour les profils âgés (audit du 07/10, L3). */}
+            <span className={`${compact ? 'text-xs' : 'text-xs sm:text-[13px]'} leading-tight text-center whitespace-nowrap ${view === v ? 'font-bold text-ink' : 'font-semibold text-ink/70'}`}>{tabLabel(v)}</span>
           </button>
         </li>
       ))}
