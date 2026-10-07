@@ -139,8 +139,8 @@ Deno.serve(async (req) => {
   system += fixHint
   const history = Array.isArray(body.history) ? body.history.slice(-MAX_HISTORY) : []
   // Les tours de la conversation, puis la question du moment. La chaîne
-  // (_shared/chaine.ts) essaie Gemini gratuit, puis Cloudflare gratuit, puis
-  // Gemini payant (Beau, 07/10 : « partout il doit y avoir les chaînes »).
+  // (_shared/chaine.ts) essaie Gemini gratuit, Groq gratuit, Cloudflare gratuit,
+  // puis Gemini payant (Beau, 07/10 : « partout il doit y avoir les chaînes »).
   const tours: Tour[] = [
     ...history
       .filter((h) => h && (h.role === 'user' || h.role === 'model') && typeof h.text === 'string')
