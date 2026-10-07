@@ -1,6 +1,7 @@
 // learn-tutor — Finia, l'assistante de Finjaro, dans son rôle de tutrice pour Finjaro Learn (et les autres agents de Learn).
 // JWT obligatoire (verify_jwt = true). Clé Gemini lue côté serveur uniquement.
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { ecrire, lireJson, type Tour } from '../_shared/chaine.ts'
 
 const MAX_FIELD = 4000 // caractères par champ d'entrée
 const MAX_HISTORY = 6
@@ -86,8 +87,6 @@ Deno.serve(async (req) => {
   if (rpcErr) return json({ error: 'quota_check' }, 500)
   if (!ok) return json({ error: 'quota' }, 429)
 
-  const key = Deno.env.get('GEMINI_API_KEY')
-  if (!key) return json({ error: 'unavailable' }, 503)
 
   // Ce que tout agent de Learn sait de l'environnement (une ligne chacun, aucun chiffre).
   const contexte = lang === 'en'
@@ -113,48 +112,36 @@ Deno.serve(async (req) => {
   }
   system += fixHint
   const history = Array.isArray(body.history) ? body.history.slice(-MAX_HISTORY) : []
-  const contents = [
+  // Les tours de la conversation, puis la question du moment. La chaîne
+  // (_shared/chaine.ts) essaie Gemini gratuit, puis Cloudflare gratuit, puis
+  // Gemini payant (Beau, 07/10 : « partout il doit y avoir les chaînes »).
+  const tours: Tour[] = [
     ...history
       .filter((h) => h && (h.role === 'user' || h.role === 'model') && typeof h.text === 'string')
-      .map((h) => ({ role: h.role, parts: [{ text: String(h.text).slice(0, MAX_FIELD) }] })),
-    {
-      role: 'user',
-      parts: [{ text: `Leçon : ${lesson}\nCode de l'élève :\n${code}\nRésultat :\n${output}\nQuestion : ${question}` }],
-    },
+      .map((h) => ({ role: h.role as Tour['role'], text: String(h.text).slice(0, MAX_FIELD) })),
+    { role: 'user', text: `Leçon : ${lesson}\nCode de l'élève :\n${code}\nRésultat :\n${output}\nQuestion : ${question}` },
   ]
-
-  const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-    body: JSON.stringify({
-      systemInstruction: { parts: [{ text: system }] },
-      contents,
-      generationConfig: fixMode
-        ? {
-            maxOutputTokens: 2000,
-            temperature: 0.2,
-            thinkingConfig: { thinkingBudget: 0 },
-            responseMimeType: 'application/json',
-            responseSchema: {
-              type: 'OBJECT',
-              properties: { explanation: { type: 'STRING' }, fixed_code: { type: 'STRING' } },
-              required: ['explanation', 'fixed_code'],
-            },
-          }
-        : { maxOutputTokens: 600, temperature: 0.4, thinkingConfig: { thinkingBudget: 0 } },
-    }),
-    signal: AbortSignal.timeout(25_000),
-  }).catch((e) => (e?.name === 'TimeoutError' ? null : undefined))
-  if (r === null) return json({ error: 'timeout' }, 504)
-  if (!r || !r.ok) return json({ error: 'ai' }, 502)
-  const data = await r.json()
-  const answer = data?.candidates?.[0]?.content?.parts?.map((p: { text?: string }) => p.text ?? '').join('') ?? ''
+  const rendu = await ecrire({
+    system,
+    tours,
+    maxSortie: fixMode ? 2000 : 600,
+    temperature: fixMode ? 0.2 : 0.4,
+    schema: fixMode
+      ? {
+          type: 'OBJECT',
+          properties: { explanation: { type: 'STRING' }, fixed_code: { type: 'STRING' } },
+          required: ['explanation', 'fixed_code'],
+        }
+      : undefined,
+  })
+  if ('erreur' in rendu) return json({ error: 'ai', detail: rendu.essais.map((e) => e.split(' : ')[0]) }, 502)
+  const answer = rendu.texte
   if (!answer.trim()) return json({ error: 'empty_answer' }, 502)
   if (fixMode) {
     // Correction proposée : l'élève la voit en différences et l'accepte ou la refuse côté client.
     try {
-      const parsed = JSON.parse(answer)
-      if (typeof parsed.fixed_code !== 'string' || typeof parsed.explanation !== 'string') throw new Error('shape')
+      const parsed = lireJson(answer)
+      if (!parsed || typeof parsed.fixed_code !== 'string' || typeof parsed.explanation !== 'string') throw new Error('shape')
       return json({ explanation: parsed.explanation.slice(0, 1500), fixed_code: parsed.fixed_code.slice(0, 8000) })
     } catch {
       return json({ error: 'bad_fix' }, 502)
