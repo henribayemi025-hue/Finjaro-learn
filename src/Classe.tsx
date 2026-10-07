@@ -53,6 +53,19 @@ export default function Classe({ lang, titre, pos, total, parcours, track, langa
   const [fil, setFil] = useState<Echange[]>(() => lireFil(cleFil))
   useEffect(() => { setFil(lireFil(cleFil)) }, [cleFil])
   const [attente, setAttente] = useState('')
+  // Une messagerie (Beau, 07/10 : « pour lire il faut descendre, puis remonter pour écrire ») :
+  // les messages au-dessus, la saisie en bas, la boîte défile seule vers le dernier message —
+  // sauf si l'élève est remonté relire, qu'on ne ramène pas de force.
+  const boite = useRef<HTMLDivElement>(null)
+  const saisie2 = useRef<HTMLTextAreaElement>(null)
+  const formulaire = useRef<HTMLFormElement>(null)
+  const enBas = useRef(true)
+  useEffect(() => {
+    const b = boite.current
+    if (b && enBas.current) b.scrollTop = b.scrollHeight
+  }, [fil, attente])
+  // La question vient de partir : la saisie reste à l'écran, sous la conversation qui a grandi.
+  useEffect(() => { if (attente) formulaire.current?.scrollIntoView({ block: 'nearest' }) }, [attente])
   const [busy, setBusy] = useState(false)
   const rangee = useRef<HTMLUListElement>(null)
   // Au téléphone, la rangée des profs défile : on montre le prof de la leçon.
@@ -111,7 +124,9 @@ export default function Classe({ lang, titre, pos, total, parcours, track, langa
   const poser = async () => {
     const q = question.trim()
     if (!q || busy) return
+    enBas.current = true
     setBusy(true); setAttente(q); setQuestion('')
+    if (saisie2.current) { saisie2.current.style.height = ''; saisie2.current.focus() }
     const history = fil.filter((e) => e.prof === prof.id).slice(-3).flatMap((e) => [{ role: 'user' as const, text: e.q }, { role: 'model' as const, text: e.a }])
     const r = await askTutor({ question: q, code, lesson: `[${langage === 'py' ? 'Python' : 'JavaScript'}] ${titre}`, output: sortie, lang, agentId: prof.id, socratique: parQuestions, history })
     const a = r.answer ?? (r.error === 'quota' ? (fr ? 'Limite de questions atteinte pour aujourd’hui.' : 'Question limit reached for today.') : (fr ? `${nom} est indisponible pour l’instant, réessaie plus tard.` : `${nom} is unavailable right now, try again later.`))
@@ -154,7 +169,15 @@ export default function Classe({ lang, titre, pos, total, parcours, track, langa
       </div>
 
       <div className="rounded-xl border border-brass/60 bg-paper p-3 space-y-2">
-        <p className="text-sm font-semibold">{fr ? `Une question ? Demande à ${nom}` : `A question? Ask ${nom}`}</p>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-sm font-semibold">{fr ? `Une question ? Demande à ${nom}` : `A question? Ask ${nom}`}</p>
+          {fil.length > 0 && !busy && (
+            <button type="button" className="text-xs text-ink/60 underline underline-offset-2 min-h-9 px-1"
+              onClick={() => { setFil([]); ecrire(cleFil, '[]'); saisie2.current?.focus() }}>
+              {fr ? 'Nouvelle conversation' : 'New conversation'}
+            </button>
+          )}
+        </div>
         <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm" role="radiogroup" aria-label={fr ? 'Façon de répondre' : 'How to answer'}>
           {([false, true] as const).map((q) => (
             <label key={String(q)} className="flex items-center gap-1.5 cursor-pointer min-h-9">
@@ -163,10 +186,34 @@ export default function Classe({ lang, titre, pos, total, parcours, track, langa
             </label>
           ))}
         </div>
+        {(fil.length > 0 || attente) && (
+          <div ref={boite} onScroll={(e) => { const b = e.currentTarget; enBas.current = b.scrollHeight - b.scrollTop - b.clientHeight < 48 }}
+            className="max-h-[min(55vh,30rem)] overflow-y-auto overscroll-contain rounded-lg bg-cream/30 border border-brass/30 p-2.5 space-y-3" aria-live="polite">
+            {fil.map((e, i) => {
+              const qui = agents.find((a) => a.id === e.prof) ?? prof
+              return (
+                <div key={i} className="space-y-2">
+                  <p className="ml-auto w-fit max-w-[85%] rounded-2xl rounded-tr-sm bg-terracotta/10 border border-terracotta/25 px-3 py-2 text-sm whitespace-pre-wrap break-words">{e.q}</p>
+                  <div className="flex gap-2 items-start"><span className="shrink-0"><AgentFace src={qui.face} initial={qui.name[0]} size="sm" /></span><p className="min-w-0 rounded-2xl rounded-tl-sm bg-paper border border-brass/60 px-3 py-2 text-sm whitespace-pre-wrap break-words">{e.a}</p></div>
+                  {e.orienter && <Orienter o={e.orienter} lang={lang} />}
+                </div>
+              )
+            })}
+            {attente && (
+              <div className="space-y-2">
+                <p className="ml-auto w-fit max-w-[85%] rounded-2xl rounded-tr-sm bg-terracotta/10 border border-terracotta/25 px-3 py-2 text-sm whitespace-pre-wrap break-words">{attente}</p>
+                <div className="flex gap-2 items-center"><span className="shrink-0"><AgentFace src={prof.face} initial={prof.name[0]} size="sm" /></span><p className="text-sm text-ink/65 italic" role="status">{fr ? `${nom} réfléchit…` : `${nom} is thinking…`}</p></div>
+              </div>
+            )}
+          </div>
+        )}
         {!supabase || (ai && signedIn) ? (
-          <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); void poser() }}>
-            <input value={question} onChange={(e) => setQuestion(e.target.value)} placeholder={fr ? `Pose ta question à ${nom}…` : `Ask ${nom} a question…`} aria-label={fr ? 'Ta question' : 'Your question'}
-              className="flex-1 min-w-0 min-h-11 rounded-xl border border-brass bg-cream/40 px-3 text-sm" />
+          <form ref={formulaire} className="flex gap-2 items-end scroll-mb-28 sm:scroll-mb-4" onSubmit={(e) => { e.preventDefault(); void poser() }}>
+            {/* Plusieurs lignes possibles : Entrée envoie, Maj+Entrée va à la ligne. */}
+            <textarea ref={saisie2} rows={1} value={question} placeholder={fr ? `Écris à ${nom}…` : `Message ${nom}…`} aria-label={fr ? 'Ta question' : 'Your question'}
+              onChange={(e) => { setQuestion(e.target.value); const t = e.currentTarget; t.style.height = 'auto'; t.style.height = Math.min(t.scrollHeight, 128) + 'px' }}
+              onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); void poser() } }}
+              className="flex-1 min-w-0 min-h-11 max-h-32 resize-none rounded-xl border border-brass bg-cream/40 px-3 py-2.5 text-sm leading-snug" />
             <button className="btn btn-primary" disabled={!question.trim() || busy}>{busy ? '…' : fr ? 'Envoyer' : 'Send'}</button>
           </form>
         ) : !signedIn ? (
@@ -176,26 +223,6 @@ export default function Classe({ lang, titre, pos, total, parcours, track, langa
           </div>
         ) : (
           <p className="text-sm text-ink/70">{fr ? 'Les réponses des profs sont désactivées : active « Finia » en haut de la page.' : 'Teacher answers are off: turn on “Finia” at the top of the page.'}</p>
-        )}
-        {(fil.length > 0 || attente) && (
-          <div className="space-y-2.5 pt-1" aria-live="polite">
-            {fil.map((e, i) => {
-              const qui = agents.find((a) => a.id === e.prof) ?? prof
-              return (
-                <div key={i} className="space-y-2">
-                  <p className="ml-auto w-fit max-w-[85%] rounded-2xl rounded-tr-sm bg-terracotta/10 border border-terracotta/25 px-3 py-2 text-sm whitespace-pre-wrap">{e.q}</p>
-                  <div className="flex gap-2 items-start"><AgentFace src={qui.face} initial={qui.name[0]} size="sm" /><p className="min-w-0 rounded-2xl rounded-tl-sm bg-cream/60 border border-brass/60 px-3 py-2 text-sm whitespace-pre-wrap">{e.a}</p></div>
-                  {e.orienter && <Orienter o={e.orienter} lang={lang} />}
-                </div>
-              )
-            })}
-            {attente && (
-              <div className="space-y-2">
-                <p className="ml-auto w-fit max-w-[85%] rounded-2xl rounded-tr-sm bg-terracotta/10 border border-terracotta/25 px-3 py-2 text-sm whitespace-pre-wrap">{attente}</p>
-                <div className="flex gap-2 items-center"><AgentFace src={prof.face} initial={prof.name[0]} size="sm" /><p className="text-sm text-ink/65 italic" role="status">{fr ? `${nom} réfléchit…` : `${nom} is thinking…`}</p></div>
-              </div>
-            )}
-          </div>
         )}
       </div>
     </section>
@@ -210,9 +237,9 @@ function Orienter({ o, lang }: { o: Orientation; lang: Lang }) {
   const track = lecon?.group && TRACKS.find((t) => t.groups.includes(lecon.group!))?.key
   if (!lecon || !qui || !track) return null
   return (
-    <div className="ml-10 flex flex-wrap items-center gap-2 rounded-xl border border-terracotta/40 bg-paper px-3 py-2">
-      <AgentFace src={qui.face} initial={qui.name[0]} size="sm" />
-      <span className="flex-1 min-w-0 text-sm">{fr ? 'Leçon proposée : ' : 'Suggested lesson: '}<strong>{lecon.title[lang]}</strong>{fr ? `, avec ${qui.name}` : `, with ${qui.name}`}</span>
+    <div className="sm:ml-10 flex flex-wrap items-center gap-2 rounded-xl border border-terracotta/40 bg-paper px-3 py-2">
+      <span className="shrink-0"><AgentFace src={qui.face} initial={qui.name[0]} size="sm" /></span>
+      <span className="flex-1 min-w-0 basis-40 text-sm">{fr ? 'Leçon proposée : ' : 'Suggested lesson: '}<strong>{lecon.title[lang]}</strong>{fr ? `, avec ${qui.name}` : `, with ${qui.name}`}</span>
       <button className="btn btn-primary" onClick={() => { ecrire('learn:prof:' + track, qui.id); window.location.hash = '#/lecon/' + lecon.id }}>{fr ? 'J’y vais →' : 'Take me there →'}</button>
     </div>
   )
