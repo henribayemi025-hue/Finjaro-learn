@@ -1,3 +1,4 @@
+import { Md } from './Md'
 import { useState } from 'react'
 import { agents, loadCustomAgents, saveCustomAgents, type CustomAgent } from './agents'
 import AgentFace from './AgentFace'
@@ -148,8 +149,8 @@ export default function AgentPanel({ lang, signedIn, ctx }: { lang: Lang; signed
       </div>
       {!signedIn && <p className="text-sm rounded-md bg-brass/15 border border-brass p-2">{t.needLogin}</p>}
       {(busy || answer) && (
-        <div className="rounded-md bg-white/60 border border-ink/20 p-3 text-sm whitespace-pre-wrap" aria-live="polite">
-          <strong>{agent.name} : </strong>{busy ? t.thinking : answer}
+        <div className="rounded-md bg-white/60 border border-ink/20 p-3 text-sm" aria-live="polite">
+          <strong>{agent.name} : </strong>{busy ? t.thinking : <Md text={answer} />}
           {answer && canSpeak && <button className="ml-2 underline" onClick={() => speakSmart(answer, lang, () => {}, agent.key === 'ia' ? 'Puck' : 'Kore')}>🔊</button>}
         </div>
       )}

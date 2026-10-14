@@ -1,3 +1,4 @@
+import { Md } from './Md'
 import { useEffect, useRef, useState } from 'react'
 import { agents } from './agents'
 import AgentFace from './AgentFace'
@@ -194,7 +195,7 @@ export default function Classe({ lang, titre, pos, total, parcours, track, langa
               return (
                 <div key={i} className="space-y-2">
                   <p className="ml-auto w-fit max-w-[85%] rounded-2xl rounded-tr-sm bg-terracotta/10 border border-terracotta/25 px-3 py-2 text-sm whitespace-pre-wrap break-words">{e.q}</p>
-                  <div className="flex gap-2 items-start"><span className="shrink-0"><AgentFace src={qui.face} initial={qui.name[0]} size="sm" /></span><p className="min-w-0 rounded-2xl rounded-tl-sm bg-paper border border-brass/60 px-3 py-2 text-sm whitespace-pre-wrap break-words">{e.a}</p></div>
+                  <div className="flex gap-2 items-start"><span className="shrink-0"><AgentFace src={qui.face} initial={qui.name[0]} size="sm" /></span><div className="min-w-0 rounded-2xl rounded-tl-sm bg-paper border border-brass/60 px-3 py-2 text-sm break-words"><Md text={e.a} /></div></div>
                   {e.orienter && <Orienter o={e.orienter} lang={lang} />}
                 </div>
               )

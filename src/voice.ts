@@ -18,8 +18,12 @@ export function listen(lang: string, onText: (t: string) => void, onEnd: () => v
   return () => r.stop()
 }
 
+/** Le texte lu à voix haute : sans les signes du Markdown (étoiles, dièses, apostrophes inversées). */
+export const lisible = (t: string) => t.replace(/```[\s\S]*?```/g, ' ').replace(/[*_`#>]+/g, '').replace(/\s+/g, ' ').trim()
+
 export function speak(text: string, lang: string) {
   if (!canSpeak) return
+  text = lisible(text)
   speechSynthesis.cancel()
   const u = new SpeechSynthesisUtterance(text)
   u.lang = lang === 'en' ? 'en-US' : 'fr-FR'
@@ -29,6 +33,7 @@ export function speak(text: string, lang: string) {
 /** Lit le texte puis appelle onEnd (fin de lecture, erreur ou interruption). */
 export function speakThen(text: string, lang: string, onEnd: () => void) {
   if (!canSpeak) { onEnd(); return }
+  text = lisible(text)
   speechSynthesis.cancel()
   const u = new SpeechSynthesisUtterance(text)
   u.lang = lang === 'en' ? 'en-US' : 'fr-FR'
@@ -71,6 +76,7 @@ async function playAI(text: string, voice: string, onEnd: () => void): Promise<b
 
 /** Lit un texte : voix IA si activée et autorisée, sinon voix du navigateur. */
 export function speakSmart(text: string, lang: string, onEnd: () => void = () => {}, voice = 'Kore') {
+  text = lisible(text)
   if (voixIAActive() && !aiOff) {
     void playAI(text, voice, onEnd).then((ok) => { if (!ok) speakThen(text, lang, onEnd) })
     return

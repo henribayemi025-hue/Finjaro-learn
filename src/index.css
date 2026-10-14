@@ -157,3 +157,17 @@ button:not(:disabled):active { transform: translateY(1px); }
 .lettre-table th, .lettre-table td { padding: .55rem .75rem; text-align: left; vertical-align: top; border-bottom: 1px solid var(--color-brass); }
 .lettre-table th { background: color-mix(in srgb, var(--color-terracotta) 8%, transparent); font-weight: 700; }
 .lettre-table td:first-child a { white-space: nowrap; word-break: normal; }
+
+/* Réponses de l'assistant mises en forme (Md.tsx) */
+.md { line-height: 1.55; overflow-wrap: anywhere; }
+.md > :first-child { margin-top: 0; }
+.md > :last-child { margin-bottom: 0; }
+.md p { margin: .5rem 0; }
+.md ul { list-style: disc; padding-left: 1.25rem; margin: .5rem 0; }
+.md ol { list-style: decimal; padding-left: 1.25rem; margin: .5rem 0; }
+.md li { margin: .15rem 0; }
+.md strong { font-weight: 700; }
+.md code { background: rgb(0 0 0 / .07); border-radius: .25rem; padding: 0 .3rem; font-size: .9em; }
+.md pre { background: var(--color-code); color: var(--color-code-fg); border-radius: .5rem; padding: .75rem; overflow-x: auto; margin: .5rem 0; font-size: .85rem; }
+.md pre code { background: none; padding: 0; }
+.md h1, .md h2, .md h3 { font-weight: 700; margin: .75rem 0 .25rem; font-size: 1rem; }
