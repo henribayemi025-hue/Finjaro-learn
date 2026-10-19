@@ -26,6 +26,7 @@ import { algoLessons } from './lessonsAlgo'
 import { quantLessons } from './lessonsQuant'
 import { nlpLessons } from './lessonsNLP'
 import { compilLessons } from './lessonsCompil'
+import { finsLessons } from './lessonsFins'
 
 type T = Record<Lang, string>
 export type Group = 'js' | 'py-bases' | 'py-algo' | 'py-lecture' | 'py-projets' | 'ds-numpy' | 'ds-pandas' | 'ds-ml' | 'ds-viz' | 'dl' | 'dl-reseaux' | 'ai-rag' | 'ai-agents' | 'pe' | 'maths' | 'crypto' | 'archi' | 'jeux' | 'neuro' | 'bio' | 'signal' | 'systemes' | 'ethique' | 'pg-calc' | 'pg-robot' | 'pg-faq' | 'pg-ligne' | 'ia-api' | 'git' | 'c' | 'cpp' | 'robo' | 'robo-traces' | 'robo-reel' | 'pg-ligne' | 'algo' | 'quant' | 'nlp' | 'compil'
@@ -53,6 +54,8 @@ export interface Lesson {
   langue?: 'c' | 'cpp'
   /** Bibliothèques Python à charger (numpy, pandas…). */
   packages?: string[]
+  /** Fin de module : trois exercices de difficulté croissante, puis le projet (lessonsFins.ts). */
+  niveau?: 'facile' | 'moyen' | 'difficile' | 'projet'
 }
 
 const jsLessons: Lesson[] = [
@@ -139,7 +142,7 @@ const jsLessons: Lesson[] = [
 ]
 
 const ORDER: Group[] = ['js', 'py-bases', 'py-algo', 'py-lecture', 'py-projets', 'ds-numpy', 'ds-pandas', 'ds-ml', 'ds-viz', 'dl', 'dl-reseaux', 'ai-rag', 'ai-agents', 'pe', 'maths', 'crypto', 'archi', 'jeux', 'neuro', 'bio', 'signal', 'systemes', 'ethique', 'pg-calc', 'pg-robot', 'pg-faq', 'pg-ligne', 'ia-api', 'git', 'c', 'cpp', 'robo', 'robo-traces', 'robo-reel', 'algo', 'quant', 'nlp', 'compil']
-export const lessons: Lesson[] = [...jsLessons.map((l) => ({ ...l, lang: 'js' as const, group: 'js' as const })), ...pyLessons, ...readLessons, ...dataLessons, ...vizLessons, ...dlLessons, ...aiLessons, ...peLessons, ...mathsLessons, ...cryptoLessons, ...archiLessons, ...compilLessons, ...nlpLessons, ...quantLessons, ...algoLessons, ...roboLessons, ...cLessons, ...cppLessons, ...outilsLessons, ...projetsLessons, ...robo2Lessons, ...suiveurLessons, ...ethiqueLessons, ...systemesLessons, ...signalLessons, ...bioLessons, ...neuroLessons, ...jeuxLessons]
+export const lessons: Lesson[] = [...jsLessons.map((l) => ({ ...l, lang: 'js' as const, group: 'js' as const })), ...finsLessons, ...pyLessons, ...readLessons, ...dataLessons, ...vizLessons, ...dlLessons, ...aiLessons, ...peLessons, ...mathsLessons, ...cryptoLessons, ...archiLessons, ...compilLessons, ...nlpLessons, ...quantLessons, ...algoLessons, ...roboLessons, ...cLessons, ...cppLessons, ...outilsLessons, ...projetsLessons, ...robo2Lessons, ...suiveurLessons, ...ethiqueLessons, ...systemesLessons, ...signalLessons, ...bioLessons, ...neuroLessons, ...jeuxLessons]
   .map((l, i) => ({ l, i }))
   .sort((a, b) => ORDER.indexOf(a.l.group ?? 'js') - ORDER.indexOf(b.l.group ?? 'js') || a.i - b.i)
   .map((x) => x.l)

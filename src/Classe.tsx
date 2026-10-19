@@ -47,6 +47,7 @@ export default function Classe({ lang, titre, pos, total, parcours, track, langa
   const [etape, setEtape] = useState(0)
   const [voirIndice, setVoirIndice] = useState(false)
   const [question, setQuestion] = useState('')
+  const [ouvert, setOuvert] = useState(false) // la boîte à questions est repliée tant qu'on n'a rien demandé
   const [parQuestions, setParQuestions] = useState(() => lire('learn:socratique') === '1')
   // La conversation avec le prof reste affichée et gardée par leçon (Beau, 07/10 : « il m'a répondu,
   // mais dès que je suis revenu écrire, ça avait disparu »). Le prof la reçoit aussi : il s'en souvient.
@@ -142,8 +143,11 @@ export default function Classe({ lang, titre, pos, total, parcours, track, langa
 
   return (
     <section aria-label={fr ? 'Ta classe' : 'Your class'} className="rounded-2xl border border-terracotta/30 bg-gradient-to-br from-terracotta/8 to-amber/10 p-4 sm:p-5 space-y-4">
-      <div>
-        <p className="text-xs font-bold uppercase tracking-wider text-terracotta-dark mb-2">{fr ? 'Tes profs' : 'Your teachers'}</p>
+      {/* La liste des profs est repliée : la leçon doit se voir dès le premier écran (Beau, 14/10 : « je ne vois pas la leçon »). */}
+      <details className="group">
+        <summary className="cursor-pointer list-none flex items-center gap-2 min-h-9 text-xs font-bold uppercase tracking-wider text-terracotta-dark">
+          {fr ? `Ton prof : ${prof.name}` : `Your teacher: ${prof.name}`}<span className="normal-case font-semibold tracking-normal text-ink/60 underline underline-offset-2">{fr ? 'changer' : 'change'}</span>
+        </summary>
         <ul ref={rangee} className="flex sm:grid sm:grid-cols-3 lg:grid-cols-5 gap-2 overflow-x-auto -mx-1 px-1 pb-1 [scrollbar-width:none]">
           {agents.map((a) => (
             <li key={a.id} className="shrink-0 w-44 sm:w-auto">
@@ -158,7 +162,7 @@ export default function Classe({ lang, titre, pos, total, parcours, track, langa
             </li>
           ))}
         </ul>
-      </div>
+      </details>
 
       <div className="flex gap-3 items-start">
         <span className="shrink-0 hidden sm:block"><AgentFace src={prof.face} initial={prof.name[0]} size="md" /></span><span className="shrink-0 sm:hidden"><AgentFace src={prof.face} initial={prof.name[0]} size="sm" /></span>
@@ -169,6 +173,11 @@ export default function Classe({ lang, titre, pos, total, parcours, track, langa
         </div>
       </div>
 
+      {!ouvert && fil.length === 0 && !attente ? (
+        <button type="button" className="btn w-full sm:w-auto justify-start" onClick={() => { setOuvert(true); requestAnimationFrame(() => saisie2.current?.focus()) }}>
+          💬 {fr ? `Une question ? Demande à ${nom}` : `A question? Ask ${nom}`}
+        </button>
+      ) : (
       <div className="rounded-xl border border-brass/60 bg-paper p-3 space-y-2">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-sm font-semibold">{fr ? `Une question ? Demande à ${nom}` : `A question? Ask ${nom}`}</p>
@@ -226,6 +235,7 @@ export default function Classe({ lang, titre, pos, total, parcours, track, langa
           <p className="text-sm text-ink/70">{fr ? 'Les réponses des profs sont désactivées : active « Finia » en haut de la page.' : 'Teacher answers are off: turn on “Finia” at the top of the page.'}</p>
         )}
       </div>
+      )}
     </section>
   )
 }

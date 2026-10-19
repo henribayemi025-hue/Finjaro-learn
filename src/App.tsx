@@ -22,6 +22,8 @@ import { lessons } from './lessons'
 import AgentPanel from './AgentPanel'
 import Classe from './Classe'
 import TravailSujet from './espace/TravailSujet'
+import RetourProjet from './RetourProjet'
+import { profDe } from './Classe'
 import DiffModal from './DiffModal'
 import { askFix, type FixProposal } from './tutor'
 import { playError, playSuccess } from './sounds'
@@ -225,6 +227,17 @@ export default function App() {
       }
       await markPassed(code)
     }
+    return r
+  }
+
+  // « Où dire que c'est terminé » (Beau, 14/10) : un bouton toujours visible dans la barre de la leçon.
+  // Le code est vérifié avant : on ne coche jamais une leçon dont les tests ne passent pas.
+  const terminer = async () => {
+    const suivante = pos < trackLessons.length ? trackLessons[pos].i : null
+    if (done.includes(lesson.id)) { if (suivante !== null) ouvre(suivante); return }
+    if (lesson.predict || lesson.lecture) { document.getElementById('exercice')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); return }
+    const r = await run()
+    if (r?.passed && suivante !== null) setTimeout(() => ouvre(suivante), 900)
   }
 
   // Après 3 échecs, l'agent propose de lui-même un indice, puis un exercice sur mesure (si connecté et IA activée).
@@ -397,13 +410,17 @@ export default function App() {
           <div className="sticky top-16 xl:top-[4.75rem] z-20 -mx-4 px-4 py-2 bg-[color-mix(in_srgb,var(--color-cream)_88%,transparent)] backdrop-blur-xl border-b border-brass flex items-center gap-2">
             <button className="btn px-3" onClick={() => nav('#/parcours/' + trackSlug(track))} aria-label={(lang === 'fr' ? 'Retour au parcours ' : 'Back to track ') + acuName(lang, track)}>←<span className="hidden sm:inline"> {TRACK_ICON[track]} {acuName(lang, track)}</span></button>
             <span className="flex-1 text-center text-sm font-semibold text-ink/70 truncate">{lang === 'fr' ? 'Leçon' : 'Lesson'} {pos} / {trackLessons.length}</span>
-            <button className="btn btn-primary px-3 text-sm" onClick={() => setTravail(true)} aria-label={lang === 'fr' ? 'Travailler avec les agents IA' : 'Work with AI agents'}>🤖<span className="hidden sm:inline"> {lang === 'fr' ? 'Avec les agents IA' : 'With AI agents'}</span></button>
+            <button className={`btn px-3 text-sm ${done.includes(lesson.id) ? '' : 'btn-primary'}`} onClick={() => void terminer()} disabled={!!running}
+              aria-label={done.includes(lesson.id) ? (lang === 'fr' ? 'Leçon terminée, passer à la suivante' : 'Lesson done, go to the next one') : (lang === 'fr' ? 'J’ai terminé : vérifier et passer à la suite' : 'I’m done: check and move on')}>
+              ✓<span className="hidden sm:inline"> {done.includes(lesson.id) ? (lang === 'fr' ? 'Terminé · suite' : 'Done · next') : (lang === 'fr' ? 'J’ai terminé' : 'I’m done')}</span></button>
+            <button className="btn px-3 text-sm" onClick={() => setTravail(true)} aria-label={lang === 'fr' ? 'Travailler avec les agents IA' : 'Work with AI agents'}>🤖<span className="hidden sm:inline"> {lang === 'fr' ? 'Avec les agents IA' : 'With AI agents'}</span></button>
             <button className="icon-btn" disabled={pos <= 1} onClick={() => ouvre(trackLessons[pos - 2].i)} aria-label={lang === 'fr' ? 'Leçon précédente' : 'Previous lesson'}>‹</button>
             <button className="icon-btn" disabled={pos >= trackLessons.length} onClick={() => ouvre(trackLessons[pos].i)} aria-label={lang === 'fr' ? 'Leçon suivante' : 'Next lesson'}>›</button>
           </div>
           <div className="card p-5 sm:p-6 space-y-4">
           <div className="flex items-start justify-between gap-3">
             <h2 className="text-xl sm:text-2xl leading-tight">{lesson.title[lang]}</h2>
+            {lesson.niveau && <span className="chip shrink-0">🏁 {({ facile: { fr: 'Facile', en: 'Easy' }, moyen: { fr: 'Moyen', en: 'Medium' }, difficile: { fr: 'Difficile', en: 'Hard' }, projet: { fr: 'Projet', en: 'Project' } } as const)[lesson.niveau][lang]}</span>}
             <span className="chip shrink-0">{lesson.langue === 'c' ? '⚙️ C' : lesson.langue === 'cpp' ? '⚙️ C++' : lesson.lang === 'py' ? '🐍 Python' : '⚡ JavaScript'}</span>
           </div>
           <Classe key={lesson.id} lang={lang} titre={lesson.title[lang]} pos={pos} total={trackLessons.length} parcours={acuName(lang, track)} track={track} langage={lesson.lang ?? 'js'}
@@ -553,6 +570,7 @@ export default function App() {
                   )
                 })()}
                 {res.passed === true && <p className="rounded-xl p-3 font-semibold bg-[color-mix(in_srgb,#22c55e_14%,transparent)] border border-[color-mix(in_srgb,#22c55e_45%,transparent)]">✅ {t.ok}</p>}
+                {res.passed === true && lesson.niveau === 'projet' && <RetourProjet lang={lang} profId={profDe(track, lesson.lang ?? 'js')} titre={lesson.title[lang]} code={code} sortie={res.output.join('\n')} ai={ai} signedIn={!!session} />}
                 {res.passed === true && golf && <p className="text-xs text-ink/70">⛳ {t.golf} : {golf.n} {t.chars} · {t.bestGolf} : {golf.best}</p>}
                 {res.passed === false && !res.error && <p className="rounded-xl bg-terracotta/10 border border-terracotta/40 p-3 text-sm text-terracotta-dark">{t.ko}</p>}
                 {res.passed && idx < lessons.length - 1 && (

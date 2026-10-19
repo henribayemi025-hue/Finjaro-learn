@@ -56,6 +56,7 @@ export default function Parcours({ lang, k, done, current, onOpen, onBack }: { l
                       className={`w-full min-h-12 text-left rounded-xl px-3 py-2.5 flex items-center gap-3 ${l.id === current ? 'bg-terracotta/10 ring-1 ring-terracotta/40' : 'hover:bg-ink/5'}`}>
                       <span className={`shrink-0 size-7 rounded-full grid place-items-center text-xs font-bold ${ok ? 'grad text-white' : 'bg-ink/8 text-ink/60'}`}>{ok ? '✓' : n}</span>
                       <span className="flex-1 min-w-0 font-medium">{l.title[lang]}</span>
+                      {l.niveau && <span className="chip shrink-0">🏁 {({ facile: { fr: 'Facile', en: 'Easy' }, moyen: { fr: 'Moyen', en: 'Medium' }, difficile: { fr: 'Difficile', en: 'Hard' }, projet: { fr: 'Projet', en: 'Project' } } as const)[l.niveau][lang]}</span>}
                       {l.id === current && <span className="chip shrink-0">{t.current}</span>}
                       <span aria-hidden="true" className="text-ink/40">›</span>
                     </button>

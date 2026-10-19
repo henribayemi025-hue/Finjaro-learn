@@ -50,7 +50,7 @@ const lireFil = (k: string): Echange[] => {
 const PROMPTS = new Set(['prompt', 'nlp', 'eng', 'outils'])
 
 export default function TravailSujet({ lang, lesson, track, code, onCode, onRun, res, running, ai, signedIn, onClose, onPrev, onNext }: {
-  lang: Lang; lesson: Lesson; track: string; code: string; onCode: (v: string) => void; onRun: () => void | Promise<void>
+  lang: Lang; lesson: Lesson; track: string; code: string; onCode: (v: string) => void; onRun: () => unknown
   res: RunResult | null; running: boolean; ai: boolean; signedIn: boolean; onClose: () => void; onPrev?: () => void; onNext?: () => void
 }) {
   const t = T[lang]
