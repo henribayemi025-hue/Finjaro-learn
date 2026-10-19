@@ -12,6 +12,7 @@ import type { Lang } from './i18n'
 const MOTS = {
   js: ['return', 'for', 'if', 'else', 'let', 'const', 'function', 'console.log', 'push', 'length', '===', '%', '*', '+'],
   py: ['return', 'for', 'in', 'if', 'else', 'def', 'print', 'append', 'len', 'range', '==', '%', '*', 'join', 'split'],
+  sql: ['SELECT', 'FROM', 'WHERE', 'ORDER BY', 'GROUP BY', 'COUNT', 'SUM', 'JOIN', 'ON', 'DESC', 'AS', 'AND'],
 }
 const T = {
   fr: { title: 'Petit quiz', fill: 'Compléter', order: 'Remettre dans l’ordre', fillQ: 'Quel mot manque à la place de ____ ?', orderQ: 'Touche les lignes dans le bon ordre.',
@@ -32,7 +33,7 @@ const motif = (m: string) => new RegExp(/^\w/.test(m) ? `\\b${echap(m)}\\b` : ec
 
 export function construireQuiz(l: Lesson) {
   const g = graine(l.id)
-  const langage = l.lang === 'py' ? 'py' : 'js'
+  const langage = l.lang === 'py' ? 'py' : l.lang === 'sql' ? 'sql' : 'js'
   const code = l.solution.replace(/\r/g, '')
   // Compléter : le premier mot-clé (dans un ordre propre à la leçon) présent dans la solution.
   const presents = melange(MOTS[langage], g).filter((m) => motif(m).test(code))

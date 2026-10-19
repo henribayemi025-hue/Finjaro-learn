@@ -13,6 +13,7 @@ export const ac = {
     inProgress: 'En cours', soon: 'À venir', lessonsCount: 'leçons faites',
     tracks: {
       prog: ['Programmation', 'JavaScript puis Python, algorithmique, structures de données.'],
+      sql: ['SQL et bases de données', 'SELECT, WHERE, tri, COUNT et SUM, GROUP BY, JOIN : les requêtes tournent dans ton navigateur.'],
       data: ['Data science', 'NumPy, pandas, statistiques, régression, classification, évaluation.'],
       dl: ['IA et deep learning', 'Neurone, rétropropagation, convolution, attention : crée tes réseaux.'],
       eng: ['AI engineering', 'RAG, sorties structurées, agents, évaluation, robustesse.'],
@@ -48,6 +49,7 @@ export const ac = {
     inProgress: 'In progress', soon: 'Coming', lessonsCount: 'lessons done',
     tracks: {
       prog: ['Programming', 'JavaScript then Python, algorithms, data structures.'],
+      sql: ['SQL and databases', 'SELECT, WHERE, sorting, COUNT and SUM, GROUP BY, JOIN: queries run in your browser.'],
       data: ['Data science', 'NumPy, pandas, statistics, regression, classification, evaluation.'],
       dl: ['AI and deep learning', 'Neuron, backpropagation, convolution, attention: build your networks.'],
       eng: ['AI engineering', 'RAG, structured outputs, agents, evaluation, robustness.'],

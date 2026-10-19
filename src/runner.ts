@@ -220,8 +220,47 @@ export async function runPython(code: string, checks: string[], packages: string
 }
 
 /** Lance le code d'une leçon dans le bon langage. */
-export function runLesson(lesson: { lang?: 'js' | 'py'; checks: string[]; packages?: string[] }, code: string): Promise<RunResult> {
+export function runLesson(lesson: { lang?: 'js' | 'py' | 'sql'; checks: string[]; packages?: string[]; solution?: string; sql?: { setup: string; ordre?: boolean } }, code: string): Promise<RunResult> {
+  if (lesson.lang === 'sql' && lesson.sql) return runSql(code, lesson.solution ?? '', lesson.sql.setup, !!lesson.sql.ordre)
   return lesson.lang === 'py' ? runPython(code, lesson.checks, lesson.packages) : runCode(code, lesson.checks)
+}
+
+// ───────── SQL (sql.js : SQLite compilé en WebAssembly, chargé à la demande depuis jsDelivr : gratuit, aucune clé) ─────────
+// Le verdict vient du code : la requête de l'élève et la solution tournent sur la même base neuve, on compare les lignes.
+const SQLJS = 'https://cdn.jsdelivr.net/npm/sql.js@1.10.3/dist/'
+const sqlWorkerSrc = `
+let SQL = null
+const table = (r) => {
+  if (!r) return ['(aucune ligne)']
+  const w = r.columns.map((c, i) => Math.min(24, Math.max(String(c).length, ...r.values.map((v) => String(v[i] ?? 'NULL').length))))
+  const ligne = (v) => v.map((x, i) => String(x ?? 'NULL').slice(0, 24).padEnd(w[i])).join(' | ')
+  return [ligne(r.columns), w.map((n) => '-'.repeat(n)).join('-+-'), ...r.values.slice(0, 50).map(ligne), ...(r.values.length > 50 ? ['… ' + r.values.length + ' lignes'] : [])]
+}
+const exec = (setup, code) => { const db = new SQL.Database(); try { db.run(setup); const r = db.exec(code); return r[r.length - 1] || null } finally { db.close() } }
+const cle = (r, ordre) => { const rows = (r ? r.values : []).map((v) => JSON.stringify(v.map((x) => (typeof x === 'number' ? Math.round(x * 1e6) / 1e6 : x)))); return JSON.stringify(ordre ? rows : rows.sort()) }
+onmessage = async (e) => {
+  const { setup, code, solution, ordre } = e.data
+  try {
+    if (!SQL) { importScripts('${SQLJS}sql-wasm.js'); SQL = await initSqlJs({ locateFile: (f) => '${SQLJS}' + f }) }
+    const r = exec(setup, code)
+    const attendu = exec(setup, solution)
+    postMessage({ output: table(r), error: null, passed: cle(r, ordre) === cle(attendu, ordre) })
+  } catch (err) {
+    postMessage({ output: [], error: String(err && err.message || err), passed: false })
+  }
+}`
+
+/** Exécute une requête SQL sur une base SQLite neuve (dans un Worker, timeout 15 s la première fois : chargement). */
+export function runSql(code: string, solution: string, setup: string, ordre: boolean): Promise<RunResult> {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(new Blob([sqlWorkerSrc], { type: 'text/javascript' }))
+    const w = new Worker(url)
+    const done = (r: RunResult) => { clearTimeout(t); w.terminate(); URL.revokeObjectURL(url); resolve(r) }
+    const t = setTimeout(() => done({ output: [], error: 'Timeout', passed: false }), 15000)
+    w.onmessage = (e) => done(e.data)
+    w.onerror = (e) => done({ output: [], error: e.message, passed: false })
+    w.postMessage({ setup, code, solution, ordre })
+  })
 }
 
 export interface TraceStep { ligne: number; evt: string; fn: string; vars: Record<string, string> }

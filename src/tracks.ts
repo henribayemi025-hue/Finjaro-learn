@@ -8,6 +8,8 @@ export const TRACKS: { key: string; name: L2; groups: Group[]; groupName: Partia
     groupName: { 'pg-calc': { fr: 'Calculatrice', en: 'Calculator' }, 'pg-robot': { fr: 'Robot explorateur', en: 'Explorer robot' }, 'pg-faq': { fr: 'Assistant FAQ', en: 'FAQ assistant' }, 'pg-ligne': { fr: 'Robot suiveur de ligne (7 étapes)', en: 'Line-following robot (7 steps)' } } },
   { key: 'prog', name: { fr: 'Programmation', en: 'Programming' }, groups: ['js', 'py-bases', 'py-algo', 'py-lecture', 'py-projets'],
     groupName: { js: { fr: 'JavaScript', en: 'JavaScript' }, 'py-bases': { fr: 'Python · bases', en: 'Python · basics' }, 'py-algo': { fr: 'Algorithmes et structures', en: 'Algorithms and structures' }, 'py-lecture': { fr: 'Lire du code', en: 'Reading code' }, 'py-projets': { fr: 'Projets', en: 'Projects' } } },
+  { key: 'sql', name: { fr: 'SQL et bases de données', en: 'SQL and databases' }, groups: ['sql'],
+    groupName: { sql: { fr: 'Interroger une base', en: 'Querying a database' } } },
   { key: 'data', name: { fr: 'Data science', en: 'Data science' }, groups: ['ds-numpy', 'ds-pandas', 'ds-ml', 'ds-viz'],
     groupName: { 'ds-numpy': { fr: 'NumPy', en: 'NumPy' }, 'ds-pandas': { fr: 'pandas', en: 'pandas' }, 'ds-ml': { fr: 'Statistiques et apprentissage', en: 'Statistics and learning' }, 'ds-viz': { fr: 'Graphiques et projet', en: 'Charts and project' } } },
   { key: 'dl', name: { fr: 'IA et deep learning', en: 'AI and deep learning' }, groups: ['dl', 'dl-reseaux'],

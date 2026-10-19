@@ -430,7 +430,7 @@ export default function App() {
           <div className="flex items-start justify-between gap-3">
             <h2 className="text-xl sm:text-2xl leading-tight">{lesson.title[lang]}</h2>
             {lesson.niveau && <span className="chip shrink-0">🏁 {({ facile: { fr: 'Facile', en: 'Easy' }, moyen: { fr: 'Moyen', en: 'Medium' }, difficile: { fr: 'Difficile', en: 'Hard' }, projet: { fr: 'Projet', en: 'Project' } } as const)[lesson.niveau][lang]}</span>}
-            <span className="chip shrink-0">{lesson.langue === 'c' ? '⚙️ C' : lesson.langue === 'cpp' ? '⚙️ C++' : lesson.lang === 'py' ? '🐍 Python' : '⚡ JavaScript'}</span>
+            <span className="chip shrink-0">{lesson.langue === 'c' ? '⚙️ C' : lesson.langue === 'cpp' ? '⚙️ C++' : lesson.lang === 'sql' ? '🗄️ SQL' : lesson.lang === 'py' ? '🐍 Python' : '⚡ JavaScript'}</span>
           </div>
           <Classe key={lesson.id} lang={lang} titre={lesson.title[lang]} pos={pos} total={trackLessons.length} parcours={acuName(lang, track)} track={track} langage={lesson.lang ?? 'js'}
             tache={lesson.task[lang]} indice={lesson.hint[lang]} aExemple={!!lesson.example} signedIn={!!session} ai={ai} code={code} sortie={res?.output.join('\n') ?? ''}
@@ -465,7 +465,7 @@ export default function App() {
             <div className="ide">
               <div className="ide-bar">
                 <span className="ide-dot bg-[#ff5f57]" /><span className="ide-dot bg-[#febc2e]" /><span className="ide-dot bg-[#28c840]" />
-                <span className="ml-2 font-mono">{lesson.lang === 'py' ? 'main.py' : 'main.js'}</span>
+                <span className="ml-2 font-mono">{lesson.lang === 'py' ? 'main.py' : lesson.lang === 'sql' ? 'requete.sql' : 'main.js'}</span>
                 <button onClick={run} disabled={!!running} className="ml-auto btn btn-primary py-1 px-3 text-xs">▶ {t.run}</button>
               </div>
               <div className="md:hidden flex gap-1 overflow-x-auto px-2 py-1.5 border-b border-white/10" role="toolbar" aria-label={lang === 'fr' ? 'Symboles' : 'Symbols'}>
@@ -515,12 +515,12 @@ export default function App() {
               >
                 {t.solution}
               </button>
-              <button className="btn" onClick={async () => {
+              {lesson.lang !== 'sql' && <button className="btn" onClick={async () => {
                 const ext = lesson.lang === 'py' ? 'py' : 'js'
                 const id = nouvelId()
                 await sauverProjet({ id, titre: lesson.title[lang], lang: lesson.lang === 'py' ? 'py' : 'js', principal: 'main.' + ext, fichiers: [{ chemin: 'main.' + ext, contenu: code }], maj: new Date().toISOString() })
                 nav('#/atelier/' + id)
-              }}>🛠️ {lang === 'fr' ? 'Ouvrir dans l’éditeur' : 'Open in the editor'}</button>
+              }}>🛠️ {lang === 'fr' ? 'Ouvrir dans l’éditeur' : 'Open in the editor'}</button>}
               {lesson.lang === 'py' && (
                 <button onClick={() => setDebug(!debug)} aria-pressed={debug} className="btn">🕰 {t.debug}</button>
               )}

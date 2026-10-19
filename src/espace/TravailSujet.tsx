@@ -72,7 +72,7 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
   const [promptBusy, setPromptBusy] = useState(false)
   const boite = useRef<HTMLDivElement>(null)
   const enBas = useRef(true)
-  const langage = lesson.langue === 'c' ? 'C' : lesson.langue === 'cpp' ? 'C++' : lesson.lang === 'py' ? 'Python' : 'JavaScript'
+  const langage = lesson.langue === 'c' ? 'C' : lesson.langue === 'cpp' ? 'C++' : lesson.lang === 'py' ? 'Python' : lesson.lang === 'sql' ? 'SQL' : 'JavaScript'
 
   const fermer = useRef(onClose)
   useEffect(() => { fermer.current = onClose })

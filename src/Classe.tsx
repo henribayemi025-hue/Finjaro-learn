@@ -27,14 +27,14 @@ const lireFil = (k: string): Echange[] => {
 }
 
 /** Le prof de la matière : Maya pour JavaScript, Idris pour l'IA et Python, Finia ailleurs. */
-export function profDe(track: string, langage: 'js' | 'py') {
+export function profDe(track: string, langage: 'js' | 'py' | 'sql') {
   if (langage === 'js' && (track === 'prog' || track === 'projets')) return 'js'
   if (['dl', 'data', 'prompt', 'nlp', 'eng', 'outils'].includes(track)) return 'ia'
   return 'finia'
 }
 
 export default function Classe({ lang, titre, pos, total, parcours, track, langage, tache, indice, etat, erreur, aExemple, signedIn, ai, code, sortie, aller }: {
-  lang: Lang; titre: string; pos: number; total: number; parcours: string; track: string; langage: 'js' | 'py'
+  lang: Lang; titre: string; pos: number; total: number; parcours: string; track: string; langage: 'js' | 'py' | 'sql'
   tache: string; indice: string; etat: Etat; erreur: string; aExemple: boolean; signedIn: boolean; ai: boolean; code: string; sortie: string
   aller: (id: 'explication' | 'exemple' | 'exercice') => void
 }) {
@@ -130,7 +130,7 @@ export default function Classe({ lang, titre, pos, total, parcours, track, langa
     setBusy(true); setAttente(q); setQuestion('')
     if (saisie2.current) { saisie2.current.style.height = ''; saisie2.current.focus() }
     const history = fil.filter((e) => e.prof === prof.id).slice(-3).flatMap((e) => [{ role: 'user' as const, text: e.q }, { role: 'model' as const, text: e.a }])
-    const r = await askTutor({ question: q, code, lesson: `[${langage === 'py' ? 'Python' : 'JavaScript'}] ${titre}`, output: sortie, lang, agentId: prof.id, socratique: parQuestions, history })
+    const r = await askTutor({ question: q, code, lesson: `[${langage === 'py' ? 'Python' : langage === 'sql' ? 'SQL' : 'JavaScript'}] ${titre}`, output: sortie, lang, agentId: prof.id, socratique: parQuestions, history })
     const a = r.answer ?? (r.error === 'quota' ? (fr ? 'Limite de questions atteinte pour aujourd’hui.' : 'Question limit reached for today.') : (fr ? `${nom} est indisponible pour l’instant, réessaie plus tard.` : `${nom} is unavailable right now, try again later.`))
     setFil((f) => {
       // Un refus (quota, panne) s'affiche mais ne se garde pas : il ne doit pas revenir au prof comme une vraie réponse.
