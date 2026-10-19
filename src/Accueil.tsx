@@ -173,7 +173,6 @@ export default function Accueil({ lang, done, idx, onOpen, onTrack, onResume, on
             const fait = ls.filter(({ l }) => done.includes(l.id)).length
             const p = ls.length ? Math.round((fait / ls.length) * 100) : 0
             const desc = a.tracks[key as keyof typeof a.tracks]?.[1] ?? ''
-            const suivantes = [...ls.filter(({ l }) => !done.includes(l.id)), ...ls.filter(({ l }) => done.includes(l.id))].slice(0, 2)
             const next = ls.find(({ l }) => !done.includes(l.id)) ?? ls[0]
             return (
               <li key={key} className="snap-start shrink-0 w-[85%] sm:w-[60%] md:w-auto">
@@ -189,27 +188,16 @@ export default function Accueil({ lang, done, idx, onOpen, onTrack, onResume, on
                     </span>
                   </button>
                   <div className="p-4 sm:p-5 pt-3 sm:pt-4 flex flex-col gap-3 flex-1">
+                  {/* Carte allégée (A7, 19/10) : une description, la progression si elle a commencé, un seul bouton qui dit où il mène. */}
                   <p className="text-sm text-ink/70 line-clamp-2">{desc}</p>
-                  <div>
-                    <div className="flex justify-between text-xs mb-1"><span className="text-ink/60">{t.verified}</span><span className="font-bold">{p}%</span></div>
-                    <div className="h-1.5 rounded-full bg-ink/10 overflow-hidden"><div className="h-full grad rounded-full" style={{ width: p + '%' }} /></div>
-                  </div>
-                  <ul className="space-y-1">
-                    {suivantes.map(({ l, i }) => (
-                      <li key={l.id}>
-                        <button onClick={() => onOpen(i)} className={`w-full min-h-11 text-left rounded-xl px-3 py-2 text-sm flex items-center gap-2 ${done.includes(l.id) ? 'bg-[color-mix(in_srgb,#22c55e_10%,transparent)]' : 'hover:bg-ink/5'}`}>
-                          <span aria-hidden="true" className={`size-4 shrink-0 rounded-full border-2 ${done.includes(l.id) ? 'bg-[#22c55e] border-[#22c55e]' : 'border-ink/30'}`} />
-                          <span className="truncate">{l.title[lang]}</span>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="mt-auto grid grid-cols-2 gap-2">
-                    <button onClick={() => onTrack(key)} className="btn">{lang === 'fr' ? `Les ${ls.length} leçons` : `All ${ls.length} lessons`}</button>
-                    <button onClick={() => next && onOpen(next.i)} className="btn bg-terracotta/10 border-transparent text-terracotta-dark">
-                      {fait === ls.length && ls.length ? t.review : fait > 0 ? t.cont : t.start} →
+                  {fait > 0 && (
+                    <div className="h-1.5 rounded-full bg-ink/10 overflow-hidden" role="progressbar" aria-label={t.verified} aria-valuenow={p} aria-valuemin={0} aria-valuemax={100}><div className="h-full grad rounded-full" style={{ width: p + '%' }} /></div>
+                  )}
+                  {next && (
+                    <button onClick={() => onOpen(next.i)} className="mt-auto btn bg-terracotta/10 border-transparent text-terracotta-dark justify-between text-left">
+                      <span className="truncate">{fait === ls.length && ls.length ? t.review : fait > 0 ? t.cont : t.start} : {next.l.title[lang]}</span><span aria-hidden="true">→</span>
                     </button>
-                  </div>
+                  )}
                   </div>
                 </div>
               </li>
