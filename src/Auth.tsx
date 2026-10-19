@@ -11,6 +11,7 @@ const TX = {
     usedLink: 'Ce lien a déjà servi ou a expiré : un lien ne marche qu’une fois. Redemande-en un.',
     notConfirmed: 'Ton e-mail n’est pas encore confirmé : clique sur le lien reçu par e-mail.',
     oneClick: 'Un clic sur le lien reçu suffit : il ne sert qu’une fois.',
+    forgot: 'Mot de passe oublié ? Reçois un lien de connexion par e-mail : il te connecte sans mot de passe.', emailFirst: 'Écris d’abord ton e-mail, puis touche « Mot de passe oublié ».',
   },
   en: {
     google: 'Continue with Google', apple: 'Continue with Apple', orEmail: 'or with your email',
@@ -19,6 +20,7 @@ const TX = {
     usedLink: 'This link was already used or has expired: a link works only once. Ask for a new one.',
     notConfirmed: 'Your email is not confirmed yet: click the link you received by email.',
     oneClick: 'One click on the link you receive is enough: it works only once.',
+    forgot: 'Forgot your password? Get a sign-in link by email: it signs you in without a password.', emailFirst: 'Type your email first, then tap “Forgot your password”.',
   },
 } as const
 
@@ -76,6 +78,8 @@ export function Connexion({ lang }: { lang: Lang }) {
         <button onClick={withPassword} disabled={!email || !password} className="btn btn-primary flex-1">{t.signIn}</button>
         <button onClick={magic} disabled={!email} className="btn flex-1">{t.magicLink}</button>
       </div>
+      {/* « Mot de passe oublié » (plan du 19/10, A8) : le lien par e-mail existant connecte sans mot de passe ; aucun changement d'authentification. */}
+      <button type="button" onClick={() => (email ? magic() : setMsg(x.emailFirst))} className="w-full text-left text-xs text-ink/70 underline underline-offset-2 min-h-9">{x.forgot}</button>
       {msg && <p className="text-xs leading-relaxed rounded-lg bg-brass/15 border border-brass p-2" role="status">{msg}</p>}
     </div>
   )
