@@ -21,6 +21,7 @@ import { ui, type Lang } from './i18n'
 import { lessons } from './lessons'
 import AgentPanel from './AgentPanel'
 import Classe from './Classe'
+import TravailSujet from './espace/TravailSujet'
 import DiffModal from './DiffModal'
 import { askFix, type FixProposal } from './tutor'
 import { playError, playSuccess } from './sounds'
@@ -120,6 +121,8 @@ export default function App() {
   const [showHint, setShowHint] = useState(false)
   const [chrono, setChrono] = useState(false)
   const [running, setRunning] = useState<'' | 'run' | 'py'>('')
+  // « Travailler avec les agents IA » : la leçon s'ouvre dans le cadre de l'Atelier (Beau, 14/10).
+  const [travail, setTravail] = useState(false)
   const [menu, setMenu] = useState(false)
   const [plus, setPlus] = useState(false)
   const [authNote, setAuthNote] = useState('')
@@ -384,11 +387,17 @@ export default function App() {
       )}
       {burst > 0 && <Burst key={burst} />}
       {chrono && <Chrono lang={lang} sound={sound} onClose={() => setChrono(false)} onPlayed={recordDay} />}
+      {route.v === 'lecon' && travail && (
+        <TravailSujet key={lesson.id} lang={lang} lesson={lesson} track={track} code={code} onCode={(v) => { setCode(v); save('code:' + lesson.id, v) }}
+          onRun={run} res={res} running={!!running} ai={ai} signedIn={!!session} onClose={() => setTravail(false)}
+          onPrev={pos > 1 ? () => ouvre(trackLessons[pos - 2].i) : undefined} onNext={pos < trackLessons.length ? () => ouvre(trackLessons[pos].i) : undefined} />
+      )}
       {route.v === 'lecon' && <div id="lecon" className="max-w-6xl mx-auto px-4 py-4">
         <div className="space-y-4 min-w-0">
           <div className="sticky top-16 xl:top-[4.75rem] z-20 -mx-4 px-4 py-2 bg-[color-mix(in_srgb,var(--color-cream)_88%,transparent)] backdrop-blur-xl border-b border-brass flex items-center gap-2">
             <button className="btn px-3" onClick={() => nav('#/parcours/' + trackSlug(track))} aria-label={(lang === 'fr' ? 'Retour au parcours ' : 'Back to track ') + acuName(lang, track)}>←<span className="hidden sm:inline"> {TRACK_ICON[track]} {acuName(lang, track)}</span></button>
             <span className="flex-1 text-center text-sm font-semibold text-ink/70 truncate">{lang === 'fr' ? 'Leçon' : 'Lesson'} {pos} / {trackLessons.length}</span>
+            <button className="btn btn-primary px-3 text-sm" onClick={() => setTravail(true)} aria-label={lang === 'fr' ? 'Travailler avec les agents IA' : 'Work with AI agents'}>🤖<span className="hidden sm:inline"> {lang === 'fr' ? 'Avec les agents IA' : 'With AI agents'}</span></button>
             <button className="icon-btn" disabled={pos <= 1} onClick={() => ouvre(trackLessons[pos - 2].i)} aria-label={lang === 'fr' ? 'Leçon précédente' : 'Previous lesson'}>‹</button>
             <button className="icon-btn" disabled={pos >= trackLessons.length} onClick={() => ouvre(trackLessons[pos].i)} aria-label={lang === 'fr' ? 'Leçon suivante' : 'Next lesson'}>›</button>
           </div>
