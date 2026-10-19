@@ -1,15 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from './supabase'
-import { askTutor } from './tutor'
-import { agents } from './agents'
-import CoCode from './CoCode'
-import Defis from './Defis'
-import type { CoEvent } from './coop'
+import AtelierEspace, { type Espace } from './espace/AtelierEspace'
 import { ui, type Lang } from './i18n'
 
-interface Espace { id: string; nom: string; type: string }
-interface Msg { id: number; user_id: string | null; agent_id: string | null; texte: string; created_at: string }
 
 const btn = 'rounded-md bg-terracotta text-white px-3 py-1.5 text-sm disabled:opacity-40'
 const inp = 'rounded-md border border-ink/30 bg-white/60 px-2 py-1.5 text-sm'
@@ -51,7 +45,8 @@ export default function Espaces({ lang, session }: { lang: Lang; session: Sessio
 
   if (!supabase) return null
   if (!session) return <p className="rounded-md bg-brass/15 border border-brass p-3 text-sm">{t.spacesLogin}</p>
-  if (current) return <Salon lang={lang} session={session} espace={current} onBack={() => setCurrent(null)} />
+  // Un espace ouvert prend tout l'écran, comme un projet de l'Atelier.
+  if (current) return <AtelierEspace key={current.id} lang={lang} session={session} espace={current} espaces={list.length ? list : [current]} onSwitch={setCurrent} onBack={() => { setCurrent(null); void load() }} />
 
   const create = async () => {
     const { data, error } = await supabase!.rpc('learn_creer_espace', { p_nom: nom, p_type: type })
@@ -86,107 +81,6 @@ export default function Espaces({ lang, session }: { lang: Lang; session: Sessio
           ))}
         </ul>
       )}
-    </div>
-  )
-}
-
-function Salon({ lang, session, espace, onBack }: { lang: Lang; session: Session; espace: Espace; onBack: () => void }) {
-  const t = ui[lang]
-  const [msgs, setMsgs] = useState<Msg[]>([])
-  const [text, setText] = useState('')
-  const [invite, setInvite] = useState('')
-  const [online, setOnline] = useState(1)
-  const [busy, setBusy] = useState(false)
-  const [note, setNote] = useState('')
-  const chan = useRef<ReturnType<NonNullable<typeof supabase>['channel']> | null>(null)
-  const bottom = useRef<HTMLDivElement>(null)
-  const coHandler = useRef<((ev: CoEvent) => void) | null>(null)
-  const [myName, setMyName] = useState('')
-
-  const fetchMsgs = useCallback(async () => {
-    const { data } = await supabase!.from('learn_messages').select('id,user_id,agent_id,texte,created_at')
-      .eq('espace_id', espace.id).order('id', { ascending: false }).limit(100)
-    setMsgs(((data ?? []) as Msg[]).reverse())
-  }, [espace.id])
-
-  useEffect(() => {
-    fetchMsgs()
-    supabase!.from('learn_profils').select('pseudo').eq('user_id', session.user.id).maybeSingle().then(({ data }) => setMyName((data?.pseudo as string) || (lang === 'fr' ? 'Membre' : 'Member')))
-    // Canal Realtime privé (autorisé aux membres par RLS) : diffusion + présence.
-    const ch = supabase!.channel(`learn:espace:${espace.id}`, { config: { private: true, presence: { key: session.user.id } } })
-    ch.on('broadcast', { event: 'msg' }, () => fetchMsgs())
-      .on('broadcast', { event: 'co' }, ({ payload }) => coHandler.current?.(payload as CoEvent))
-      .on('presence', { event: 'sync' }, () => setOnline(Object.keys(ch.presenceState()).length))
-      .subscribe((s) => { if (s === 'SUBSCRIBED') ch.track({ at: Date.now() }) })
-    chan.current = ch
-    return () => { supabase!.removeChannel(ch) }
-  }, [espace.id, session.user.id, fetchMsgs])
-
-  useEffect(() => { bottom.current?.scrollIntoView?.({ block: 'end' }) }, [msgs])
-
-  const sendCo = (ev: CoEvent) => { void chan.current?.send({ type: 'broadcast', event: 'co', payload: ev }) }
-  const ping = () => chan.current?.send({ type: 'broadcast', event: 'msg', payload: {} })
-
-  const send = async () => {
-    const q = text.trim()
-    if (!q || busy) return
-    setBusy(true); setText(''); setNote('')
-    const { error } = await supabase!.from('learn_messages').insert({ espace_id: espace.id, user_id: session.user.id, texte: q })
-    if (error) { setNote(t.aiError); setBusy(false); return }
-    await fetchMsgs(); ping()
-    // Un agent répond quand on le nomme (@Finia, @Maya, @Idris).
-    const agent = agents.find((a) => a.ready && q.toLowerCase().includes('@' + a.name.toLowerCase()))
-    if (agent) {
-      const r = await askTutor({ question: q, code: '', lesson: espace.nom, output: '', lang, agentId: agent.id, espaceId: espace.id })
-      if (!r.answer) setNote(r.error === 'quota' ? t.quota : t.aiError)
-      await fetchMsgs(); ping()
-    }
-    setBusy(false)
-  }
-
-  const makeInvite = async () => {
-    const { data, error } = await supabase!.rpc('learn_creer_invitation', { p_espace: espace.id })
-    setInvite(error ? '' : `${window.location.origin}${import.meta.env.BASE_URL}?join=${data}`)
-    if (error) setNote(t.inviteError)
-  }
-
-  return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-2 flex-wrap">
-        <button className="text-sm underline" onClick={onBack}>← {t.spaces}</button>
-        <h2 className="text-xl font-bold flex-1">{espace.nom}</h2>
-        <span className="text-xs text-ink/70" aria-live="polite">{online} {t.online}</span>
-        <button className="text-sm border border-ink/30 rounded-md px-3 py-1.5" onClick={makeInvite}>{t.invite}</button>
-      </div>
-      {invite && (
-        <div className="rounded-md bg-brass/15 border border-brass p-2 text-sm break-all">
-          <p className="text-xs mb-1">{t.inviteHelp}</p>
-          <input readOnly value={invite} onFocus={(e) => e.target.select()} className={inp + ' w-full'} aria-label={t.invite} />
-        </div>
-      )}
-      <div className="rounded-xl border-2 border-brass bg-paper h-80 overflow-y-auto p-3 space-y-2" aria-live="polite">
-        {msgs.length === 0 && <p className="text-sm text-ink/60">{t.saloonEmpty}</p>}
-        {msgs.map((m) => {
-          const ag = m.agent_id ? agents.find((a) => a.id === m.agent_id) : null
-          const mine = m.user_id === session.user.id
-          return (
-            <div key={m.id} className={`flex ${mine ? 'justify-end' : ''}`}>
-              <div className={`max-w-[85%] rounded-lg px-3 py-2 text-sm whitespace-pre-wrap ${m.agent_id ? 'bg-brass/20' : mine ? 'bg-terracotta text-white' : 'bg-white/70 border border-ink/10'}`}>
-                {m.agent_id && <strong>{ag?.name ?? m.agent_id} : </strong>}{m.texte}
-              </div>
-            </div>
-          )
-        })}
-        <div ref={bottom} />
-      </div>
-      {note && <p className="text-sm text-terracotta-dark" role="status">{note}</p>}
-      <div className="flex gap-2">
-        <input value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && send()} maxLength={4000}
-          placeholder={t.saloonPlaceholder} aria-label={t.saloonPlaceholder} className={inp + ' flex-1 min-w-0'} />
-        <button className={btn} disabled={!text.trim() || busy} onClick={send}>{t.send}</button>
-      </div>
-      <Defis lang={lang} userId={session.user.id} espaceId={espace.id} />
-      {myName && <CoCode lang={lang} me={{ id: session.user.id, name: myName }} send={sendCo} handlerRef={coHandler} />}
     </div>
   )
 }

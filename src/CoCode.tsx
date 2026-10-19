@@ -11,11 +11,26 @@ const T = {
     driving: 'You are the driver: everyone sees what you type.', lesson: 'Exercise', run: 'Run (locally)', output: 'Output', ok: 'It works!', ko: 'Not yet.', you: '(you)' },
 } as const
 
+// Deux habillages : la carte crème de la page, ou le panneau sombre de l'atelier d'un espace (Espaces façon Atelier de code).
+const LOOK = {
+  clair: {
+    box: 'rounded-xl border-2 border-brass bg-paper p-3 space-y-3', muted: 'text-ink/60', faint: 'text-ink/70', task: 'text-terracotta-dark',
+    field: 'border-ink/30 bg-white/60', on: 'border-terracotta bg-white/70', off: 'border-ink/30 bg-paper', run: 'bg-terracotta text-white',
+    ghost: 'border-ink/30', pre: 'bg-code text-code-fg', bad: 'text-terracotta-dark', rows: 8, grid: 'lg:grid-cols-2',
+  },
+  sombre: {
+    box: 'p-3 space-y-3 text-[#EDF1F8]', muted: 'text-[#93A1B8]', faint: 'text-[#93A1B8]', task: 'text-[#FF8A3D]',
+    field: 'border-white/12 bg-[#0B1120] text-white', on: 'border-[#FF8A3D] bg-[#0B1120] text-white', off: 'border-white/12 bg-[#0B1120]/60 text-[#C9D4E5]',
+    run: 'bg-[#FF8A3D] text-[#0B1120] font-bold', ghost: 'border-white/20 text-white', pre: 'bg-[#0A0F1C] text-[#EDF1F8] border border-white/10', bad: 'text-[#FDA4AF]',
+    rows: 16, grid: 'xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]',
+  },
+} as const
+
 /** Éditeur partagé en direct (pilote / copilote) sur le canal Realtime privé de l'espace. */
-export default function CoCode({ lang, me, send, handlerRef }: {
-  lang: Lang; me: { id: string; name: string }; send: (ev: CoEvent) => void; handlerRef: MutableRefObject<((ev: CoEvent) => void) | null>
+export default function CoCode({ lang, me, send, handlerRef, sombre = false }: {
+  lang: Lang; me: { id: string; name: string }; send: (ev: CoEvent) => void; handlerRef: MutableRefObject<((ev: CoEvent) => void) | null>; sombre?: boolean
 }) {
-  const t = T[lang], u = ui[lang]
+  const t = T[lang], u = ui[lang], k = LOOK[sombre ? 'sombre' : 'clair']
   const first = lessons[0]
   const [s, setS] = useState<CoState>(() => initial(first.id, first.starter))
   const sRef = useRef(s)
@@ -61,42 +76,42 @@ export default function CoCode({ lang, me, send, handlerRef }: {
   }
 
   return (
-    <section className="rounded-xl border-2 border-brass bg-paper p-3 space-y-3" aria-label={t.title}>
-      <h3 className="font-serif font-bold text-lg">{t.title}</h3>
+    <section className={k.box} aria-label={t.title}>
+      {!sombre && <h3 className="font-serif font-bold text-lg">{t.title}</h3>}
       <div className="flex flex-wrap gap-2 items-center text-sm">
         <span className="font-medium">{t.pilot} : ✏️ {s.pilot ? nameOf(s.pilot) : '…'}{s.pilot === me.id ? ' ' + t.you : ''}</span>
-        <span className="text-ink/60">· {t.here} : {people.map(([id, m]) => m.name + (id === me.id ? ' ' + t.you : '')).join(', ')}</span>
+        <span className={k.muted}>· {t.here} : {people.map(([id, m]) => m.name + (id === me.id ? ' ' + t.you : '')).join(', ')}</span>
       </div>
-      <p className="text-xs text-ink/70" aria-live="polite">{iAmPilot ? t.driving : t.watching}</p>
+      <p className={`text-xs ${k.faint}`} aria-live="polite">{iAmPilot ? t.driving : t.watching}</p>
       <label className="text-sm block">{t.lesson}
-        <select value={s.lesson} disabled={!iAmPilot} onChange={(e) => pickLesson(e.target.value)} className="mt-1 sm:mt-0 sm:ml-2 block sm:inline-block w-full sm:w-auto max-w-full sm:max-w-md min-h-11 rounded-md border border-ink/30 bg-white/60 px-2 py-1 disabled:opacity-60">
+        <select value={s.lesson} disabled={!iAmPilot} onChange={(e) => pickLesson(e.target.value)} className={`mt-1 sm:mt-0 sm:ml-2 block sm:inline-block w-full sm:w-auto max-w-full sm:max-w-md min-h-11 rounded-md border ${k.field} px-2 py-1 disabled:opacity-60`}>
           {lessons.map((l) => <option key={l.id} value={l.id}>{l.title[lang]}</option>)}
         </select>
       </label>
-      <p className="text-sm font-medium text-terracotta-dark">{lesson.task[lang]}</p>
-      <div className="grid gap-3 lg:grid-cols-2 items-start">
-        <textarea value={s.code} readOnly={!iAmPilot} onChange={(e) => onType(e.target.value)} rows={8} spellCheck={false}
-          aria-label={t.title} className={`w-full rounded-lg border p-3 font-mono text-sm ${iAmPilot ? 'border-terracotta bg-white/70' : 'border-ink/30 bg-paper'}`} />
+      <p className={`text-sm font-medium ${k.task}`}>{lesson.task[lang]}</p>
+      <div className={`grid gap-3 ${k.grid} items-start`}>
+        <textarea value={s.code} readOnly={!iAmPilot} onChange={(e) => onType(e.target.value)} rows={k.rows} spellCheck={false}
+          aria-label={t.title} className={`w-full rounded-lg border p-3 font-mono text-sm ${iAmPilot ? k.on : k.off}`} />
         <div className="space-y-2 min-w-0">
-          <button className="bg-terracotta text-white rounded-md px-4 py-2 text-sm" onClick={async () => setRes(await runLesson(lesson, s.code))}>{t.run}</button>
+          <button className={`${k.run} rounded-md px-4 py-2 text-sm`} onClick={async () => setRes(await runLesson(lesson, s.code))}>{t.run}</button>
           {res && (
             <div aria-live="polite" className="space-y-1">
               <h4 className="text-sm font-semibold">{t.output}</h4>
-              <pre className="rounded-lg bg-code text-code-fg p-3 text-sm overflow-x-auto whitespace-pre-wrap font-mono">{res.output.length ? res.output.join('\n') : u.noOutput}</pre>
-              {res.error && <p className="text-sm text-terracotta-dark">{u.error} {res.error}</p>}
+              <pre className={`rounded-lg ${k.pre} p-3 text-sm overflow-x-auto whitespace-pre-wrap font-mono`}>{res.output.length ? res.output.join('\n') : u.noOutput}</pre>
+              {res.error && <p className={`text-sm ${k.bad}`}>{u.error} {res.error}</p>}
               {res.passed === true && <p className="font-medium">✅ {t.ok}</p>}
-              {res.passed === false && !res.error && <p className="text-terracotta-dark">{t.ko}</p>}
+              {res.passed === false && !res.error && <p className={k.bad}>{t.ko}</p>}
             </div>
           )}
         </div>
       </div>
       {iAmPilot && people.length > 1 && (
         <div className="flex gap-2 items-center flex-wrap">
-          <select value={target} onChange={(e) => setTarget(e.target.value)} aria-label={t.pass} className="rounded-md border border-ink/30 bg-white/60 px-2 py-1.5 text-sm">
+          <select value={target} onChange={(e) => setTarget(e.target.value)} aria-label={t.pass} className={`rounded-md border ${k.field} px-2 py-1.5 text-sm`}>
             <option value="">{t.to}</option>
             {people.filter(([id]) => id !== me.id).map(([id, m]) => <option key={id} value={id}>{m.name}</option>)}
           </select>
-          <button disabled={!target} className="rounded-md border border-ink/30 px-3 py-1.5 text-sm disabled:opacity-40"
+          <button disabled={!target} className={`rounded-md border ${k.ghost} px-3 py-1.5 text-sm disabled:opacity-40`}
             onClick={() => { emit({ t: 'pilot', from: me.id, to: target }); setTarget('') }}>🤝 {t.pass}</button>
         </div>
       )}

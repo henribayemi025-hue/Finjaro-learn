@@ -26,12 +26,22 @@ const T = {
 interface Defi { id: string; lesson_id: string; created_at: string }
 interface Sol { user_id: string; code: string; passed: boolean }
 
-const btn = 'rounded-md bg-terracotta text-white px-3 py-1.5 text-sm disabled:opacity-40'
-const ghost = 'rounded-md border border-ink/30 px-3 py-1.5 text-sm'
-const pre = 'rounded-lg bg-code text-code-fg p-3 text-sm overflow-x-auto whitespace-pre-wrap font-mono'
+// Deux habillages : la carte crème de la page, ou le panneau sombre de l'atelier d'un espace.
+const LOOK = {
+  clair: {
+    box: 'rounded-xl border-2 border-brass bg-paper p-3 space-y-3', btn: 'rounded-md bg-terracotta text-white px-3 py-1.5 text-sm disabled:opacity-40',
+    ghost: 'rounded-md border border-ink/30 px-3 py-1.5 text-sm', pre: 'rounded-lg bg-code text-code-fg p-3 text-sm overflow-x-auto whitespace-pre-wrap font-mono',
+    field: 'border-ink/30 bg-white/60', card: 'border-brass/50 bg-white/50', muted: 'text-ink/60', faint: 'text-ink/50', task: 'text-terracotta-dark', code: 'border-ink/30 bg-white/70', rows: 8,
+  },
+  sombre: {
+    box: 'p-3 space-y-3 text-[#EDF1F8]', btn: 'rounded-md bg-[#FF8A3D] text-[#0B1120] font-bold px-3 py-1.5 text-sm disabled:opacity-40',
+    ghost: 'rounded-md border border-white/20 text-white px-3 py-1.5 text-sm', pre: 'rounded-lg bg-[#0A0F1C] text-[#EDF1F8] border border-white/10 p-3 text-sm overflow-x-auto whitespace-pre-wrap font-mono',
+    field: 'border-white/12 bg-[#0B1120] text-white', card: 'border-white/12 bg-white/5', muted: 'text-[#93A1B8]', faint: 'text-[#64748B]', task: 'text-[#FF8A3D]', code: 'border-white/12 bg-[#0B1120] text-white', rows: 14,
+  },
+} as const
 
-export default function Defis({ lang, userId, espaceId }: { lang: Lang; userId: string; espaceId: string }) {
-  const t = T[lang]
+export default function Defis({ lang, userId, espaceId, sombre = false }: { lang: Lang; userId: string; espaceId: string; sombre?: boolean }) {
+  const t = T[lang], k = LOOK[sombre ? 'sombre' : 'clair']
   const [defis, setDefis] = useState<Defi[]>([])
   const [open, setOpen] = useState<Defi | null>(null)
   const [isHost, setIsHost] = useState(false)
@@ -54,31 +64,31 @@ export default function Defis({ lang, userId, espaceId }: { lang: Lang; userId: 
     if (error) setNote(t.error); else { setNote(''); load() }
   }
 
-  if (open) return <Defi lang={lang} userId={userId} espaceId={espaceId} defi={open} onBack={() => setOpen(null)} />
+  if (open) return <Defi lang={lang} userId={userId} espaceId={espaceId} defi={open} onBack={() => setOpen(null)} sombre={sombre} />
 
   return (
-    <section className="rounded-xl border-2 border-brass bg-paper p-3 space-y-3" aria-label={t.title}>
-      <h3 className="font-serif font-bold text-lg">{t.title}</h3>
+    <section className={k.box} aria-label={t.title}>
+      {!sombre && <h3 className="font-serif font-bold text-lg">{t.title}</h3>}
       {isHost && (
         <div className="flex gap-2 items-center flex-wrap">
           <label className="text-sm">{t.pick}
-            <select value={pick} onChange={(e) => setPick(e.target.value)} className="mt-1 sm:mt-0 sm:ml-2 block sm:inline-block w-full sm:w-auto max-w-full sm:max-w-md min-h-11 rounded-md border border-ink/30 bg-white/60 px-2 py-1">
+            <select value={pick} onChange={(e) => setPick(e.target.value)} className={`mt-1 sm:mt-0 sm:ml-2 block sm:inline-block w-full sm:w-auto max-w-full sm:max-w-md min-h-11 rounded-md border ${k.field} px-2 py-1`}>
               {lessons.map((l) => <option key={l.id} value={l.id}>{l.title[lang]}</option>)}
             </select>
           </label>
-          <button className={btn} onClick={launch}>{t.launch}</button>
+          <button className={k.btn} onClick={launch}>{t.launch}</button>
         </div>
       )}
-      {note && <p className="text-sm text-terracotta-dark" role="status">{note}</p>}
-      {defis.length === 0 ? <p className="text-sm text-ink/60">{t.none}</p> : (
+      {note && <p className={`text-sm ${k.task}`} role="status">{note}</p>}
+      {defis.length === 0 ? <p className={`text-sm ${k.muted}`}>{t.none}</p> : (
         <ul className="grid gap-2 sm:grid-cols-2">
           {defis.map((d) => {
             const l = lessons.find((x) => x.id === d.lesson_id)
             return (
               <li key={d.id}>
-                <button onClick={() => setOpen(d)} className="w-full text-left rounded-lg border border-brass/50 bg-white/50 p-3">
+                <button onClick={() => setOpen(d)} className={`w-full text-left rounded-lg border ${k.card} p-3`}>
                   <span className="font-semibold">{l?.title[lang] ?? d.lesson_id}</span>
-                  <span className="block text-xs text-ink/60">{new Date(d.created_at).toLocaleDateString(lang)}</span>
+                  <span className={`block text-xs ${k.muted}`}>{new Date(d.created_at).toLocaleDateString(lang)}</span>
                 </button>
               </li>
             )
@@ -89,8 +99,8 @@ export default function Defis({ lang, userId, espaceId }: { lang: Lang; userId: 
   )
 }
 
-function Defi({ lang, userId, espaceId, defi, onBack }: { lang: Lang; userId: string; espaceId: string; defi: Defi; onBack: () => void }) {
-  const t = T[lang]
+function Defi({ lang, userId, espaceId, defi, onBack, sombre }: { lang: Lang; userId: string; espaceId: string; defi: Defi; onBack: () => void; sombre: boolean }) {
+  const t = T[lang], k = LOOK[sombre ? 'sombre' : 'clair']
   const lesson = lessons.find((l) => l.id === defi.lesson_id) ?? lessons[0]
   const [code, setCode] = useState(lesson.starter)
   const [passed, setPassed] = useState<boolean | null>(null)
@@ -135,39 +145,39 @@ function Defi({ lang, userId, espaceId, defi, onBack }: { lang: Lang; userId: st
   }
 
   return (
-    <section className="rounded-xl border-2 border-brass bg-paper p-3 space-y-3">
+    <section className={k.box}>
       <button className="text-sm underline" onClick={onBack}>{t.back}</button>
       <h3 className="font-serif font-bold text-lg">{lesson.title[lang]}</h3>
-      <p className="text-sm font-medium text-terracotta-dark">{lesson.task[lang]}</p>
-      <p className="text-xs text-ink/60">{t.task}</p>
+      <p className={`text-sm font-medium ${k.task}`}>{lesson.task[lang]}</p>
+      <p className={`text-xs ${k.muted}`}>{t.task}</p>
       <div className="grid gap-3 lg:grid-cols-2 items-start">
-        <textarea value={code} onChange={(e) => setCode(e.target.value)} rows={8} spellCheck={false} aria-label={lesson.title[lang]}
-          className="w-full rounded-lg border border-ink/30 bg-white/70 p-3 font-mono text-sm" />
+        <textarea value={code} onChange={(e) => setCode(e.target.value)} rows={k.rows} spellCheck={false} aria-label={lesson.title[lang]}
+          className={`w-full rounded-lg border ${k.code} p-3 font-mono text-sm`} />
         <div className="space-y-2 min-w-0">
           <div className="flex gap-2 flex-wrap">
-            <button className={ghost} onClick={run}>{t.run}</button>
-            <button className={btn} onClick={submit}>{mine ? t.resubmit : t.submit}</button>
+            <button className={k.ghost} onClick={run}>{t.run}</button>
+            <button className={k.btn} onClick={submit}>{mine ? t.resubmit : t.submit}</button>
           </div>
           {passed !== null && <p className="text-sm">{passed ? `✅ ${t.ok}` : t.ko}</p>}
-          {out && <pre className={pre}>{out}</pre>}
+          {out && <pre className={k.pre}>{out}</pre>}
           {msg && <p className="text-sm" role="status">{msg}</p>}
         </div>
       </div>
       <div className="space-y-2">
         <h4 className="font-semibold text-sm">{t.others}{mine ? ` · ${sols.length} ${t.count}` : ''}</h4>
-        {!mine ? <p className="text-sm text-ink/60">{t.locked}</p> : (
+        {!mine ? <p className={`text-sm ${k.muted}`}>{t.locked}</p> : (
           <ul className="space-y-2">
             {sols.map((s) => (
-              <li key={s.user_id} className="rounded-lg border border-brass/50 bg-white/50 p-2 space-y-1">
-                <p className="text-xs text-ink/70">
+              <li key={s.user_id} className={`rounded-lg border ${k.card} p-2 space-y-1`}>
+                <p className={`text-xs ${k.muted}`}>
                   <strong>{names[s.user_id] ?? '…'}</strong>{s.user_id === userId ? ` ${t.yours}` : ''} · {s.passed ? t.declared : t.notDeclared}
                 </p>
-                <pre className={pre}>{s.code}</pre>
+                <pre className={k.pre}>{s.code}</pre>
               </li>
             ))}
           </ul>
         )}
-        <p className="text-xs text-ink/50">{t.note}</p>
+        <p className={`text-xs ${k.faint}`}>{t.note}</p>
       </div>
     </section>
   )
