@@ -23,6 +23,7 @@ import AgentPanel from './AgentPanel'
 import Classe from './Classe'
 import TravailSujet from './espace/TravailSujet'
 import RetourProjet from './RetourProjet'
+import Quiz from './Quiz'
 import { profDe } from './Classe'
 import DiffModal from './DiffModal'
 import { askFix, type FixProposal } from './tutor'
@@ -447,6 +448,7 @@ export default function App() {
             </section>
           )}
           </div>
+          {!lesson.lecture && !lesson.predict && <Quiz key={lesson.id + lang} lesson={lesson} lang={lang} />}
           {lesson.predict && (
             <div id="exercice" className="card p-5 sm:p-6 scroll-mt-32">
             <Predict key={lesson.id} lesson={lesson} lang={lang} hasNext={idx < lessons.length - 1}
