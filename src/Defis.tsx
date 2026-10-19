@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from './supabase'
-import { lessons } from './lessons'
+import { lessons as toutes, enLangue } from './lessons'
 import { runLesson } from './runner'
 import type { Lang } from './i18n'
 
@@ -42,6 +42,7 @@ const LOOK = {
 
 export default function Defis({ lang, userId, espaceId, sombre = false }: { lang: Lang; userId: string; espaceId: string; sombre?: boolean }) {
   const t = T[lang], k = LOOK[sombre ? 'sombre' : 'clair']
+  const lessons = toutes.map((l) => enLangue(l, lang)) // code de l'exercice dans la langue de l'élève
   const [defis, setDefis] = useState<Defi[]>([])
   const [open, setOpen] = useState<Defi | null>(null)
   const [isHost, setIsHost] = useState(false)
@@ -101,6 +102,7 @@ export default function Defis({ lang, userId, espaceId, sombre = false }: { lang
 
 function Defi({ lang, userId, espaceId, defi, onBack, sombre }: { lang: Lang; userId: string; espaceId: string; defi: Defi; onBack: () => void; sombre: boolean }) {
   const t = T[lang], k = LOOK[sombre ? 'sombre' : 'clair']
+  const lessons = toutes.map((l) => enLangue(l, lang)) // code de l'exercice dans la langue de l'élève
   const lesson = lessons.find((l) => l.id === defi.lesson_id) ?? lessons[0]
   const [code, setCode] = useState(lesson.starter)
   const [passed, setPassed] = useState<boolean | null>(null)

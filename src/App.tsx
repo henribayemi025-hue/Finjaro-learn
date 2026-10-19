@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import Espaces from './Espaces'
 import { TRACK_ICON } from './Curriculum'
@@ -18,7 +18,7 @@ import { o as outilsUi } from './outils/i18n'
 import { AuthBox, Bienvenue, messageAuth } from './Auth'
 import { supabase } from './supabase'
 import { ui, type Lang } from './i18n'
-import { lessons } from './lessons'
+import { lessons, enLangue, cleCode } from './lessons'
 import AgentPanel from './AgentPanel'
 import Classe from './Classe'
 import TravailSujet from './espace/TravailSujet'
@@ -105,8 +105,8 @@ export default function App() {
   const [ai, setAi] = useState(() => load('ai', '0') === '1')
   const [idx, setIdx] = useState(() => Math.max(0, lessons.findIndex((l) => l.id === load('last', ''))))
   const [done, setDone] = useState<string[]>(() => JSON.parse(load('done', '[]')))
-  const lesson = lessons[idx]
-  const [code, setCode] = useState(() => load('code:' + lesson.id, lesson.starter))
+  const lesson = enLangue(lessons[idx], lang)
+  const [code, setCode] = useState(() => load(cleCode(lesson, lang), lesson.starter))
   const [res, setRes] = useState<RunResult | null>(null)
   const [sound, setSound] = useState(() => load('sound', '1') === '1')
   const [fix, setFix] = useState<FixProposal | null>(null)
@@ -123,6 +123,14 @@ export default function App() {
   const [showHint, setShowHint] = useState(false)
   const [chrono, setChrono] = useState(false)
   const [running, setRunning] = useState<'' | 'run' | 'py'>('')
+  // Changement de langue pendant une leçon : le code (et ses tests) change de langue avec elle.
+  const langPrec = useRef(lang)
+  useEffect(() => {
+    if (langPrec.current === lang) return
+    langPrec.current = lang
+    const l = enLangue(lessons[idx], lang)
+    setCode(load(cleCode(l, lang), l.starter)); setRes(null)
+  }, [lang, idx])
   // « Travailler avec les agents IA » : la leçon s'ouvre dans le cadre de l'Atelier (Beau, 14/10).
   const [travail, setTravail] = useState(false)
   const [menu, setMenu] = useState(false)
@@ -174,7 +182,7 @@ export default function App() {
   const go = (i: number) => {
     setIdx(i)
     save('last', lessons[i].id)
-    setCode(load('code:' + lessons[i].id, lessons[i].starter))
+    setCode(load(cleCode(lessons[i], lang), enLangue(lessons[i], lang).starter))
     setRes(null)
     setFails(0)
     setStuckHint(false)
@@ -401,7 +409,7 @@ export default function App() {
       {burst > 0 && <Burst key={burst} />}
       {chrono && <Chrono lang={lang} sound={sound} onClose={() => setChrono(false)} onPlayed={recordDay} />}
       {route.v === 'lecon' && travail && (
-        <TravailSujet key={lesson.id} lang={lang} lesson={lesson} track={track} code={code} onCode={(v) => { setCode(v); save('code:' + lesson.id, v) }}
+        <TravailSujet key={lesson.id} lang={lang} lesson={lesson} track={track} code={code} onCode={(v) => { setCode(v); save(cleCode(lesson, lang), v) }}
           onRun={run} res={res} running={!!running} ai={ai} signedIn={!!session} onClose={() => setTravail(false)}
           onPrev={pos > 1 ? () => ouvre(trackLessons[pos - 2].i) : undefined} onNext={pos < trackLessons.length ? () => ouvre(trackLessons[pos].i) : undefined} />
       )}
@@ -469,7 +477,7 @@ export default function App() {
                       const ins = sym === '⇥' ? '    ' : sym
                       const a = el.selectionStart, b = el.selectionEnd
                       const v = code.slice(0, a) + ins + code.slice(b)
-                      setCode(v); save('code:' + lesson.id, v)
+                      setCode(v); save(cleCode(lesson, lang), v)
                       requestAnimationFrame(() => { el.focus(); el.selectionStart = el.selectionEnd = a + ins.length })
                     }}>{sym}</button>
                 ))}
@@ -477,14 +485,14 @@ export default function App() {
               <textarea
                 id="editeur"
                 value={code}
-                onChange={(e) => { setCode(e.target.value); save('code:' + lesson.id, e.target.value) }}
+                onChange={(e) => { setCode(e.target.value); save(cleCode(lesson, lang), e.target.value) }}
                 onKeyDown={(e) => {
                   if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); void run() }
                   if (e.key === 'Tab' && !e.shiftKey) {
                     e.preventDefault()
                     const el = e.currentTarget, a = el.selectionStart, b = el.selectionEnd
                     const v = code.slice(0, a) + '    ' + code.slice(b)
-                    setCode(v); save('code:' + lesson.id, v)
+                    setCode(v); save(cleCode(lesson, lang), v)
                     requestAnimationFrame(() => { el.selectionStart = el.selectionEnd = a + 4 })
                   }
                 }}
@@ -500,7 +508,7 @@ export default function App() {
               <button onClick={run} disabled={!!running} className="btn btn-primary">{running ? '⏳' : '▶'} {t.run}</button>
               <button onClick={() => setShowHint(true)} className="btn">💡 {t.hint}</button>
               <button
-                onClick={() => { setCode(lesson.solution); save('code:' + lesson.id, lesson.solution) }}
+                onClick={() => { setCode(lesson.solution); save(cleCode(lesson, lang), lesson.solution) }}
                 className="btn"
               >
                 {t.solution}
@@ -592,7 +600,7 @@ export default function App() {
           {debug && lesson.lang === 'py' && <div id="debug" className="scroll-mt-20"><StepDebugger lang={lang} code={code} packages={lesson.packages} onClose={() => setDebug(false)} /></div>}
           {fix && (
             <DiffModal lang={lang} original={code} fix={fix} onClose={() => setFix(null)}
-              onAccept={() => { setCode(fix.fixed_code); save('code:' + lesson.id, fix.fixed_code); setFix(null); setRes(null) }} />
+              onAccept={() => { setCode(fix.fixed_code); save(cleCode(lesson, lang), fix.fixed_code); setFix(null); setRes(null) }} />
           )}
         </div>
       </div>}

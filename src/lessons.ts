@@ -27,6 +27,7 @@ import { quantLessons } from './lessonsQuant'
 import { nlpLessons } from './lessonsNLP'
 import { compilLessons } from './lessonsCompil'
 import { finsLessons } from './lessonsFins'
+import { codeEn } from './lessonsEn'
 
 type T = Record<Lang, string>
 export type Group = 'js' | 'py-bases' | 'py-algo' | 'py-lecture' | 'py-projets' | 'ds-numpy' | 'ds-pandas' | 'ds-ml' | 'ds-viz' | 'dl' | 'dl-reseaux' | 'ai-rag' | 'ai-agents' | 'pe' | 'maths' | 'crypto' | 'archi' | 'jeux' | 'neuro' | 'bio' | 'signal' | 'systemes' | 'ethique' | 'pg-calc' | 'pg-robot' | 'pg-faq' | 'pg-ligne' | 'ia-api' | 'git' | 'c' | 'cpp' | 'robo' | 'robo-traces' | 'robo-reel' | 'pg-ligne' | 'algo' | 'quant' | 'nlp' | 'compil'
@@ -54,6 +55,8 @@ export interface Lesson {
   langue?: 'c' | 'cpp'
   /** Bibliothèques Python à charger (numpy, pandas…). */
   packages?: string[]
+  /** Code de l'exercice en anglais (Beau, 14/10 : « tu mets du français alors qu'on est en mode anglais ») : remplace starter, example, solution, checks en mode anglais. */
+  en?: { starter: string; example?: string; solution: string; checks: string[] }
   /** Fin de module : trois exercices de difficulté croissante, puis le projet (lessonsFins.ts). */
   niveau?: 'facile' | 'moyen' | 'difficile' | 'projet'
 }
@@ -146,3 +149,12 @@ export const lessons: Lesson[] = [...jsLessons.map((l) => ({ ...l, lang: 'js' as
   .map((l, i) => ({ l, i }))
   .sort((a, b) => ORDER.indexOf(a.l.group ?? 'js') - ORDER.indexOf(b.l.group ?? 'js') || a.i - b.i)
   .map((x) => x.l)
+  // Version anglaise du code quand elle existe (lessonsEn.ts) : consigne, indice et code.
+  .map((l) => { const e = codeEn[l.id]; return e ? { ...l, task: { ...l.task, en: e.task }, hint: { ...l.hint, en: e.hint }, en: { starter: e.starter, example: e.example, solution: e.solution, checks: e.checks } } : l })
+
+/** La leçon dans la langue de l'élève : en anglais, le code de l'exercice (noms, textes attendus) passe en anglais quand il existe. */
+export function enLangue(l: Lesson, lang: Lang): Lesson {
+  return lang === 'en' && l.en ? { ...l, ...l.en, example: l.en.example ?? l.example } : l
+}
+/** Clé du code gardé sur l'appareil : séparée en anglais quand l'exercice a sa version anglaise (les tests diffèrent). */
+export const cleCode = (l: Lesson, lang: Lang) => 'code:' + l.id + (lang === 'en' && l.en ? ':en' : '')

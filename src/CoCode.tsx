@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react'
 import { apply, prune, initial, HELLO_EVERY, type CoEvent, type CoState } from './coop'
-import { lessons } from './lessons'
+import { lessons as toutes, enLangue } from './lessons'
 import { runLesson, type RunResult } from './runner'
 import { ui, type Lang } from './i18n'
 
@@ -31,6 +31,7 @@ export default function CoCode({ lang, me, send, handlerRef, sombre = false }: {
   lang: Lang; me: { id: string; name: string }; send: (ev: CoEvent) => void; handlerRef: MutableRefObject<((ev: CoEvent) => void) | null>; sombre?: boolean
 }) {
   const t = T[lang], u = ui[lang], k = LOOK[sombre ? 'sombre' : 'clair']
+  const lessons = toutes.map((l) => enLangue(l, lang)) // code de l'exercice dans la langue de l'élève
   const first = lessons[0]
   const [s, setS] = useState<CoState>(() => initial(first.id, first.starter))
   const sRef = useRef(s)
