@@ -77,3 +77,89 @@ export const finsLessons: Lesson[] = [
     ],
   },
 ]
+
+/**
+ * FIN DE MODULE · PYTHON (bases). Même modèle que JavaScript : trois exercices (facile, moyen, difficile) puis un projet,
+ * vérifiés par le code (python via Pyodide dans le navigateur, python3 dans `npm run test:exos`).
+ * Les noms de fonctions sont en anglais pour que le code soit identique dans les deux langues ; seule la consigne change.
+ */
+const enPy = (starter: string) => starter.replace('# ton code ici', '# your code here')
+
+const pyFin = (
+  p: Pick<Lesson, 'id' | 'niveau' | 'title' | 'explain' | 'task' | 'hint' | 'example' | 'solution' | 'checks'> & { starter: string },
+): Lesson => ({
+  ...p, lang: 'py', group: 'py-bases',
+  en: { starter: enPy(p.starter), example: p.example, solution: p.solution, checks: p.checks },
+})
+
+export const finsPy: Lesson[] = [
+  pyFin({
+    id: 'fin-py-facile', niveau: 'facile',
+    title: { fr: 'Fin du module · exercice facile : l’aire', en: 'End of module · easy exercise: the area' },
+    explain: {
+      fr: 'Premier exercice de fin de module. Une fonction reçoit deux valeurs, les combine, et rend le résultat avec return.',
+      en: 'First end-of-module exercise. A function receives two values, combines them, and gives the result back with return.',
+    },
+    example: `def add(a, b):\n    return a + b\n\nprint(add(2, 3))  # 5`,
+    task: { fr: 'Écris area(width, height) qui renvoie la largeur multipliée par la hauteur.', en: 'Write area(width, height) that returns the width multiplied by the height.' },
+    starter: `def area(width, height):\n    # ton code ici\n    pass\n`,
+    hint: { fr: 'Une seule ligne : return width * height', en: 'One line: return width * height' },
+    solution: `def area(width, height):\n    return width * height`,
+    checks: ['area(3, 4) == 12', 'area(0, 5) == 0', 'area(2.5, 2) == 5.0'],
+  }),
+  pyFin({
+    id: 'fin-py-moyen', niveau: 'moyen',
+    title: { fr: 'Fin du module · exercice moyen : compter les pairs', en: 'End of module · medium exercise: count the even numbers' },
+    explain: {
+      fr: 'Deuxième exercice : une liste, une boucle et une condition ensemble. Un nombre est pair quand le reste de sa division par 2 vaut 0 : n % 2 == 0.',
+      en: 'Second exercise: a list, a loop and a condition together. A number is even when the remainder of its division by 2 is 0: n % 2 == 0.',
+    },
+    example: `count = 0\nfor n in [5, 8, 9]:\n    if n > 6:\n        count += 1\nprint(count)  # 2`,
+    task: { fr: 'Écris count_even(numbers) qui renvoie combien de nombres pairs contient la liste.', en: 'Write count_even(numbers) that returns how many even numbers the list contains.' },
+    starter: `def count_even(numbers):\n    # ton code ici\n    pass\n`,
+    hint: { fr: 'Pars de 0, parcours la liste, et ajoute 1 quand n % 2 == 0. Attention aux négatifs : -2 est pair.', en: 'Start at 0, loop over the list, and add 1 when n % 2 == 0. Mind the negatives: -2 is even.' },
+    solution: `def count_even(numbers):\n    count = 0\n    for n in numbers:\n        if n % 2 == 0:\n            count += 1\n    return count`,
+    checks: ['count_even([1, 2, 3, 4]) == 2', 'count_even([]) == 0', 'count_even([2, 4, 6]) == 3', 'count_even([-2, -1]) == 1'],
+  }),
+  pyFin({
+    id: 'fin-py-difficile', niveau: 'difficile',
+    title: { fr: 'Fin du module · exercice difficile : compter les mots', en: 'End of module · hard exercise: count the words' },
+    explain: {
+      fr: 'Troisième exercice, le plus dur : du texte, une boucle et un dictionnaire qu’on remplit. Les majuscules ne comptent pas : « Le » et « le » sont le même mot. text.split() coupe sur les espaces.',
+      en: 'Third exercise, the hardest: text, a loop and a dictionary you fill in. Capital letters do not matter: “The” and “the” are the same word. text.split() cuts on spaces.',
+    },
+    example: `counts = {}\ncounts["a"] = counts.get("a", 0) + 1\ncounts["a"] = counts.get("a", 0) + 1\nprint(counts)  # {'a': 2}`,
+    task: {
+      fr: 'Écris word_count(text) qui renvoie un dictionnaire : chaque mot (en minuscules) associé au nombre de fois où il apparaît.',
+      en: 'Write word_count(text) that returns a dictionary: each word (in lowercase) mapped to the number of times it appears.',
+    },
+    starter: `def word_count(text):\n    # ton code ici\n    pass\n`,
+    hint: { fr: 'Passe le texte en minuscules avec text.lower(), parcours text.split(), et utilise counts.get(mot, 0) + 1.', en: 'Lowercase the text with text.lower(), loop over text.split(), and use counts.get(word, 0) + 1.' },
+    solution: `def word_count(text):\n    counts = {}\n    for word in text.lower().split():\n        counts[word] = counts.get(word, 0) + 1\n    return counts`,
+    checks: ['word_count("a b a") == {"a": 2, "b": 1}', 'word_count("The the THE") == {"the": 3}', 'word_count("") == {}', 'word_count("x  y") == {"x": 1, "y": 1}'],
+  }),
+  pyFin({
+    id: 'fin-py-projet', niveau: 'projet',
+    title: { fr: 'Projet du module : le carnet de dépenses', en: 'Module project: the expense notebook' },
+    explain: {
+      fr: 'Le projet réunit tout le module : dictionnaires, boucles, conditions et fonctions. Un carnet est un dictionnaire {nom: montant}. Tu écris trois fonctions qui marchent ensemble. Le code est vérifié par des tests ; une fois validé, tu peux demander l’avis de ton professeur sur ton code.',
+      en: 'The project brings the whole module together: dictionaries, loops, conditions and functions. A notebook is a dictionary {name: amount}. You write three functions that work together. The code is checked by tests; once it passes, you can ask your teacher for feedback on your code.',
+    },
+    example: `notebook = {"rent": 500, "food": 200}\nprint(sum(notebook.values()))  # 700`,
+    task: {
+      fr: '1) total(expenses) renvoie la somme des montants (0 si le carnet est vide). 2) biggest(expenses) renvoie le nom de la plus grosse dépense (None si le carnet est vide). 3) report(expenses) renvoie une liste de lignes "nom: montant", de la plus grosse dépense à la plus petite.',
+      en: '1) total(expenses) returns the sum of the amounts (0 if the notebook is empty). 2) biggest(expenses) returns the name of the biggest expense (None if the notebook is empty). 3) report(expenses) returns a list of "name: amount" lines, from the biggest expense to the smallest.',
+    },
+    starter: `def total(expenses):\n    # ton code ici\n    pass\n\ndef biggest(expenses):\n    # ton code ici\n    pass\n\ndef report(expenses):\n    # ton code ici\n    pass\n`,
+    hint: {
+      fr: 'total : sum(expenses.values()). biggest : pense au cas vide d’abord. report : sorted(expenses.items(), key=lambda p: p[1], reverse=True) donne les paires dans le bon ordre.',
+      en: 'total: sum(expenses.values()). biggest: handle the empty case first. report: sorted(expenses.items(), key=lambda p: p[1], reverse=True) gives the pairs in the right order.',
+    },
+    solution: `def total(expenses):\n    return sum(expenses.values())\n\ndef biggest(expenses):\n    if not expenses:\n        return None\n    best = None\n    for name in expenses:\n        if best is None or expenses[name] > expenses[best]:\n            best = name\n    return best\n\ndef report(expenses):\n    pairs = sorted(expenses.items(), key=lambda p: p[1], reverse=True)\n    return [name + ": " + str(amount) for name, amount in pairs]`,
+    checks: [
+      'total({"a": 5, "b": 10}) == 15', 'total({}) == 0',
+      'biggest({"a": 5, "b": 10}) == "b"', 'biggest({}) is None', 'biggest({"x": 3}) == "x"',
+      'report({"a": 5, "b": 10}) == ["b: 10", "a: 5"]', 'report({}) == []',
+    ],
+  }),
+]
