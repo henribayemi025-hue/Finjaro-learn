@@ -83,7 +83,7 @@ export const finsLessons: Lesson[] = [
  * vérifiés par le code (python via Pyodide dans le navigateur, python3 dans `npm run test:exos`).
  * Les noms de fonctions sont en anglais pour que le code soit identique dans les deux langues ; seule la consigne change.
  */
-const enPy = (starter: string) => starter.replace('# ton code ici', '# your code here')
+const enPy = (starter: string) => starter.replaceAll('# ton code ici', '# your code here')
 
 const pyFin = (
   p: Pick<Lesson, 'id' | 'niveau' | 'title' | 'explain' | 'task' | 'hint' | 'example' | 'solution' | 'checks'> & { starter: string },
