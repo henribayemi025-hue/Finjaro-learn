@@ -87,8 +87,9 @@ const enPy = (starter: string) => starter.replaceAll('# ton code ici', '# your c
 
 const pyFin = (
   p: Pick<Lesson, 'id' | 'niveau' | 'title' | 'explain' | 'task' | 'hint' | 'example' | 'solution' | 'checks'> & { starter: string },
+  group: 'py-bases' | 'py-algo' = 'py-bases',
 ): Lesson => ({
-  ...p, lang: 'py', group: 'py-bases',
+  ...p, lang: 'py', group,
   en: { starter: enPy(p.starter), example: p.example, solution: p.solution, checks: p.checks },
 })
 
@@ -162,4 +163,80 @@ export const finsPy: Lesson[] = [
       'report({"a": 5, "b": 10}) == ["b: 10", "a: 5"]', 'report({}) == []',
     ],
   }),
+]
+
+/** FIN DE MODULE · PYTHON (algorithmes et structures) : récursivité, recherche dichotomique, pile, file et classe. */
+export const finsPyAlgo: Lesson[] = [
+  pyFin({
+    id: 'fin-pyalgo-facile', niveau: 'facile',
+    title: { fr: 'Fin du module · exercice facile : la puissance', en: 'End of module · easy exercise: the power' },
+    explain: {
+      fr: 'Premier exercice : une fonction qui s’appelle elle-même. Elle a toujours un cas d’arrêt (ici : exposant 0) et un cas où elle se rappelle avec un problème plus petit.',
+      en: 'First exercise: a function that calls itself. It always has a stopping case (here: exponent 0) and a case where it calls itself with a smaller problem.',
+    },
+    example: `def countdown(n):\n    if n == 0:\n        return 0\n    return n + countdown(n - 1)\n\nprint(countdown(3))  # 6`,
+    task: { fr: 'Écris power(base, exp) qui renvoie base élevé à la puissance exp (exp est un entier positif ou nul), sans utiliser ** ni pow.', en: 'Write power(base, exp) that returns base raised to the power exp (exp is a whole number, zero or more), without using ** or pow.' },
+    starter: `def power(base, exp):\n    # ton code ici\n    pass\n`,
+    hint: { fr: 'Cas d’arrêt : exp == 0 donne 1. Sinon : base * power(base, exp - 1).', en: 'Stopping case: exp == 0 gives 1. Otherwise: base * power(base, exp - 1).' },
+    solution: `def power(base, exp):\n    if exp == 0:\n        return 1\n    return base * power(base, exp - 1)`,
+    checks: ['power(2, 10) == 1024', 'power(5, 0) == 1', 'power(3, 1) == 3', 'power(0, 3) == 0'],
+  }, 'py-algo'),
+  pyFin({
+    id: 'fin-pyalgo-moyen', niveau: 'moyen',
+    title: { fr: 'Fin du module · exercice moyen : chercher dans une liste triée', en: 'End of module · medium exercise: search a sorted list' },
+    explain: {
+      fr: 'Deuxième exercice : la recherche dichotomique. Dans une liste triée, on regarde le milieu et on jette la moitié qui ne peut pas contenir la valeur. On recommence jusqu’à trouver ou jusqu’à ce qu’il ne reste rien.',
+      en: 'Second exercise: binary search. In a sorted list, look at the middle and throw away the half that cannot contain the value. Repeat until you find it or nothing is left.',
+    },
+    example: `items = [2, 4, 6, 8]\nmid = len(items) // 2\nprint(items[mid])  # 6`,
+    task: { fr: 'Écris binary_search(items, target) qui renvoie la position (en partant de 0) de target dans la liste triée items, ou -1 s’il n’y est pas.', en: 'Write binary_search(items, target) that returns the position (starting at 0) of target in the sorted list items, or -1 if it is not there.' },
+    starter: `def binary_search(items, target):\n    # ton code ici\n    pass\n`,
+    hint: { fr: 'Garde deux bornes, low et high. Tant que low <= high : calcule mid, compare items[mid] à target, et avance low ou recule high.', en: 'Keep two bounds, low and high. While low <= high: compute mid, compare items[mid] with target, and move low up or high down.' },
+    solution: `def binary_search(items, target):\n    low, high = 0, len(items) - 1\n    while low <= high:\n        mid = (low + high) // 2\n        if items[mid] == target:\n            return mid\n        if items[mid] < target:\n            low = mid + 1\n        else:\n            high = mid - 1\n    return -1`,
+    checks: ['binary_search([1, 3, 5, 7, 9], 7) == 3', 'binary_search([1, 3, 5, 7, 9], 1) == 0', 'binary_search([1, 3, 5, 7, 9], 9) == 4', 'binary_search([1, 3, 5, 7, 9], 4) == -1', 'binary_search([], 1) == -1', 'binary_search([5], 5) == 0'],
+  }, 'py-algo'),
+  pyFin({
+    id: 'fin-pyalgo-difficile', niveau: 'difficile',
+    title: { fr: 'Fin du module · exercice difficile : parenthèses équilibrées', en: 'End of module · hard exercise: balanced brackets' },
+    explain: {
+      fr: 'Troisième exercice, le plus dur : une pile. On empile chaque parenthèse ouvrante ; devant une fermante, on dépile et on vérifie qu’elle ferme la bonne ouvrante. Les autres caractères sont ignorés.',
+      en: 'Third exercise, the hardest: a stack. Push every opening bracket; on a closing one, pop and check that it closes the right opening one. Other characters are ignored.',
+    },
+    example: `stack = []\nstack.append("(")\nstack.append("[")\nprint(stack.pop())  # [`,
+    task: { fr: 'Écris balanced(text) qui renvoie True si les (), [] et {} du texte sont bien ouverts et fermés dans le bon ordre, False sinon.', en: 'Write balanced(text) that returns True if the (), [] and {} in the text are opened and closed in the right order, False otherwise.' },
+    starter: `def balanced(text):\n    # ton code ici\n    pass\n`,
+    hint: { fr: 'Un dictionnaire {")": "(", "]": "[", "}": "{"} donne l’ouvrante attendue. Une fermante sur une pile vide est déjà une erreur. À la fin, la pile doit être vide.', en: 'A dictionary {")": "(", "]": "[", "}": "{"} gives the expected opening bracket. A closing bracket on an empty stack is already an error. At the end, the stack must be empty.' },
+    solution: `def balanced(text):\n    pairs = {")": "(", "]": "[", "}": "{"}\n    stack = []\n    for ch in text:\n        if ch in "([{":\n            stack.append(ch)\n        elif ch in pairs:\n            if not stack or stack.pop() != pairs[ch]:\n                return False\n    return not stack`,
+    checks: ['balanced("([]{})") is True', 'balanced("(]") is False', 'balanced("((") is False', 'balanced("") is True', 'balanced("]") is False', 'balanced("a(b)c") is True'],
+  }, 'py-algo'),
+  pyFin({
+    id: 'fin-pyalgo-projet', niveau: 'projet',
+    title: { fr: 'Projet du module : la file du guichet', en: 'Module project: the ticket queue' },
+    explain: {
+      fr: 'Le projet réunit le module : une classe qui garde ses données, une file (premier arrivé, premier servi), une recherche dans la liste. Tu écris la classe TicketQueue. Le code est vérifié par des tests ; une fois validé, tu peux demander l’avis de ton professeur sur ton code.',
+      en: 'The project brings the module together: a class that keeps its data, a queue (first in, first out), a search in the list. You write the TicketQueue class. The code is checked by tests; once it passes, you can ask your teacher for feedback on your code.',
+    },
+    example: `line = []\nline.append("a")\nline.append("b")\nprint(line.pop(0))  # a`,
+    task: {
+      fr: 'Écris la classe TicketQueue : add(name) ajoute une personne à la fin ; next() renvoie et retire la première (None si la file est vide) ; size() renvoie le nombre de personnes ; position(name) renvoie sa place en partant de 1 (-1 si absente) ; remove(name) la retire et renvoie True (False si absente).',
+      en: 'Write the TicketQueue class: add(name) adds a person at the end; next() returns and removes the first one (None if the queue is empty); size() returns the number of people; position(name) returns their place starting at 1 (-1 if absent); remove(name) removes them and returns True (False if absent).',
+    },
+    starter: `class TicketQueue:\n    def __init__(self):\n        # ton code ici\n        pass\n\n    def add(self, name):\n        # ton code ici\n        pass\n\n    def next(self):\n        # ton code ici\n        pass\n\n    def size(self):\n        # ton code ici\n        pass\n\n    def position(self, name):\n        # ton code ici\n        pass\n\n    def remove(self, name):\n        # ton code ici\n        pass\n`,
+    hint: {
+      fr: 'Garde une liste self.items créée dans __init__ (pas partagée entre les files). next utilise pop(0). position utilise items.index(name) + 1.',
+      en: 'Keep a list self.items created in __init__ (not shared between queues). next uses pop(0). position uses items.index(name) + 1.',
+    },
+    solution: `class TicketQueue:\n    def __init__(self):\n        self.items = []\n\n    def add(self, name):\n        self.items.append(name)\n\n    def next(self):\n        if not self.items:\n            return None\n        return self.items.pop(0)\n\n    def size(self):\n        return len(self.items)\n\n    def position(self, name):\n        if name in self.items:\n            return self.items.index(name) + 1\n        return -1\n\n    def remove(self, name):\n        if name in self.items:\n            self.items.remove(name)\n            return True\n        return False`,
+    checks: [
+      '(lambda q: (q.add("Ana"), q.add("Bob"), q.size())[-1])(TicketQueue()) == 2',
+      '(lambda q: (q.add("Ana"), q.add("Bob"), q.next())[-1])(TicketQueue()) == "Ana"',
+      'TicketQueue().next() is None',
+      '(lambda q: (q.add("Ana"), q.add("Bob"), q.position("Bob"))[-1])(TicketQueue()) == 2',
+      'TicketQueue().position("Zed") == -1',
+      '(lambda q: (q.add("Ana"), q.add("Bob"), q.next(), q.position("Bob"))[-1])(TicketQueue()) == 1',
+      '(lambda q: (q.add("Ana"), q.remove("Ana"))[-1])(TicketQueue()) is True',
+      'TicketQueue().remove("Zed") is False',
+      '(lambda a, b: (a.add("x"), b.size())[-1])(TicketQueue(), TicketQueue()) == 0',
+    ],
+  }, 'py-algo'),
 ]
