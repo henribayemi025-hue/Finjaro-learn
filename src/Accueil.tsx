@@ -6,7 +6,7 @@ import { TRACK_ICON } from './Curriculum'
 import type { Lang } from './i18n'
 import { chargerIndex, type Numero } from './Lettre'
 import Carrousel, { type Diapo } from './Carrousel'
-import { cursusTotal, modulesVus } from './cursus'
+import { cursusTotal, modulesVus } from './cursusData'
 
 type Niveau = 'debutant' | 'intermediaire' | 'avance'
 /** Niveau conseillé de chaque parcours (une indication de difficulté, pas une note). */

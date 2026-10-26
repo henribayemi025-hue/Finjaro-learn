@@ -1,6 +1,6 @@
 // Vérifie le cursus « De zéro à chercheur IA » : chaque module a des leçons, aucune leçon n'est dans deux modules, l'avancement est exact.
 import assert from 'node:assert/strict'
-import { modulesVus, cursusTotal, moduleCourant, MODULES } from '../.test-build/cursus.mjs'
+import { modulesVus, cursusTotal, moduleCourant, MODULES } from '../.test-build/cursusdata.mjs'
 let n = 0
 const ok = (c, m) => { assert.ok(c, m); n++ }
 const vide = modulesVus([])

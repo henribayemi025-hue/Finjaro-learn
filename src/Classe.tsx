@@ -137,7 +137,7 @@ export default function Classe({ lang, titre, pos, total, parcours, track, langa
     setBusy(true); setAttente(q); setQuestion('')
     if (saisie2.current) { saisie2.current.style.height = ''; saisie2.current.focus() }
     const history = fil.filter((e) => e.prof === prof.id).slice(-3).flatMap((e) => [{ role: 'user' as const, text: e.q }, { role: 'model' as const, text: e.a }])
-    const r = await askTutor({ question: q, code, lesson: contexte ?? `[${langage === 'py' ? 'Python' : langage === 'sql' ? 'SQL' : 'JavaScript'}] ${titre}`, output: sortie, lang, agentId: prof.id, socratique: parQuestions, history })
+    const r = await askTutor({ question: q, code, lesson: (contexte ?? `[${langage === 'py' ? 'Python' : langage === 'sql' ? 'SQL' : 'JavaScript'}] ${titre}`) + '\n' + (fr ? 'Où il en est : ' : 'Where he is: ') + ({ rien: fr ? 'il n’a pas encore lancé son code' : 'he has not run his code yet', ok: fr ? 'exercice réussi' : 'exercise passed', ko: fr ? 'il a lancé son code, le résultat n’est pas bon' : 'he ran his code, the result is wrong', erreur: fr ? 'son code a une erreur : ' + erreur.slice(0, 200) : 'his code has an error: ' + erreur.slice(0, 200) } as Record<string, string>)[etat], output: sortie, lang, agentId: prof.id, socratique: parQuestions, history })
     const a = r.answer ?? (r.error === 'quota' ? (fr ? 'Limite de questions atteinte pour aujourd’hui.' : 'Question limit reached for today.') : (fr ? `${nom} est indisponible pour l’instant, réessaie plus tard.` : `${nom} is unavailable right now, try again later.`))
     setFil((f) => {
       // Un refus (quota, panne) s'affiche mais ne se garde pas : il ne doit pas revenir au prof comme une vraie réponse.

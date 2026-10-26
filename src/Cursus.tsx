@@ -3,7 +3,7 @@ import { agents } from './agents'
 import AgentFace from './AgentFace'
 import { Md } from './Md'
 import { askTutor } from './tutor'
-import { cursusTotal, moduleCourant, modulesVus, type ModuleVu } from './cursus'
+import { cursusTotal, moduleCourant, modulesVus, type ModuleVu } from './cursusData'
 import type { Lang } from './i18n'
 
 const T = {

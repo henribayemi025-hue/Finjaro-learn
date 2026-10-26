@@ -150,7 +150,7 @@ Deno.serve(async (req) => {
   const rendu = await ecrire({
     system,
     tours,
-    maxSortie: fixMode ? 2000 : 600,
+    maxSortie: fixMode ? 2000 : 800,
     temperature: fixMode ? 0.2 : 0.4,
     schema: fixMode
       ? {

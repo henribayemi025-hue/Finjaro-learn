@@ -8,6 +8,7 @@ import type { Lesson } from '../lessons'
 import { lireBase, type RunResult, type TableVue } from '../runner'
 import { contexteSql, tablesDe } from '../sqlBase'
 import { expliqueErreur } from '../explainError'
+import { contexteCours } from '../contexteCours'
 import type { Lang } from '../i18n'
 
 // TRAVAILLER UN SUJET AVEC LES AGENTS IA, dans le même cadre que l'Atelier de code (Beau, 14/10 : « quand je choisis de faire avec
@@ -130,7 +131,7 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
     enBas.current = true; setBusy(true); setQuestion('')
     setFil((f) => [...f, { q, a: '', prof: prof.id }])
     const history = fil.filter((e) => e.prof === prof.id && e.ok !== false && e.a).slice(-3).flatMap((e) => [{ role: 'user' as const, text: e.q }, { role: 'model' as const, text: e.a }])
-    const r = await askTutor({ question: q, code: aCode ? code : notes, lesson: estSql ? contexteSql(titre, setupSql, lang) : `[${langage}] ${titre}`, output: res?.output.join('\n') ?? '', lang, agentId: prof.id, history })
+    const r = await askTutor({ question: q, code: aCode ? code : notes, lesson: contexteCours(lesson, lang, (() => { try { return JSON.parse(localStorage.getItem('learn:done') ?? '[]') as string[] } catch { return [] } })(), estSql ? contexteSql(titre, setupSql, lang) : ''), output: res?.output.join('\n') ?? '', lang, agentId: prof.id, history })
     const a = r.answer ?? (r.error === 'quota' ? t.quota : t.down(prof.name))
     setFil((f) => {
       const suite = [...f.slice(0, -1), { q, a, prof: prof.id, ok: !!r.answer }].slice(-20)

@@ -44,7 +44,8 @@ async function viaGemini(cle: string, model: string, d: Demande, delaiMs: number
       systemInstruction: { parts: [{ text: d.system }] },
       contents: d.tours.map((t) => ({ role: t.role, parts: [{ text: t.text }] })),
       generationConfig: {
-        maxOutputTokens: d.maxSortie,
+        // La réflexion « low » des Gemini 3 compte dans cette limite : sans marge, la réponse visible était coupée en pleine phrase (Beau, 26/10).
+        maxOutputTokens: d.maxSortie + 1200,
         temperature: d.temperature,
         thinkingConfig,
         ...(d.schema ? { responseMimeType: 'application/json', responseSchema: d.schema } : {}),
@@ -59,6 +60,11 @@ async function viaGemini(cle: string, model: string, d: Demande, delaiMs: number
     .map((p: { text?: string }) => p.text ?? '')
     .join('')
   if (!txt.trim()) throw new Error(`réponse vide (${body?.candidates?.[0]?.finishReason ?? '?'})`)
+  // Réponse coupée par la limite : on s'arrête à la dernière phrase entière plutôt qu'au milieu d'un mot.
+  if (body?.candidates?.[0]?.finishReason === 'MAX_TOKENS' && !d.schema) {
+    const fin = Math.max(txt.lastIndexOf('. '), txt.lastIndexOf('.\n'), txt.lastIndexOf('? '), txt.lastIndexOf('! '), txt.lastIndexOf('\n\n'))
+    if (fin > txt.length * 0.4) return txt.slice(0, fin + 1).trim()
+  }
   return txt
 }
 
