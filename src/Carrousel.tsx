@@ -44,17 +44,17 @@ export default function Carrousel({ lang, diapos }: { lang: Lang; diapos: Diapo[
   const fr = lang === 'fr'
   return (
     <section aria-roledescription={fr ? 'carrousel' : 'carousel'} aria-label={fr ? 'Tes leçons' : 'Your lessons'}
-      className="relative rounded-3xl overflow-hidden shadow-xl rise"
+      className="relative rounded-[20px] overflow-hidden shadow-md rise"
       onMouseEnter={() => setPause(true)} onMouseLeave={() => setPause(false)} onFocusCapture={() => setPause(true)} onTouchStart={() => setPause(true)}>
       <div ref={piste} className="flex overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {diapos.map((d, k) => (
           <div key={d.key} role="group" aria-roledescription={fr ? 'diapositive' : 'slide'} aria-label={`${k + 1} / ${diapos.length}`}
-            className="relative shrink-0 w-full snap-start aspect-[16/10] sm:aspect-[16/5] max-h-72 bg-ink">
+            className="relative shrink-0 w-full snap-start aspect-[2/1] lg:aspect-[3/1] max-h-96 bg-ink">
             <img src={d.image} alt="" loading={k === 0 ? 'eager' : 'lazy'} decoding="async" className="absolute inset-0 size-full object-cover" />
             <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/5 sm:bg-gradient-to-r sm:from-black/80 sm:via-black/40 sm:to-transparent" />
-            <div className="absolute inset-x-0 bottom-0 p-4 pb-9 sm:py-6 sm:pl-16 sm:pr-6 sm:pb-9 sm:max-w-[60%] text-white space-y-1.5">
+            <div className="absolute inset-x-0 bottom-0 p-4 pb-8 sm:pl-16 sm:max-w-[60%] text-white space-y-1">
               <span className="inline-block rounded-full bg-terracotta px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider shadow">{d.badge}</span>
-              <h2 className="font-display text-xl sm:text-2xl leading-[1.1] drop-shadow">{d.titre}</h2>
+              <h2 className="font-display text-lg sm:text-xl leading-[1.1] drop-shadow line-clamp-2">{d.titre}</h2>
               <p className="hidden sm:block text-sm text-white/85 line-clamp-1">{d.sousTitre}</p>
               <button className="btn btn-primary text-sm px-4 py-2 mt-1" onClick={d.onClick} tabIndex={k === i ? 0 : -1}>▶ {d.action}</button>
             </div>
