@@ -414,7 +414,33 @@ const J_pm_m1j2_b = projet({
   ],
 })
 
-export const PROJETS: Record<string, Lesson[]> = {
+const ETUDES: Record<string, { nom: string; fr: string; en: string }> = {
+  "pm-m1j1-a": { nom: "Google", fr: "Une équipe de Google a besoin d’outils de calcul fiables pour ses tests : tables, sommes, suites, motifs. Tu écris la boîte à outils.", en: "A Google-style team needs reliable number tools for its tests: tables, sums, sequences, patterns. You write the toolbox." },
+  "pm-m1j1-b": { nom: "Amazon", fr: "Une équipe de type Amazon refait le logiciel d’une caisse : monnaie, mots de passe, comptes à rebours. Tu écris les cinq briques.", en: "An Amazon-style team rebuilds a till’s software: change, passwords, countdowns. You write the five building blocks." },
+  "pm-m1j2-a": { nom: "BlackRock", fr: "Un gestionnaire d’actifs type BlackRock suit des portefeuilles par client, avec plusieurs lignes chacun. Ici, le même schéma avec un carnet de notes : tu écris la logique de suivi et de classement.", en: "An asset manager like BlackRock tracks portfolios per client, with several lines each. Here, the same structure with a gradebook: you write the tracking and ranking logic." },
+  "pm-m1j2-b": { nom: "Stripe", fr: "Une équipe de type Stripe gère des stocks et des mouvements sans jamais laisser un solde incohérent. Tu écris le module d’inventaire.", en: "A Stripe-style team handles balances and movements without ever leaving an inconsistent total. You write the inventory module." },
+  "pm-m1-a": { nom: "Anthropic", fr: "Étude de cas de synthèse du module 1. Une équipe de type Anthropic suit ses dépenses de calcul par catégorie : tu construis le gestionnaire de budget, avec tout ce que tu as appris.", en: "Module 1 synthesis case study. An Anthropic-style team tracks its compute spending per category: you build the budget manager with everything you learned." },
+  "pm-m1-b": { nom: "Airbnb", fr: "Étude de cas de synthèse du module 1. Une équipe de type Airbnb analyse des milliers d’avis : tu écris l’analyseur de texte.", en: "Module 1 synthesis case study. An Airbnb-style team analyses thousands of reviews: you write the text analyser." },
+  "pm-m1-c": { nom: "Netflix", fr: "Étude de cas de synthèse du module 1. Une équipe de type Netflix suit les résultats de ses utilisateurs par matière et par profil : tu écris le carnet.", en: "Module 1 synthesis case study. A Netflix-style team tracks results per subject and profile: you write the gradebook." },
+  "pm-m2-a": { nom: "Spotify", fr: "Étude de cas du module 2. Une équipe de type Spotify doit retrouver vite un morceau parmi des millions : tu construis le moteur de recherche par index.", en: "Module 2 case study. A Spotify-style team must find a track among millions fast: you build the index search engine." },
+  "pm-m2-b": { nom: "Uber", fr: "Étude de cas du module 2. Une équipe de type Uber calcule le plus court trajet dans un réseau de routes : tu écris l’algorithme.", en: "Module 2 case study. An Uber-style team computes the shortest route in a road network: you write the algorithm." },
+  "pm-m3-a": { nom: "Microsoft", fr: "Étude de cas du module 3. Tu rejoins une équipe de type Microsoft : le code d’un collègue pressé est en production avec des bugs. Tu les trouves et tu les corriges.", en: "Module 3 case study. You join a Microsoft-style team: a rushed colleague’s code is in production with bugs. You find and fix them." },
+  "pm-m3-b": { nom: "Meta", fr: "Étude de cas du module 3. Une équipe de type Meta a des algorithmes qui tombent en panne : tu fais le diagnostic et tu répares.", en: "Module 3 case study. A Meta-style team has algorithms breaking down: you diagnose and repair." },
+  "pm-m4-a": { nom: "NVIDIA", fr: "Étude de cas du module 4. Une équipe de type NVIDIA conçoit des puces : tu construis l’additionneur, la brique de base du calcul.", en: "Module 4 case study. An NVIDIA-style team designs chips: you build the adder, the basic block of computing." },
+  "pm-m4-b": { nom: "Apple", fr: "Étude de cas du module 4. Une équipe de type Apple conçoit un processeur : tu écris un mini-processeur et son assembleur.", en: "Module 4 case study. An Apple-style team designs a processor: you write a mini processor and its assembler." },
+  "pm-m7-a": { nom: "OpenAI", fr: "Étude de cas du module 7. Une équipe de type OpenAI entraîne un modèle : tu écris ta première IA, une régression par descente de gradient.", en: "Module 7 case study. An OpenAI-style team trains a model: you write your first AI, a regression by gradient descent." },
+  "pm-m7-b": { nom: "DeepMind", fr: "Étude de cas du module 7. Une équipe de type DeepMind cherche par le sens, pas par les mots : tu construis un moteur TF-IDF et cosinus.", en: "Module 7 case study. A DeepMind-style team searches by meaning, not words: you build a TF-IDF and cosine engine." },
+  "pm-m8-a": { nom: "Tesla", fr: "Étude de cas du module 8. Une équipe de type Tesla suit les ventes par région : tu construis le tableau de bord.", en: "Module 8 case study. A Tesla-style team tracks sales per region: you build the dashboard." },
+  "pm-m8-b": { nom: "SpaceX", fr: "Étude de cas du module 8. Une équipe de type SpaceX reçoit des données de capteurs sales : tu les nettoies et tu les résumes.", en: "Module 8 case study. A SpaceX-style team receives dirty sensor data: you clean it and summarise it." },
+}
+/** Chaque projet est une étude de cas d'entreprise : situation fictive « de type X » (jamais un document de l'entreprise), avec le nom de l'entreprise dans le titre. */
+const enEtude = (l: Lesson): Lesson => {
+  const e = ETUDES[l.id]
+  if (!e) return l
+  return { ...l, title: { fr: 'Étude de cas · ' + e.nom + ' : ' + l.title.fr, en: 'Case study · ' + e.nom + ': ' + l.title.en }, explain: { fr: e.fr + ' (Situation fictive, inspirée du genre de travail de ces équipes.)\n\n' + l.explain.fr, en: e.en + ' (Fictional situation, inspired by the kind of work such teams do.)\n\n' + l.explain.en } }
+}
+
+const PROJETS_BRUTS: Record<string, Lesson[]> = {
   'm1-j1': [J_pm_m1j1_a, J_pm_m1j1_b],
   'm1-j2': [J_pm_m1j2_a, J_pm_m1j2_b],
   m1: [M1A, M1B, M1C],
@@ -424,6 +450,8 @@ export const PROJETS: Record<string, Lesson[]> = {
   m7: [PM_M7_A, PM_M7_B],
   m8: [PM_M8_A, PM_M8_B],
 }
+
+export const PROJETS: Record<string, Lesson[]> = Object.fromEntries(Object.entries(PROJETS_BRUTS).map(([k, v]) => [k, v.map(enEtude)]))
 
 /** Projets d'étape : proposés au milieu d'un module, juste après la leçon `apres` (Beau, 26/10 : un projet après les boucles, un autre après les listes, puis celui qui regroupe tout). */
 export const JALONS: { id: string; apres: string }[] = [

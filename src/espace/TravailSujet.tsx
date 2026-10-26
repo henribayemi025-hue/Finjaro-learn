@@ -353,7 +353,7 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
   )
 
   // ───────── Centre : éditeur (onglets de fichier) + console ─────────
-  const onglets: Centre[] = [...(aCode ? ['code' as const] : []), ...(aCode && !estSql && !projet ? ['projet' as const] : []), ...(estSql ? ['base' as const] : []), ...(aPrompts ? ['prompts' as const] : []), 'notes']
+  const onglets: Centre[] = [...(aCode ? ['code' as const] : []), ...(estSql ? ['base' as const] : []), ...(aPrompts ? ['prompts' as const] : []), 'notes']
   const colonneCentre = (
     <div className="h-full flex flex-col min-h-0 bg-slate-950">
       <div className="shrink-0 flex items-stretch h-10 border-b border-slate-800 bg-slate-950" role="tablist" aria-label={titre}>
@@ -610,8 +610,6 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
         ))}
       </div>
       <div className="shrink-0 px-3 py-1.5 border-t border-slate-800/70 bg-slate-950/40 flex gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {aCode && !estSql && !projet && <button onClick={() => void proposerProjet()} disabled={!!projetBusy || busy} className="shrink-0 text-[11.5px] px-2.5 py-1 rounded-full bg-sky-500/15 hover:bg-sky-500/25 text-sky-200 border border-sky-500/40 disabled:opacity-40">{t.projetPropose}</button>}
-        {aCode && !estSql && !projet && enonce && <button onClick={() => { setCentre('projet'); setVue('travail'); void corrigerProjet() }} disabled={!!projetBusy || busy} className="shrink-0 text-[11.5px] px-2.5 py-1 rounded-full bg-sky-500/15 hover:bg-sky-500/25 text-sky-200 border border-sky-500/40 disabled:opacity-40">{t.projetCorrige}</button>}
         {t.chips.map(([label, q]) => (
           <button key={label} onClick={() => void poser(q)} disabled={busy || !ai || !signedIn}
             className="shrink-0 text-[11.5px] px-2.5 py-1 rounded-full bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/60 disabled:opacity-40">{label}</button>
