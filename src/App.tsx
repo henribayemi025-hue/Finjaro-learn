@@ -5,6 +5,7 @@ import { TRACK_ICON } from './Curriculum'
 import Accueil from './Accueil'
 import Parcours from './Parcours'
 import Cursus from './Cursus'
+import ExpliqueIci from './ExpliqueIci'
 import Atelier from './Atelier'
 import { nouvelId, sauverProjet } from './atelierStore'
 import Lettre from './Lettre'
@@ -446,16 +447,18 @@ export default function App() {
             etat={!res ? 'rien' : res.passed ? 'ok' : res.error ? 'erreur' : res.passed === false ? 'ko' : 'rien'}
             erreur={res?.error ? (expliqueErreur(res.error, lang, code) ?? res.error.split('\n').filter(Boolean).pop() ?? '') : ''}
             aller={(id) => { const el = document.getElementById(id); el?.scrollIntoView({ behavior: 'smooth', block: 'start' }); if (id === 'exercice') setTimeout(() => document.getElementById('editeur')?.focus({ preventScroll: true }), 400) }} />
-          <section id="explication" className="scroll-mt-32">
-            <h3 className="text-sm uppercase tracking-wide text-ink/55 mb-1.5">{t.explain}</h3>
-            <p className="leading-relaxed text-[15px]">{lesson.explain[lang]}</p>
-          </section>
-          {lesson.example && (
-            <section id="exemple" className="scroll-mt-32">
-              <h3 className="text-sm uppercase tracking-wide text-ink/55 mb-1.5">{t.example}</h3>
-              <pre className={pre}>{lesson.example}</pre>
+          <ExpliqueIci lang={lang} profId={profDe(track, lesson.lang ?? 'js')} titre={lesson.title[lang]} cours={lesson.explain[lang] + (lesson.example ? '\n' + lesson.example : '')} signedIn={!!session}>
+<section id="explication" className="scroll-mt-32">
+              <h3 className="text-sm uppercase tracking-wide text-ink/55 mb-1.5">{t.explain}</h3>
+              <p className="leading-relaxed text-[15px] whitespace-pre-line">{lesson.explain[lang]}</p>
             </section>
-          )}
+            {lesson.example && (
+              <section id="exemple" className="scroll-mt-32">
+                <h3 className="text-sm uppercase tracking-wide text-ink/55 mb-1.5">{t.example}</h3>
+                <pre className={pre}>{lesson.example}</pre>
+              </section>
+            )}
+          </ExpliqueIci>
           </div>
           {!lesson.lecture && !lesson.predict && <Quiz key={lesson.id + lang} lesson={lesson} lang={lang} />}
           {lesson.predict && (
