@@ -13,7 +13,7 @@ type Niveau = 'debutant' | 'intermediaire' | 'avance'
 const NIVEAU: Record<string, Niveau> = {
   projets: 'debutant', prog: 'debutant', prompt: 'debutant', sql: 'debutant',
   data: 'intermediaire', dl: 'intermediaire', maths: 'intermediaire', crypto: 'intermediaire', archi: 'intermediaire', ethique: 'intermediaire', systemes: 'avance', signal: 'intermediaire', bio: 'intermediaire', neuro: 'avance', jeux: 'intermediaire', ccpp: 'intermediaire', robo: 'intermediaire', outils: 'intermediaire',
-  eng: 'avance', algo: 'avance', quant: 'avance', compil: 'avance', nlp: 'avance',
+  eng: 'avance', rech: 'avance', algo: 'avance', quant: 'avance', compil: 'avance', nlp: 'avance',
 }
 // Débutant d'abord dans la liste des parcours (audit du 07/10, L1 : 22 parcours au même niveau perdaient le nouveau).
 const ORDRE: Record<Niveau, number> = { debutant: 0, intermediaire: 1, avance: 2 }

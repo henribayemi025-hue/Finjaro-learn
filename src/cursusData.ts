@@ -57,6 +57,9 @@ export const MODULES: Module[] = [
   { id: 'm14', prof: 'sci', groups: ['ethique'],
     titre: { fr: 'Biais, vie privée, explicabilité', en: 'Bias, privacy, explainability' },
     sauras: { fr: 'Mesurer un biais et dire quand un modèle ne doit pas décider seul.', en: 'Measure a bias and say when a model must not decide alone.' } },
+  { id: 'm15', prof: 'ia', groups: ['rech'],
+    titre: { fr: 'Penser comme un chercheur', en: 'Thinking like a researcher' },
+    sauras: { fr: 'Mesurer sans te tromper : répéter, fixer la graine, comparer à une base, faire une ablation, savoir si une différence est réelle, apprendre par essais, lire un article.', en: 'Measure without fooling yourself: repeat, fix the seed, compare to a baseline, run an ablation, know whether a difference is real, learn by trial, read a paper.' } },
 ]
 
 export interface ModuleVu { m: Module; ls: { l: Lesson; i: number }[]; fait: number; pct: number }

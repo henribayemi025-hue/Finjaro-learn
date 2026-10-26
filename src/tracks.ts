@@ -48,6 +48,8 @@ export const TRACKS: { key: string; name: L2; groups: Group[]; groupName: Partia
     groupName: { archi: { fr: 'Portes, additionneur, processeur', en: 'Gates, adder, processor' } } },
   { key: 'crypto', name: { fr: 'Cryptographie', en: 'Cryptography' }, groups: ['crypto'],
     groupName: { crypto: { fr: 'Chiffres, hachage, RSA', en: 'Ciphers, hashing, RSA' } } },
+  { key: 'rech', name: { fr: 'Recherche en IA', en: 'AI research' }, groups: ['rech'],
+    groupName: { rech: { fr: 'Mesurer, comparer, ne pas se tromper soi-même', en: 'Measure, compare, do not fool yourself' } } },
   { key: 'maths', name: { fr: "Maths pour l'IA", en: 'Maths for AI' }, groups: ['maths'],
     groupName: { maths: { fr: 'Vecteurs, gradient, probabilités', en: 'Vectors, gradient, probability' } } },
 ]

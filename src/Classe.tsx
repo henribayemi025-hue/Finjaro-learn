@@ -34,7 +34,7 @@ export function profDe(track: string, langage: 'js' | 'py' | 'sql') {
   if (['signal', 'neuro', 'bio', 'ethique'].includes(track)) return 'sci'
   if (langage === 'py') return 'ia'
   if (langage === 'js' && (track === 'prog' || track === 'projets')) return 'js'
-  if (['dl', 'data', 'prompt', 'nlp', 'eng', 'outils'].includes(track)) return 'ia'
+  if (['dl', 'data', 'prompt', 'nlp', 'eng', 'outils', 'rech'].includes(track)) return 'ia'
   return 'finia'
 }
 

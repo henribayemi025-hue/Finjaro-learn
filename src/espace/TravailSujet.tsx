@@ -47,6 +47,8 @@ const T = {
     askErr: (n: string) => `✨ Demander à ${n}`, errQ: (e: string) => `J’ai cette erreur : « ${e} ». Explique-la-moi très simplement et dis-moi où regarder, sans me donner la solution.`,
     copy: 'Copier', copied: 'Copié', apply: 'Appliquer', compare: 'Comparer', yourAgents: 'Ton agent', status: { none: 'pas lancé', ok: 'réussi', ko: 'à corriger', err: 'erreur' },
     fileHint: 'Ctrl + Entrée pour lancer',
+    sos: '🆘 Sauve-moi', sosTip: (n: string) => `Clique pour demander de l’aide à ${n}`,
+    sosQ: 'À l’aide, je suis bloqué ! Regarde mon code et ce que dit la console, dis-moi simplement ce qui ne va pas et où regarder, sans me donner la solution.',
   },
   en: {
     close: 'Back to the lesson', lesson: 'Lesson', explain: 'Explanation', example: 'Example', task: 'Your task', hint: 'Hint', showHint: 'Show the hint',
@@ -71,6 +73,8 @@ const T = {
     askErr: (n: string) => `✨ Ask ${n}`, errQ: (e: string) => `I get this error: “${e}”. Explain it very simply and tell me where to look, without giving me the solution.`,
     copy: 'Copy', copied: 'Copied', apply: 'Apply', compare: 'Compare', yourAgents: 'Your agent', status: { none: 'not run', ok: 'passed', ko: 'to fix', err: 'error' },
     fileHint: 'Ctrl + Enter to run',
+    sos: '🆘 Save me', sosTip: (n: string) => `Click to ask ${n} for help`,
+    sosQ: 'Help, I am stuck! Look at my code and what the console says, tell me simply what is wrong and where to look, without giving me the solution.',
   },
 } as const
 
@@ -124,6 +128,9 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
   const prof = prets.find((a) => a.id === profId) ?? prets[0]
   const choisirProf = (id: string) => { setProfId(id); ecrire('learn:prof:' + track, id) }
   const [diff, setDiff] = useState<string | null>(null)
+  // La rangée des agents se replie (Beau, 26/10 : « je dois pouvoir fermer cette partie, pour que ça ne prenne pas trop de place »), et le choix est gardé.
+  const [choixOuvert, setChoixOuvert] = useState(() => lire('learn:agentsOuverts') !== '0')
+  const basculerChoix = () => { setChoixOuvert((o) => { ecrire('learn:agentsOuverts', o ? '0' : '1'); return !o }) }
   const cleFil = `learn:fil:${track}:${titre}`
   const [fil, setFil] = useState<Echange[]>(() => lireFil(cleFil))
   const [question, setQuestion] = useState('')
@@ -175,10 +182,18 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
   }
 
 
+  const avatar = (a: typeof prof, taille: string) => a.face
+    ? <img src={a.face} alt="" className={`${taille} rounded-full object-cover border border-slate-700`} />
+    : <span className={`${taille} rounded-full grid place-items-center bg-slate-700 text-slate-100 font-bold text-[12px]`}>{a.name[0]}</span>
   const nomFichier = lesson.lang === 'py' ? 'main.py' : lesson.lang === 'sql' ? 'requete.sql' : 'main.js'
   const statut: keyof typeof t.status = !res ? 'none' : res.passed ? 'ok' : res.error ? 'err' : 'ko'
   const couleurStatut = { none: 'text-slate-400 border-slate-700', ok: 'text-emerald-300 border-emerald-500/50 bg-emerald-500/10', ko: 'text-amber-300 border-amber-500/50 bg-amber-500/10', err: 'text-rose-300 border-rose-500/50 bg-rose-500/10' }[statut]
   const explication = res?.error ? expliqueErreur(res.error, lang, code) : null
+  const sauveMoi = () => {
+    if (!ai || !signedIn) { window.dispatchEvent(new Event('learn:login')); return }
+    setVue('agent')
+    void poser(t.sosQ)
+  }
   const demanderErreur = () => {
     if (!res?.error) return
     const derniere = res.error.split('\n').filter(Boolean).pop() ?? res.error
@@ -247,15 +262,21 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
               <button onClick={() => setCentre('base')} className="ml-auto font-sans text-[12px] font-semibold text-sky-300 underline min-h-8">{t.viewRows}</button>
             </div>
           )}
-          <div className="flex-1 min-h-40">
+          <div className="flex-1 min-h-40 relative">
             <Suspense fallback={<div className="p-4 text-slate-500 text-[13px]">…</div>}>
               <Editeur chemin={nomFichier} valeur={code} onChange={onCode} onCurseur={() => {}} onLancer={() => void onRun()} label={t.code} />
             </Suspense>
+            <button onClick={sauveMoi} disabled={busy} title={t.sosTip(prof.name)} aria-label={t.sosTip(prof.name)}
+              className={`absolute bottom-3 right-4 z-10 rounded-full p-0.5 bg-slate-900/90 border shadow-lg transition hover:scale-105 disabled:opacity-60 ${statut === 'err' || statut === 'ko' ? 'border-amber-400 shadow-amber-400/30 animate-pulse' : 'border-slate-700'}`}>
+              {avatar(prof, 'size-11')}
+            </button>
           </div>
           <div className="shrink-0 h-[38%] min-h-36 border-t border-slate-800 flex flex-col bg-slate-950">
             <div className="shrink-0 flex items-center gap-2 h-9 px-3 border-b border-slate-800/80">
               <p className={titreMini}>›_ {t.output}</p>
               <span className={`rounded-full border px-2 py-0.5 text-[11px] font-medium ${couleurStatut}`}>{t.status[statut]}</span>
+              <span className="flex-1" />
+              <button onClick={sauveMoi} disabled={busy} className="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-900 hover:bg-slate-800 pl-1 pr-2.5 h-7 text-[12px] font-medium text-slate-200 disabled:opacity-50">{avatar(prof, 'size-5')}{t.sos}</button>
             </div>
             <div className="flex-1 min-h-0 overflow-y-auto px-3 py-2 font-mono text-[12.5px] leading-relaxed" aria-live="polite">
               {!res ? <p className="text-slate-500">{t.noRun}</p> : <>
@@ -326,29 +347,30 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
 
   // ───────── Droite : l'agent du sujet ─────────
   const agentsProposes = [prof, ...prets.filter((a) => a.id !== prof.id && ['finia', 'ia', 'sql', 'js', 'maths', 'sys', 'sci'].includes(a.id))].slice(0, 5)
-  const avatar = (a: typeof prof, taille: string) => a.face
-    ? <img src={a.face} alt="" className={`${taille} rounded-full object-cover border border-slate-700`} />
-    : <span className={`${taille} rounded-full grid place-items-center bg-slate-700 text-slate-100 font-bold text-[12px]`}>{a.name[0]}</span>
   const colonneAgent = (
     <div className="h-full flex flex-col min-h-0">
       <div className="shrink-0 border-b border-slate-800 bg-slate-950 p-2">
-        <div className="flex items-center justify-between px-1 mb-1.5">
-          <span className={titreMini}>{t.yourAgents}</span>
+        <div className={`flex items-center justify-between px-1 ${choixOuvert ? 'mb-1.5' : ''}`}>
+          <button onClick={basculerChoix} aria-expanded={choixOuvert} className={'flex items-center gap-1.5 min-h-8 ' + titreMini + ' hover:text-white'}>
+            <span aria-hidden="true">{choixOuvert ? '▾' : '▸'}</span>{t.yourAgents}
+          </button>
           <button onClick={() => fixerLarg(large ? 380 : 640)} aria-label={large ? t.narrow : t.widen} title={large ? t.narrow : t.widen}
             className="hidden lg:grid size-7 place-items-center rounded text-[14px] text-slate-400 hover:bg-slate-800 hover:text-white">{large ? '⤡' : '⤢'}</button>
         </div>
-        <div className="flex gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="tablist" aria-label={t.yourAgents}>
-          {agentsProposes.map((a) => {
-            const actif = a.id === prof.id
-            return (
-              <button key={a.id} role="tab" aria-selected={actif} onClick={() => choisirProf(a.id)}
-                className={`shrink-0 w-[4.4rem] flex flex-col items-center gap-1 p-1.5 rounded-lg border ${actif ? 'bg-slate-800 border-sky-500/80 shadow shadow-sky-500/10' : 'bg-slate-900/40 border-slate-800 hover:bg-slate-800/50'}`}>
-                <span className={actif ? '' : 'opacity-70'}>{avatar(a, 'size-9')}</span>
-                <span className={`text-[11px] font-semibold truncate w-full text-center ${actif ? 'text-white' : 'text-slate-400'}`}>{a.name}</span>
-              </button>
-            )
-          })}
-        </div>
+        {choixOuvert && (
+          <div className="flex gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="tablist" aria-label={t.yourAgents}>
+            {agentsProposes.map((a) => {
+              const actif = a.id === prof.id
+              return (
+                <button key={a.id} role="tab" aria-selected={actif} onClick={() => choisirProf(a.id)}
+                  className={`shrink-0 w-[4.4rem] flex flex-col items-center gap-1 p-1.5 rounded-lg border ${actif ? 'bg-slate-800 border-sky-500/80 shadow shadow-sky-500/10' : 'bg-slate-900/40 border-slate-800 hover:bg-slate-800/50'}`}>
+                  <span className={actif ? '' : 'opacity-70'}>{avatar(a, 'size-9')}</span>
+                  <span className={`text-[11px] font-semibold truncate w-full text-center ${actif ? 'text-white' : 'text-slate-400'}`}>{a.name}</span>
+                </button>
+              )
+            })}
+          </div>
+        )}
       </div>
       <div className="shrink-0 flex items-center gap-2.5 px-3 py-2 bg-slate-950/60 border-b border-slate-800/80">
         {avatar(prof, 'size-7')}
