@@ -59,4 +59,9 @@ ok(/not finished/.test(expliqueErreur('incomplete input', 'en') ?? ''), 'requêt
 // les règles Python d'avant n'ont pas bougé
 ok(/Tu mélanges du texte/.test(expliqueErreur("TypeError: can only concatenate str (not \"int\") to str", 'fr') ?? ''), 'concaténation texte et nombre toujours reconnue')
 
+const mp = expliqueErreur("NameError: name 'Print' is not defined", 'fr')
+ok(mp && mp.includes('« print »') && /minuscules/.test(mp), 'Print majuscule (fr) : ' + mp)
+ok(/all in lowercase/.test(expliqueErreur("NameError: name 'Print' is not defined", 'en') ?? ''), 'Print majuscule (en)')
+ok(/« True »/.test(expliqueErreur("NameError: name 'true' is not defined", 'fr') ?? ''), 'true minuscule')
+ok(/est inconnu/.test(expliqueErreur("NameError: name 'monnom' is not defined", 'fr') ?? ''), 'autre nom inconnu inchangé')
 console.log(`sqlbase : ${n} vérifications passées`)
