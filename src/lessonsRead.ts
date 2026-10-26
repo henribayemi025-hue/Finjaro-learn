@@ -5,7 +5,10 @@ export const readLessons: Lesson[] = [
   {
     id: "py-lire-1", lang: 'py', group: 'py-lecture',
     title: { fr: "Lire : Boucle et condition", en: "Reading: Boucle et condition" },
-    explain: { fr: "Lire du code est une compétence à part entière : prédis, sans lancer quoi que ce soit, ce que le programme affiche. Écris exactement la sortie, une ligne par affichage.", en: "Reading code is a skill of its own: predict, without running anything, what the program prints. Write the exact output, one line per print." },
+    explain: {
+      fr: "Lire du code est une vraie compétence : un programmeur passe plus de temps à lire qu’à écrire. Ici, tu prédis ce que le programme affichera, sans le lancer. Déroule-le ligne par ligne comme Python, en notant la valeur de chaque variable.\nÉcris exactement la sortie, une ligne par affichage.",
+      en: "Reading code is a real skill: a programmer spends more time reading than writing. Here, you predict what the program will print, without running it. Walk through it line by line like Python, noting each variable’s value.\nWrite exactly the output, one line per print.",
+    },
     example: '',
     task: { fr: 'Que s\'affiche-t-il ?', en: 'What does it print?' },
     starter: '',
@@ -17,7 +20,10 @@ export const readLessons: Lesson[] = [
   {
     id: "py-lire-2", lang: 'py', group: 'py-lecture',
     title: { fr: "Lire : Tranches de liste", en: "Reading: Tranches de liste" },
-    explain: { fr: "Lire du code est une compétence à part entière : prédis, sans lancer quoi que ce soit, ce que le programme affiche. Écris exactement la sortie, une ligne par affichage.", en: "Reading code is a skill of its own: predict, without running anything, what the program prints. Write the exact output, one line per print." },
+    explain: {
+      fr: "Lire du code est une vraie compétence : un programmeur passe plus de temps à lire qu’à écrire. Ici, tu prédis ce que le programme affichera, sans le lancer. Déroule-le ligne par ligne comme Python, en notant la valeur de chaque variable.\nÉcris exactement la sortie, une ligne par affichage.",
+      en: "Reading code is a real skill: a programmer spends more time reading than writing. Here, you predict what the program will print, without running it. Walk through it line by line like Python, noting each variable’s value.\nWrite exactly the output, one line per print.",
+    },
     example: '',
     task: { fr: 'Que s\'affiche-t-il ?', en: 'What does it print?' },
     starter: '',
@@ -29,7 +35,10 @@ export const readLessons: Lesson[] = [
   {
     id: "py-lire-3", lang: 'py', group: 'py-lecture',
     title: { fr: "Lire : Deux noms, une seule liste", en: "Reading: Deux noms, une seule liste" },
-    explain: { fr: "Lire du code est une compétence à part entière : prédis, sans lancer quoi que ce soit, ce que le programme affiche. Écris exactement la sortie, une ligne par affichage.", en: "Reading code is a skill of its own: predict, without running anything, what the program prints. Write the exact output, one line per print." },
+    explain: {
+      fr: "Lire du code est une vraie compétence : un programmeur passe plus de temps à lire qu’à écrire. Ici, tu prédis ce que le programme affichera, sans le lancer. Déroule-le ligne par ligne comme Python, en notant la valeur de chaque variable.\nÉcris exactement la sortie, une ligne par affichage.",
+      en: "Reading code is a real skill: a programmer spends more time reading than writing. Here, you predict what the program will print, without running it. Walk through it line by line like Python, noting each variable’s value.\nWrite exactly the output, one line per print.",
+    },
     example: '',
     task: { fr: 'Que s\'affiche-t-il ?', en: 'What does it print?' },
     starter: '',
@@ -41,7 +50,10 @@ export const readLessons: Lesson[] = [
   {
     id: "py-lire-4", lang: 'py', group: 'py-lecture',
     title: { fr: "Lire : Division entière et reste", en: "Reading: Division entière et reste" },
-    explain: { fr: "Lire du code est une compétence à part entière : prédis, sans lancer quoi que ce soit, ce que le programme affiche. Écris exactement la sortie, une ligne par affichage.", en: "Reading code is a skill of its own: predict, without running anything, what the program prints. Write the exact output, one line per print." },
+    explain: {
+      fr: "Lire du code est une vraie compétence : un programmeur passe plus de temps à lire qu’à écrire. Ici, tu prédis ce que le programme affichera, sans le lancer. Déroule-le ligne par ligne comme Python, en notant la valeur de chaque variable.\nÉcris exactement la sortie, une ligne par affichage.",
+      en: "Reading code is a real skill: a programmer spends more time reading than writing. Here, you predict what the program will print, without running it. Walk through it line by line like Python, noting each variable’s value.\nWrite exactly the output, one line per print.",
+    },
     example: '',
     task: { fr: 'Que s\'affiche-t-il ?', en: 'What does it print?' },
     starter: '',
@@ -53,7 +65,10 @@ export const readLessons: Lesson[] = [
   {
     id: "py-lire-5", lang: 'py', group: 'py-lecture',
     title: { fr: "Lire : Compréhension de liste", en: "Reading: Compréhension de liste" },
-    explain: { fr: "Lire du code est une compétence à part entière : prédis, sans lancer quoi que ce soit, ce que le programme affiche. Écris exactement la sortie, une ligne par affichage.", en: "Reading code is a skill of its own: predict, without running anything, what the program prints. Write the exact output, one line per print." },
+    explain: {
+      fr: "Lire du code est une vraie compétence : un programmeur passe plus de temps à lire qu’à écrire. Ici, tu prédis ce que le programme affichera, sans le lancer. Déroule-le ligne par ligne comme Python, en notant la valeur de chaque variable.\nÉcris exactement la sortie, une ligne par affichage.",
+      en: "Reading code is a real skill: a programmer spends more time reading than writing. Here, you predict what the program will print, without running it. Walk through it line by line like Python, noting each variable’s value.\nWrite exactly the output, one line per print.",
+    },
     example: '',
     task: { fr: 'Que s\'affiche-t-il ?', en: 'What does it print?' },
     starter: '',
@@ -65,7 +80,10 @@ export const readLessons: Lesson[] = [
   {
     id: "py-lire-6", lang: 'py', group: 'py-lecture',
     title: { fr: "Lire : Récursivité : l'ordre des affichages", en: "Reading: Récursivité : l'ordre des affichages" },
-    explain: { fr: "Lire du code est une compétence à part entière : prédis, sans lancer quoi que ce soit, ce que le programme affiche. Écris exactement la sortie, une ligne par affichage.", en: "Reading code is a skill of its own: predict, without running anything, what the program prints. Write the exact output, one line per print." },
+    explain: {
+      fr: "Lire du code est une vraie compétence : un programmeur passe plus de temps à lire qu’à écrire. Ici, tu prédis ce que le programme affichera, sans le lancer. Déroule-le ligne par ligne comme Python, en notant la valeur de chaque variable.\nÉcris exactement la sortie, une ligne par affichage.",
+      en: "Reading code is a real skill: a programmer spends more time reading than writing. Here, you predict what the program will print, without running it. Walk through it line by line like Python, noting each variable’s value.\nWrite exactly the output, one line per print.",
+    },
     example: '',
     task: { fr: 'Que s\'affiche-t-il ?', en: 'What does it print?' },
     starter: '',
@@ -77,7 +95,10 @@ export const readLessons: Lesson[] = [
   {
     id: "py-lire-7", lang: 'py', group: 'py-lecture',
     title: { fr: "Lire : while … else", en: "Reading: while … else" },
-    explain: { fr: "Lire du code est une compétence à part entière : prédis, sans lancer quoi que ce soit, ce que le programme affiche. Écris exactement la sortie, une ligne par affichage.", en: "Reading code is a skill of its own: predict, without running anything, what the program prints. Write the exact output, one line per print." },
+    explain: {
+      fr: "Lire du code est une vraie compétence : un programmeur passe plus de temps à lire qu’à écrire. Ici, tu prédis ce que le programme affichera, sans le lancer. Déroule-le ligne par ligne comme Python, en notant la valeur de chaque variable.\nÉcris exactement la sortie, une ligne par affichage.",
+      en: "Reading code is a real skill: a programmer spends more time reading than writing. Here, you predict what the program will print, without running it. Walk through it line by line like Python, noting each variable’s value.\nWrite exactly the output, one line per print.",
+    },
     example: '',
     task: { fr: 'Que s\'affiche-t-il ?', en: 'What does it print?' },
     starter: '',
@@ -89,7 +110,10 @@ export const readLessons: Lesson[] = [
   {
     id: "py-lire-8", lang: 'py', group: 'py-lecture',
     title: { fr: "Lire : Fermeture : une fonction qui se souvient", en: "Reading: Fermeture : une fonction qui se souvient" },
-    explain: { fr: "Lire du code est une compétence à part entière : prédis, sans lancer quoi que ce soit, ce que le programme affiche. Écris exactement la sortie, une ligne par affichage.", en: "Reading code is a skill of its own: predict, without running anything, what the program prints. Write the exact output, one line per print." },
+    explain: {
+      fr: "Lire du code est une vraie compétence : un programmeur passe plus de temps à lire qu’à écrire. Ici, tu prédis ce que le programme affichera, sans le lancer. Déroule-le ligne par ligne comme Python, en notant la valeur de chaque variable.\nÉcris exactement la sortie, une ligne par affichage.",
+      en: "Reading code is a real skill: a programmer spends more time reading than writing. Here, you predict what the program will print, without running it. Walk through it line by line like Python, noting each variable’s value.\nWrite exactly the output, one line per print.",
+    },
     example: '',
     task: { fr: 'Que s\'affiche-t-il ?', en: 'What does it print?' },
     starter: '',
@@ -101,7 +125,10 @@ export const readLessons: Lesson[] = [
   {
     id: "py-lire-9", lang: 'py', group: 'py-lecture',
     title: { fr: "Lire : try / except / finally", en: "Reading: try / except / finally" },
-    explain: { fr: "Lire du code est une compétence à part entière : prédis, sans lancer quoi que ce soit, ce que le programme affiche. Écris exactement la sortie, une ligne par affichage.", en: "Reading code is a skill of its own: predict, without running anything, what the program prints. Write the exact output, one line per print." },
+    explain: {
+      fr: "Lire du code est une vraie compétence : un programmeur passe plus de temps à lire qu’à écrire. Ici, tu prédis ce que le programme affichera, sans le lancer. Déroule-le ligne par ligne comme Python, en notant la valeur de chaque variable.\nÉcris exactement la sortie, une ligne par affichage.",
+      en: "Reading code is a real skill: a programmer spends more time reading than writing. Here, you predict what the program will print, without running it. Walk through it line by line like Python, noting each variable’s value.\nWrite exactly the output, one line per print.",
+    },
     example: '',
     task: { fr: 'Que s\'affiche-t-il ?', en: 'What does it print?' },
     starter: '',
@@ -113,7 +140,10 @@ export const readLessons: Lesson[] = [
   {
     id: "py-lire-10", lang: 'py', group: 'py-lecture',
     title: { fr: "Lire : Tri stable avec clé", en: "Reading: Tri stable avec clé" },
-    explain: { fr: "Lire du code est une compétence à part entière : prédis, sans lancer quoi que ce soit, ce que le programme affiche. Écris exactement la sortie, une ligne par affichage.", en: "Reading code is a skill of its own: predict, without running anything, what the program prints. Write the exact output, one line per print." },
+    explain: {
+      fr: "Lire du code est une vraie compétence : un programmeur passe plus de temps à lire qu’à écrire. Ici, tu prédis ce que le programme affichera, sans le lancer. Déroule-le ligne par ligne comme Python, en notant la valeur de chaque variable.\nÉcris exactement la sortie, une ligne par affichage.",
+      en: "Reading code is a real skill: a programmer spends more time reading than writing. Here, you predict what the program will print, without running it. Walk through it line by line like Python, noting each variable’s value.\nWrite exactly the output, one line per print.",
+    },
     example: '',
     task: { fr: 'Que s\'affiche-t-il ?', en: 'What does it print?' },
     starter: '',
@@ -125,7 +155,10 @@ export const readLessons: Lesson[] = [
   {
     id: "py-lire-11", lang: 'py', group: 'py-lecture',
     title: { fr: "Lire : zip et enumerate", en: "Reading: zip et enumerate" },
-    explain: { fr: "Lire du code est une compétence à part entière : prédis, sans lancer quoi que ce soit, ce que le programme affiche. Écris exactement la sortie, une ligne par affichage.", en: "Reading code is a skill of its own: predict, without running anything, what the program prints. Write the exact output, one line per print." },
+    explain: {
+      fr: "Lire du code est une vraie compétence : un programmeur passe plus de temps à lire qu’à écrire. Ici, tu prédis ce que le programme affichera, sans le lancer. Déroule-le ligne par ligne comme Python, en notant la valeur de chaque variable.\nÉcris exactement la sortie, une ligne par affichage.",
+      en: "Reading code is a real skill: a programmer spends more time reading than writing. Here, you predict what the program will print, without running it. Walk through it line by line like Python, noting each variable’s value.\nWrite exactly the output, one line per print.",
+    },
     example: '',
     task: { fr: 'Que s\'affiche-t-il ?', en: 'What does it print?' },
     starter: '',
@@ -137,7 +170,10 @@ export const readLessons: Lesson[] = [
   {
     id: "py-lire-12", lang: 'py', group: 'py-lecture',
     title: { fr: "Lire : Chaînes : méthodes enchaînées", en: "Reading: Chaînes : méthodes enchaînées" },
-    explain: { fr: "Lire du code est une compétence à part entière : prédis, sans lancer quoi que ce soit, ce que le programme affiche. Écris exactement la sortie, une ligne par affichage.", en: "Reading code is a skill of its own: predict, without running anything, what the program prints. Write the exact output, one line per print." },
+    explain: {
+      fr: "Lire du code est une vraie compétence : un programmeur passe plus de temps à lire qu’à écrire. Ici, tu prédis ce que le programme affichera, sans le lancer. Déroule-le ligne par ligne comme Python, en notant la valeur de chaque variable.\nÉcris exactement la sortie, une ligne par affichage.",
+      en: "Reading code is a real skill: a programmer spends more time reading than writing. Here, you predict what the program will print, without running it. Walk through it line by line like Python, noting each variable’s value.\nWrite exactly the output, one line per print.",
+    },
     example: '',
     task: { fr: 'Que s\'affiche-t-il ?', en: 'What does it print?' },
     starter: '',
@@ -149,7 +185,10 @@ export const readLessons: Lesson[] = [
   {
     id: "py-lire-13", lang: 'py', group: 'py-lecture',
     title: { fr: "Lire : Valeur par défaut piégeuse", en: "Reading: Valeur par défaut piégeuse" },
-    explain: { fr: "Lire du code est une compétence à part entière : prédis, sans lancer quoi que ce soit, ce que le programme affiche. Écris exactement la sortie, une ligne par affichage.", en: "Reading code is a skill of its own: predict, without running anything, what the program prints. Write the exact output, one line per print." },
+    explain: {
+      fr: "Lire du code est une vraie compétence : un programmeur passe plus de temps à lire qu’à écrire. Ici, tu prédis ce que le programme affichera, sans le lancer. Déroule-le ligne par ligne comme Python, en notant la valeur de chaque variable.\nÉcris exactement la sortie, une ligne par affichage.",
+      en: "Reading code is a real skill: a programmer spends more time reading than writing. Here, you predict what the program will print, without running it. Walk through it line by line like Python, noting each variable’s value.\nWrite exactly the output, one line per print.",
+    },
     example: '',
     task: { fr: 'Que s\'affiche-t-il ?', en: 'What does it print?' },
     starter: '',

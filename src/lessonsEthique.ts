@@ -5,7 +5,10 @@ export const ethiqueLessons: Lesson[] = [
   {
     id: "eth-biais", lang: 'py', group: "ethique",
     title: { fr: "Mesurer un biais : taux par groupe", en: "Measuring bias: rate per group" },
-    explain: { fr: "Un modèle peut être juste « en moyenne » et injuste envers un groupe. Première mesure, toute simple : le TAUX DE DÉCISIONS POSITIVES par groupe (par exemple, la part de dossiers acceptés). Si un groupe est accepté à 60 % et l'autre à 30 %, il faut comprendre pourquoi avant de déployer. Les données ici sont fictives, écrites pour l'exercice.", en: "A model can be fair “on average” and unfair to one group. First, very simple measure: the POSITIVE DECISION RATE per group (e.g. the share of accepted applications). If one group is accepted at 60% and the other at 30%, you must understand why before deploying. The data here is fictional, written for the exercise." },
+    explain: {
+      fr: "Un modèle peut être juste « en moyenne » et injuste envers un groupe. La première mesure, toute simple : le taux de décisions positives par groupe (par exemple, la part de dossiers acceptés). Si un groupe est accepté à 60 % et l’autre à 30 %, il faut comprendre pourquoi avant de déployer.\nLes données ici sont fictives, écrites pour l’exercice.",
+      en: "A model can be right “on average” and unfair to a group. The first, very simple measure: the rate of positive decisions per group (for example, the share of applications accepted). If one group is accepted at 60% and another at 30%, you must understand why before deploying.\nThe data here is fictional, written for the exercise.",
+    },
     example: "decisions = [('A', 1), ('A', 0), ('B', 1)]\nprint(sum(d for g, d in decisions if g == 'A'))",
     task: { fr: "Écris taux_par_groupe(decisions) → dict {groupe: taux}, decisions étant une liste de (groupe, décision 0/1). Puis ecart(decisions) → la plus grande différence entre deux taux.", en: "Write taux_par_groupe(decisions) → dict {group: rate}, decisions being a list of (group, decision 0/1). Then ecart(decisions) → the largest difference between two rates." },
     starter: "def taux_par_groupe(decisions):\n    pass\n\ndef ecart(decisions):\n    pass\n",
@@ -16,7 +19,10 @@ export const ethiqueLessons: Lesson[] = [
   {
     id: "eth-erreurs", lang: 'py', group: "ethique",
     title: { fr: "Équité des erreurs : qui le modèle rate-t-il ?", en: "Error fairness: whom does the model miss?" },
-    explain: { fr: "Même avec le même taux d'acceptation, un modèle peut se tromper plus souvent pour un groupe. On compare le TAUX DE FAUX NÉGATIFS (personnes qui auraient dû être acceptées mais ne l'ont pas été) d'un groupe à l'autre : c'est l'idée de « l'égalité des chances ». Un détecteur de maladie qui rate surtout les malades d'un groupe est dangereux pour ce groupe, même s'il est « précis à 95 % » globalement.", en: "Even with the same acceptance rate, a model can be wrong more often for one group. Compare the FALSE NEGATIVE RATE (people who should have been accepted but weren't) across groups: that is the idea of “equal opportunity”. A disease detector that mostly misses one group's patients is dangerous for that group, even if it is “95% accurate” overall." },
+    explain: {
+      fr: "Même avec le même taux d’acceptation, un modèle peut se tromper plus souvent pour un groupe. On compare le taux de faux négatifs (les personnes qui auraient dû être acceptées mais ne l’ont pas été) d’un groupe à l’autre : c’est l’idée de « l’égalité des chances ».\nUn détecteur de maladie qui rate surtout les malades d’un groupe est dangereux pour ce groupe, même s’il est « précis à 95 % » en moyenne.",
+      en: "Even with the same acceptance rate, a model can be wrong more often for one group. We compare the false negative rate (people who should have been accepted but were not) from one group to the other: this is the idea of “equality of opportunity”.\nA disease detector that mostly misses the ill people of one group is dangerous for that group, even if it is “95% accurate” on average.",
+    },
     example: "lignes = [('A', 1, 0)]  # (groupe, vrai, prédit)\nprint(lignes[0][1] == 1 and lignes[0][2] == 0)",
     task: { fr: "Écris faux_negatifs(lignes) → dict {groupe: taux de faux négatifs} avec lignes = (groupe, vrai, prédit) ; le taux = nombre de (vrai=1, prédit=0) / nombre de vrai=1. Ignore un groupe sans aucun vrai=1.", en: "Write faux_negatifs(lignes) → dict {group: false negative rate} with lignes = (group, true, predicted); the rate = count of (true=1, predicted=0) / count of true=1. Skip a group with no true=1." },
     starter: "def faux_negatifs(lignes):\n    pass\n",
@@ -27,7 +33,10 @@ export const ethiqueLessons: Lesson[] = [
   {
     id: "eth-anonymat", lang: 'py', group: "ethique",
     title: { fr: "Anonymiser : le k-anonymat", en: "Anonymising: k-anonymity" },
-    explain: { fr: "Retirer le nom ne suffit pas à anonymiser : l'âge, la ville et le métier ensemble peuvent désigner UNE seule personne. Le k-ANONYMAT exige que chaque combinaison de ces attributs « quasi-identifiants » corresponde à au moins k personnes. On y arrive en GÉNÉRALISANT : âge exact → tranche de 10 ans, adresse précise → région. C'est la base du respect de la vie privée dans les jeux de données.", en: "Removing the name is not enough to anonymise: age, city and job together may single out ONE person. k-ANONYMITY requires every combination of these “quasi-identifier” attributes to match at least k people. You get there by GENERALISING: exact age → 10-year band, postcode → region. It is the basis of privacy in datasets." },
+    explain: {
+      fr: "Retirer le nom ne suffit pas à anonymiser : l’âge, la ville et le métier ensemble peuvent désigner une seule personne. Le k-anonymat exige que chaque combinaison de ces informations corresponde à au moins k personnes.\nOn y arrive en généralisant : l’âge exact devient une tranche de 10 ans, l’adresse précise devient une région. C’est la base du respect de la vie privée dans les jeux de données.",
+      en: "Removing the name is not enough to anonymise: age, city and job together can point to a single person. k-anonymity requires that each combination of this information matches at least k people.\nYou get there by generalising: the exact age becomes a 10-year band, the precise address becomes a region. It is the basis of privacy in datasets.",
+    },
     example: "from collections import Counter\nprint(Counter([('30-39', 'Ville A'), ('30-39', 'Ville A')]).most_common(1))",
     task: { fr: "Écris k_anonymat(lignes, colonnes) → le plus petit nombre de personnes partageant une même combinaison des colonnes données (lignes = liste de dict). Puis tranche(age) → '30-39' pour 34, etc.", en: "Write k_anonymat(lignes, colonnes) → the smallest number of people sharing one combination of the given columns (lignes = list of dicts). Then tranche(age) → '30-39' for 34, etc." },
     starter: "from collections import Counter\n\ndef k_anonymat(lignes, colonnes):\n    pass\n\ndef tranche(age):\n    pass\n",
@@ -38,7 +47,10 @@ export const ethiqueLessons: Lesson[] = [
   {
     id: "eth-explicabilite", lang: 'py', group: "ethique",
     title: { fr: "Expliquer un modèle : l'importance par permutation", en: "Explaining a model: permutation importance" },
-    explain: { fr: "Pourquoi le modèle a-t-il décidé ça ? Une méthode honnête et simple : l'IMPORTANCE PAR PERMUTATION. On mélange les valeurs d'UNE colonne (on casse son lien avec la réponse) et on regarde de combien la précision baisse. Grosse baisse → le modèle s'appuie beaucoup sur cette colonne. S'il s'appuie sur une colonne qui ne devrait pas compter (un code postal, par exemple), c'est un signal d'alerte.", en: "Why did the model decide that? An honest, simple method: PERMUTATION IMPORTANCE. Shuffle the values of ONE column (break its link with the answer) and see how much accuracy drops. Big drop → the model relies heavily on that column. If it relies on a column that shouldn't matter (a postcode, say), that's a warning sign." },
+    explain: {
+      fr: "Pourquoi le modèle a-t-il décidé ça ? Une méthode honnête et simple : l’importance par permutation. On mélange les valeurs d’une seule colonne (on casse son lien avec la réponse) et on regarde de combien la précision baisse. Grosse baisse : le modèle s’appuie beaucoup sur cette colonne.\nS’il s’appuie sur une colonne qui ne devrait pas compter (un code postal, par exemple), c’est un signal d’alerte.",
+      en: "Why did the model decide that? An honest and simple method: permutation importance. You shuffle the values of a single column (breaking its link to the answer) and see how much accuracy drops. Big drop: the model relies a lot on that column.\nIf it relies on a column that should not matter (a postcode, for example), it is a warning sign.",
+    },
     example: "import random\nr = random.Random(0)\nv = [1, 2, 3]\nr.shuffle(v)\nprint(v)",
     task: { fr: "Écris importance(modele, X, y, col, graine=0) → précision(X) − précision(X avec la colonne col mélangée). modele(ligne) renvoie une prédiction ; X est une liste de listes ; utilise random.Random(graine).shuffle sur une copie de la colonne.", en: "Write importance(modele, X, y, col, graine=0) → accuracy(X) − accuracy(X with column col shuffled). modele(row) returns a prediction; X is a list of lists; use random.Random(graine).shuffle on a copy of the column." },
     starter: "import random\n\ndef importance(modele, X, y, col, graine=0):\n    pass\n",

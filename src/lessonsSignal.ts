@@ -5,7 +5,10 @@ export const signalLessons: Lesson[] = [
   {
     id: "sig-echantillon", lang: 'py', group: "signal",
     title: { fr: "Mesurer un son : l'échantillonnage et le repliement", en: "Measuring a sound: sampling and aliasing" },
-    explain: { fr: "Un micro ou un capteur mesure le signal à intervalles réguliers : c'est l'ÉCHANTILLONNAGE, à la fréquence fe (en Hz, mesures par seconde). Règle de Nyquist : on ne peut représenter fidèlement que les fréquences inférieures à fe / 2. Au-delà, la fréquence se « REPLIE » et apparaît comme une autre, plus basse : c'est pour ça qu'une roue filmée semble parfois tourner à l'envers.", en: "A microphone or sensor measures the signal at regular intervals: SAMPLING, at frequency fe (Hz, measurements per second). Nyquist rule: only frequencies below fe / 2 can be represented faithfully. Above that, the frequency “FOLDS” and appears as another, lower one: that's why a filmed wheel sometimes seems to spin backwards." },
+    explain: {
+      fr: "Un micro ou un capteur ne mesure pas en continu : il prend une mesure à intervalles réguliers. C’est l’échantillonnage, à la fréquence fe (en Hz, c’est-à-dire le nombre de mesures par seconde).\nRègle de Nyquist : on ne peut représenter fidèlement que les fréquences inférieures à fe / 2. Au-delà, la fréquence se « replie » et apparaît comme une autre, plus basse. C’est pour ça qu’une roue filmée semble parfois tourner à l’envers.",
+      en: "A microphone or sensor does not measure continuously: it takes a measurement at regular intervals. This is sampling, at frequency fe (in Hz, the number of measurements per second).\nNyquist rule: you can only faithfully represent frequencies below fe / 2. Beyond that, the frequency “folds back” and appears as another, lower one. That is why a filmed wheel sometimes seems to spin backwards.",
+    },
     example: "import math\nfe = 8\nprint([round(math.sin(2 * math.pi * 1 * n / fe), 2) for n in range(fe)])",
     task: { fr: "Écris echantillons(f, fe, n) → liste des n valeurs sin(2π·f·k/fe) pour k = 0..n−1. Puis frequence_apparente(f, fe) → |f − fe·round(f / fe)| (la fréquence qu'on croit voir). Puis fidele(f, fe) → True si f < fe / 2.", en: "Write echantillons(f, fe, n) → list of the n values sin(2π·f·k/fe) for k = 0..n−1. Then frequence_apparente(f, fe) → |f − fe·round(f / fe)| (the frequency you think you see). Then fidele(f, fe) → True if f < fe / 2." },
     starter: "import math\n\ndef echantillons(f, fe, n):\n    pass\n\ndef frequence_apparente(f, fe):\n    pass\n\ndef fidele(f, fe):\n    pass\n",
@@ -16,7 +19,10 @@ export const signalLessons: Lesson[] = [
   {
     id: "sig-lissage", lang: 'py', group: "signal",
     title: { fr: "Nettoyer un capteur bruité : la moyenne glissante", en: "Cleaning a noisy sensor: moving average" },
-    explain: { fr: "Les capteurs tremblent : un thermomètre donne 21,3 puis 21,9 puis 21,1 alors que la pièce n'a pas changé. La MOYENNE GLISSANTE remplace chaque point par la moyenne des k derniers : le bruit rapide s'efface, la tendance lente reste. C'est un FILTRE PASSE-BAS, le plus simple qui soit. Plus k est grand, plus c'est lisse… et plus la réaction est lente.", en: "Sensors jitter: a thermometer reads 21.3 then 21.9 then 21.1 although the room hasn't changed. The MOVING AVERAGE replaces each point by the mean of the last k: fast noise fades, the slow trend stays. It is a LOW-PASS FILTER, the simplest one. The bigger k, the smoother… and the slower the reaction." },
+    explain: {
+      fr: "Les capteurs tremblent : un thermomètre donne 21,3 puis 21,9 puis 21,1 alors que la pièce n’a pas changé. La moyenne glissante remplace chaque point par la moyenne des k derniers : le bruit rapide s’efface, la tendance lente reste. C’est le filtre le plus simple qui existe (un « passe-bas »).\nPlus k est grand, plus c’est lisse… mais plus la réaction est lente.",
+      en: "Sensors jitter: a thermometer gives 21.3 then 21.9 then 21.1 while the room has not changed. The moving average replaces each point with the average of the last k: fast noise fades, the slow trend stays. It is the simplest filter there is (a “low-pass”).\nThe bigger k is, the smoother… but the slower the reaction.",
+    },
     example: "x = [1, 3, 2, 4]\nprint([sum(x[i:i + 2]) / 2 for i in range(len(x) - 1)])",
     task: { fr: "Écris moyenne_glissante(x, k) → liste de longueur len(x) − k + 1 (moyenne de chaque fenêtre de k valeurs consécutives). Puis retard(k) → (k − 1) / 2, le décalage en échantillons introduit par le filtre.", en: "Write moyenne_glissante(x, k) → list of length len(x) − k + 1 (mean of each window of k consecutive values). Then retard(k) → (k − 1) / 2, the lag in samples introduced by the filter." },
     starter: "def moyenne_glissante(x, k):\n    pass\n\ndef retard(k):\n    pass\n",
@@ -27,7 +33,10 @@ export const signalLessons: Lesson[] = [
   {
     id: "sig-convolution", lang: 'py', group: "signal",
     title: { fr: "La brique de tous les filtres : la convolution", en: "The building block of all filters: convolution" },
-    explain: { fr: "Tous les filtres linéaires (lisser, accentuer, détecter un contour, ajouter de l'écho) reposent sur une seule opération : la CONVOLUTION. On fait glisser un petit noyau h le long du signal x ; chaque sortie est la somme des produits x[i − j]·h[j]. Avec h = [1/3, 1/3, 1/3] on retrouve la moyenne glissante ; avec h = [1, −1] on mesure la variation. Les réseaux de neurones « convolutifs » apprennent eux-mêmes leurs noyaux.", en: "All linear filters (smoothing, sharpening, edge detection, echo) rest on one operation: CONVOLUTION. A small kernel h slides along the signal x; each output is the sum of products x[i − j]·h[j]. With h = [1/3, 1/3, 1/3] you get the moving average; with h = [1, −1] you measure change. “Convolutional” neural networks learn their own kernels." },
+    explain: {
+      fr: "Tous les filtres linéaires (lisser, accentuer, détecter un contour, ajouter de l’écho) reposent sur une seule opération : la convolution. On fait glisser un petit noyau h le long du signal x ; chaque sortie est la somme des produits x[i − j]·h[j].\nAvec h = [1/3, 1/3, 1/3], on retrouve la moyenne glissante ; avec h = [1, −1], on mesure la variation. Les réseaux de neurones « convolutifs » apprennent eux-mêmes leurs noyaux.",
+      en: "All linear filters (smoothing, sharpening, edge detection, adding echo) rest on a single operation: convolution. You slide a small kernel h along the signal x; each output is the sum of the products x[i − j]·h[j].\nWith h = [1/3, 1/3, 1/3], you get the moving average; with h = [1, −1], you measure the change. “Convolutional” neural networks learn their kernels themselves.",
+    },
     example: "x, h = [1, 2], [1, 1]\nprint([x[0] * h[0], x[0] * h[1] + x[1] * h[0], x[1] * h[1]])",
     task: { fr: "Écris convolution(x, h) → liste de longueur len(x) + len(h) − 1 où y[i] = somme sur j de x[i − j]·h[j] (seulement quand 0 ≤ i − j < len(x)).", en: "Write convolution(x, h) → list of length len(x) + len(h) − 1 where y[i] = sum over j of x[i − j]·h[j] (only when 0 ≤ i − j < len(x))." },
     starter: "def convolution(x, h):\n    pass\n",
@@ -38,7 +47,10 @@ export const signalLessons: Lesson[] = [
   {
     id: "sig-frequences", lang: 'py', group: "signal",
     title: { fr: "Quelles notes dans ce son ? La transformée de Fourier", en: "Which notes are in this sound? The Fourier transform" },
-    explain: { fr: "Un son est une somme de vibrations à différentes fréquences. La TRANSFORMÉE DE FOURIER DISCRÈTE (DFT) les retrouve : pour chaque fréquence k, on compare le signal à une onde de cette fréquence ; plus ils se ressemblent, plus l'AMPLITUDE |X[k]| est grande. La case k correspond à k·fe/N hertz. C'est ce que font les accordeurs, Shazam et la compression MP3 (en version rapide : la FFT).", en: "A sound is a sum of vibrations at different frequencies. The DISCRETE FOURIER TRANSFORM (DFT) recovers them: for each frequency k, compare the signal with a wave of that frequency; the more alike, the larger the AMPLITUDE |X[k]|. Bin k corresponds to k·fe/N hertz. That's what tuners, Shazam and MP3 compression do (in fast form: the FFT)." },
+    explain: {
+      fr: "Un son est une somme de vibrations à différentes fréquences. La transformée de Fourier discrète (DFT) les retrouve : pour chaque fréquence k, on compare le signal à une onde de cette fréquence ; plus ils se ressemblent, plus l’amplitude |X[k]| est grande. La case k correspond à k·fe/N hertz.\nC’est ce que font les accordeurs, Shazam et la compression MP3 (en version rapide : la FFT).",
+      en: "A sound is a sum of vibrations at different frequencies. The discrete Fourier transform (DFT) recovers them: for each frequency k, you compare the signal to a wave of that frequency; the more they look alike, the larger the amplitude |X[k]|. Cell k matches k·fe/N hertz.\nThis is what tuners, Shazam and MP3 compression do (in fast version: the FFT).",
+    },
     example: "import cmath\nprint(abs(cmath.exp(-2j * cmath.pi * 0.25)))",
     task: { fr: "Écris amplitudes(x) → liste des |X[k]| pour k = 0..N//2, avec X[k] = Σ x[n]·exp(−2iπ·k·n/N). Puis frequence_dominante(x, fe) → k·fe/N pour le k ≥ 1 d'amplitude maximale.", en: "Write amplitudes(x) → list of |X[k]| for k = 0..N//2, with X[k] = Σ x[n]·exp(−2iπ·k·n/N). Then frequence_dominante(x, fe) → k·fe/N for the k ≥ 1 with maximum amplitude." },
     starter: "import cmath\n\ndef amplitudes(x):\n    pass\n\ndef frequence_dominante(x, fe):\n    pass\n",
@@ -49,7 +61,10 @@ export const signalLessons: Lesson[] = [
   {
     id: "sig-pics", lang: 'py', group: "signal",
     title: { fr: "Compter les battements : détecter les pics", en: "Counting beats: peak detection" },
-    explain: { fr: "Une montre connectée compte les battements de cœur en repérant les PICS du signal lumineux de son capteur. Un pic est un point plus haut que ses deux voisins ET au-dessus d'un SEUIL (sinon le moindre frémissement compte). Pour éviter de compter deux fois le même battement, on impose aussi une DISTANCE MINIMALE entre deux pics.", en: "A smartwatch counts heartbeats by spotting the PEAKS of its light sensor's signal. A peak is a point higher than both neighbours AND above a THRESHOLD (otherwise every tremor counts). To avoid counting the same beat twice, you also enforce a MINIMUM DISTANCE between two peaks." },
+    explain: {
+      fr: "Une montre connectée compte les battements de cœur en repérant les pics du signal lumineux de son capteur. Un pic est un point plus haut que ses deux voisins ET au-dessus d’un seuil (sinon le moindre frémissement compte).\nPour ne pas compter deux fois le même battement, on impose aussi une distance minimale entre deux pics.",
+      en: "A smartwatch counts heartbeats by spotting the peaks of its sensor’s light signal. A peak is a point higher than both neighbours AND above a threshold (otherwise the slightest flutter counts).\nTo avoid counting the same beat twice, we also impose a minimum distance between two peaks.",
+    },
     example: "x = [0, 3, 1, 4, 2]\nprint([i for i in range(1, len(x) - 1) if x[i - 1] < x[i] > x[i + 1]])",
     task: { fr: "Écris pics(x, seuil, distance=1) → indices i (de 1 à len(x) − 2) où x[i − 1] < x[i] ≥ x[i + 1] et x[i] ≥ seuil, en ignorant un pic à moins de distance échantillons du dernier pic gardé. Puis rythme(x, seuil, distance, fe) → battements par minute = nombre de pics · 60 · fe / len(x).", en: "Write pics(x, seuil, distance=1) → indices i (from 1 to len(x) − 2) where x[i − 1] < x[i] ≥ x[i + 1] and x[i] ≥ seuil, ignoring a peak less than distance samples after the last kept peak. Then rythme(x, seuil, distance, fe) → beats per minute = number of peaks · 60 · fe / len(x)." },
     starter: "def pics(x, seuil, distance=1):\n    pass\n\ndef rythme(x, seuil, distance, fe):\n    pass\n",

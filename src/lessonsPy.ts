@@ -260,8 +260,8 @@ export const pyLessons: Lesson[] = [
     id: 'py-projet-texte', lang: 'py', group: 'py-projets',
     title: { fr: 'Projet 1 : analyseur de texte', en: 'Project 1: text analyzer' },
     explain: {
-      fr: 'Premier mini-projet : tu assembles plusieurs notions (texte, listes, dictionnaires, tri). Découpe le texte en mots en minuscules, compte-les, et donne trois résultats.',
-      en: 'First mini-project: you combine several notions (text, lists, dictionaries, sorting). Split the text into lowercase words, count them, and return three results.',
+      fr: "Premier mini-projet : tu assembles plusieurs choses apprises (texte, listes, dictionnaires, tri). Les étapes : 1) coupe le texte en mots écrits en minuscules ; 2) compte combien de fois chaque mot apparaît (un dictionnaire) ; 3) donne les trois résultats demandés.\nAvance étape par étape et vérifie chaque étape avec print avant de passer à la suivante.",
+      en: "First mini-project: you put together several things you learned (text, lists, dictionaries, sorting). The steps: 1) cut the text into lowercase words; 2) count how often each word appears (a dictionary); 3) give the three results asked.\nGo step by step and check each step with print before moving to the next.",
     },
     example: 'mots = "Le chat et le chien".lower().split()',
     task: { fr: 'Écris analyse(texte) : renvoie {"mots": nombre de mots, "uniques": nombre de mots différents, "frequent": le mot le plus fréquent (en cas d’égalité, le premier par ordre alphabétique)}.', en: 'Write analyse(texte): return {"mots": word count, "uniques": distinct words, "frequent": the most frequent word (ties: first alphabetically)}.' },
@@ -274,8 +274,8 @@ export const pyLessons: Lesson[] = [
     id: 'py-projet-stock', lang: 'py', group: 'py-projets',
     title: { fr: 'Projet 2 : gestion de stock', en: 'Project 2: stock manager' },
     explain: {
-      fr: 'Second mini-projet : une classe qui garde des données (dictionnaire) et refuse les actions impossibles avec une exception. raise ValueError("message") interrompt l’action et signale l’erreur.',
-      en: 'Second mini-project: a class that keeps data (a dictionary) and refuses impossible actions with an exception. raise ValueError("message") stops the action and signals the error.',
+      fr: "Second mini-projet : une classe qui garde des données (un dictionnaire de stock) et refuse les actions impossibles, comme retirer plus d’articles qu’il n’y en a.\nraise ValueError(\"message\") interrompt l’action et signale l’erreur avec un message clair : c’est la façon propre de dire « ce n’est pas permis ».",
+      en: "Second mini-project: a class that keeps data (a stock dictionary) and refuses impossible actions, like removing more items than there are.\nraise ValueError(\"message\") interrupts the action and reports the error with a clear message: it is the clean way of saying “this is not allowed”.",
     },
     example: 'if quantite < 0:\n    raise ValueError("quantité négative")',
     task: { fr: 'Écris la classe Stock : ajoute(nom, n) ; retire(nom, n) qui lève ValueError si le stock est insuffisant ; quantite(nom) (0 si inconnu) ; total() = somme de toutes les quantités.', en: 'Write class Stock: ajoute(nom, n); retire(nom, n) raising ValueError if stock is insufficient; quantite(nom) (0 if unknown); total() = sum of all quantities.' },
