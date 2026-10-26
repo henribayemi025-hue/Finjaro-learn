@@ -2,8 +2,8 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { EditorView, basicSetup } from 'codemirror'
 import { EditorState, Compartment, Prec } from '@codemirror/state'
 import { keymap } from '@codemirror/view'
-import { acceptCompletion } from '@codemirror/autocomplete'
-import { indentMore, indentLess } from '@codemirror/commands'
+import { acceptCompletion, closeCompletion, completionStatus } from '@codemirror/autocomplete'
+import { indentMore, indentLess, insertNewlineAndIndent } from '@codemirror/commands'
 import { javascript } from '@codemirror/lang-javascript'
 import { python } from '@codemirror/lang-python'
 import { html } from '@codemirror/lang-html'
@@ -78,12 +78,14 @@ export default function Editeur({ chemin, valeur, onChange, onCurseur, onLancer,
       state: EditorState.create({
         doc: valeur,
         extensions: [
-          basicSetup, theme, syntaxHighlighting(couleurs), EditorView.lineWrapping,
+          // Placé AVANT basicSetup : à précédence égale, le premier gagne, et la suggestion ne doit pas capter Entrée.
           // Tab comme dans VS Code (Beau, 26/10 : « j'appuie sur Tab et tout se dérègle ») : il accepte la suggestion si elle est ouverte,
           // sinon il décale de 4 espaces (Maj+Tab : dans l'autre sens). Il ne sort plus de l'éditeur, et jamais de caractère Tab dans le code.
           indentUnit.of('    '), EditorState.tabSize.of(4),
           ...(compagnon ? [EditorView.theme({ '.cm-content': { paddingRight: '56px' } })] : []),
           Prec.highest(keymap.of([
+            // Entrée = nouvelle ligne, toujours (Beau, 26/10 : « je tape somme et ça envoie le curseur ailleurs ») : la suggestion ne s'accepte qu'avec Tab.
+            { key: 'Enter', run: (v) => { if (!completionStatus(v.state)) return false; closeCompletion(v); return insertNewlineAndIndent(v) } },
             { key: 'Tab', run: (v) => acceptCompletion(v) || indentMore(v) },
             { key: 'Shift-Tab', run: indentLess },
           ])),
@@ -99,6 +101,7 @@ export default function Editeur({ chemin, valeur, onChange, onCurseur, onLancer,
               rappel.current.onCurseur(l.number, tete - l.from + 1)
             }
           }),
+          basicSetup, theme, syntaxHighlighting(couleurs), EditorView.lineWrapping,
         ],
       }),
     })
