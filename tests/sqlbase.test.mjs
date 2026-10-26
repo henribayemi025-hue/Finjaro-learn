@@ -70,4 +70,8 @@ const e6 = expliqueErreur("NameError: name 'totl' is not defined", 'fr', 'total 
 ok(e6 && e6.includes('« total »') && !e6.startsWith('Ligne'), 'nom de son code : ' + e6)
 const e7 = expliqueErreur('Traceback (most recent call last):\n  File "<exec>", line 1, in <module>\n  File "<string>", line 1, in <module>\nNameError: name \'signe\' is not defined', 'fr', 'def compare(a,b):\n  return 1')
 ok(e7 && !e7.startsWith('Ligne') && e7.includes('def signe(') && e7.includes('Le test cherche'), 'NameError du test : ' + e7)
+const e8 = expliqueErreur("TypeError: 'int' object is not callable", 'fr', 'somme = 0\nfor i in range(3):\n    somme += i\nprint(somme(5))')
+ok(e8 && e8.includes('« somme »') && e8.includes('nombre entier') && /Renomme/.test(e8), 'int non appelable : ' + e8)
+const e9 = expliqueErreur("TypeError: 'int' object is not callable", 'en', 'sum = 0\nprint(sum([1,2]))')
+ok(e9 && e9.includes('“sum”') && /Python function/.test(e9), 'sum écrasé : ' + e9)
 console.log(`sqlbase : ${n} vérifications passées`)

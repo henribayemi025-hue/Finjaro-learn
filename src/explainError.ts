@@ -57,6 +57,19 @@ function motProche(nom: string, code: string): string | null {
 /** Explication simple d'une erreur, avec la ligne fautive quand on la connaît. Le code de l'élève, s'il est donné, permet de nommer le bon mot. */
 export function expliqueErreur(err: string, lang: Lang, code = ''): string | null {
   let texte: string | null = null
+  const appel = err.match(/'(\w+)' object is not callable/)
+  if (appel && code) {
+    // Une variable qui porte le nom d'une fonction : « somme = 0 » puis « somme(…) ».
+    const noms = [...new Set([...code.matchAll(/\b([A-Za-z_]\w*)\s*\(/g)].map((m) => m[1]))]
+    const creee = noms.find((n) => new RegExp('(^|\\n)\\s*' + n + '\\s*(=|\\+=|-=)(?!=)|for\\s+' + n + '\\s+in\\b', '').test(code) && !new RegExp('def\\s+' + n + '\\b').test(code))
+    if (creee) {
+      const type = ({ int: ['un nombre entier', 'a whole number'], float: ['un nombre', 'a number'], str: ['un texte', 'a text'], list: ['une liste', 'a list'], dict: ['un dictionnaire', 'a dictionary'], bool: ['un vrai/faux', 'a true/false'] } as Record<string, string[]>)[appel[1]] ?? ['une valeur', 'a value']
+      const python = CONNUS.includes(creee) ? (lang === 'fr' ? ` « ${creee} » est aussi le nom d'une fonction de Python : en lui donnant une valeur tu l'as écrasée.` : ` “${creee}” is also the name of a Python function: by giving it a value you overwrote it.`) : ''
+      return lang === 'fr'
+        ? `Tu as créé une variable « ${creee} » (${type[0]}), puis tu l'utilises comme une fonction : ${creee}(…).${python} Renomme la variable, ou retire les parenthèses.`
+        : `You created a variable “${creee}” (${type[1]}), then you use it like a function: ${creee}(…).${python} Rename the variable, or remove the parentheses.`
+    }
+  }
   const nom = err.match(/name '([^']+)' is not defined/)
   const dernier = [...err.matchAll(/File "([^"]+)", line/g)].pop()?.[1]
   if (nom && dernier === '<string>') {

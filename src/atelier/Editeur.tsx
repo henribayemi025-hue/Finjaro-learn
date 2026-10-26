@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { EditorView, basicSetup } from 'codemirror'
 import { EditorState, Compartment, Prec } from '@codemirror/state'
 import { keymap } from '@codemirror/view'
@@ -50,14 +50,27 @@ const couleurs = HighlightStyle.define([
   { tag: tags.invalid, color: '#FB7185' },
 ])
 
-export default function Editeur({ chemin, valeur, onChange, onCurseur, onLancer, label }: {
+export default function Editeur({ chemin, valeur, onChange, onCurseur, onLancer, label, compagnon }: {
   chemin: string; valeur: string; onChange: (v: string) => void; onCurseur: (ligne: number, colonne: number) => void; onLancer: () => void; label: string
+  /** Un petit élément (le visage d'un agent) qui suit la dernière ligne du code, dans la marge de droite. */
+  compagnon?: ReactNode
 }) {
+  const [topC, setTopC] = useState(20)
   const hote = useRef<HTMLDivElement>(null)
   const vue = useRef<EditorView | null>(null)
   const langage = useRef(new Compartment())
   const rappel = useRef({ onChange, onCurseur, onLancer })
   rappel.current = { onChange, onCurseur, onLancer }
+  const placerCompagnon = () => {
+    const v = vue.current, h = hote.current
+    if (!v || !h) return
+    const c = v.coordsAtPos(v.state.doc.length)
+    const r = h.getBoundingClientRect()
+    const haut = c ? (c.top + c.bottom) / 2 - r.top : r.height - 24
+    setTopC(Math.max(20, Math.min(r.height - 24, haut)))
+  }
+  const placer = useRef(placerCompagnon)
+  placer.current = placerCompagnon
 
   useEffect(() => {
     const v = new EditorView({
@@ -69,6 +82,7 @@ export default function Editeur({ chemin, valeur, onChange, onCurseur, onLancer,
           // Tab comme dans VS Code (Beau, 26/10 : « j'appuie sur Tab et tout se dérègle ») : il accepte la suggestion si elle est ouverte,
           // sinon il décale de 4 espaces (Maj+Tab : dans l'autre sens). Il ne sort plus de l'éditeur, et jamais de caractère Tab dans le code.
           indentUnit.of('    '), EditorState.tabSize.of(4),
+          ...(compagnon ? [EditorView.theme({ '.cm-content': { paddingRight: '56px' } })] : []),
           Prec.highest(keymap.of([
             { key: 'Tab', run: (v) => acceptCompletion(v) || indentMore(v) },
             { key: 'Shift-Tab', run: indentLess },
@@ -77,6 +91,7 @@ export default function Editeur({ chemin, valeur, onChange, onCurseur, onLancer,
           EditorView.contentAttributes.of({ 'aria-label': label, autocapitalize: 'off', autocorrect: 'off', spellcheck: 'false' }),
           EditorView.domEventHandlers({ keydown: (e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); rappel.current.onLancer(); return true } return false } }),
           EditorView.updateListener.of((u) => {
+            if (u.docChanged || u.geometryChanged || u.viewportChanged) requestAnimationFrame(() => placer.current())
             if (u.docChanged) rappel.current.onChange(u.state.doc.toString())
             if (u.selectionSet || u.docChanged) {
               const tete = u.state.selection.main.head
@@ -88,7 +103,10 @@ export default function Editeur({ chemin, valeur, onChange, onCurseur, onLancer,
       }),
     })
     vue.current = v
-    return () => v.destroy()
+    const suivre = () => placer.current()
+    v.scrollDOM.addEventListener('scroll', suivre, { passive: true })
+    requestAnimationFrame(suivre)
+    return () => { v.scrollDOM.removeEventListener('scroll', suivre); v.destroy() }
     // Créé une fois ; les changements de fichier passent par l'effet suivant.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -103,5 +121,11 @@ export default function Editeur({ chemin, valeur, onChange, onCurseur, onLancer,
     v.dispatch({ changes: { from: 0, to: actuel.length, insert: valeur }, effects: effets })
   }, [chemin, valeur])
 
-  return <div ref={hote} className="h-full min-h-0 overflow-hidden" />
+  if (!compagnon) return <div ref={hote} className="h-full min-h-0 overflow-hidden" />
+  return (
+    <div className="relative h-full min-h-0">
+      <div ref={hote} className="h-full min-h-0 overflow-hidden" />
+      <div className="absolute right-2 -translate-y-1/2 transition-[top] duration-150" style={{ top: topC }}>{compagnon}</div>
+    </div>
+  )
 }

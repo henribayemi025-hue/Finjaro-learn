@@ -48,6 +48,10 @@ const T = {
     copy: 'Copier', copied: 'Copié', apply: 'Appliquer', compare: 'Comparer', yourAgents: 'Ton agent', status: { none: 'pas lancé', ok: 'réussi', ko: 'à corriger', err: 'erreur' },
     fileHint: 'Ctrl + Entrée pour lancer',
     sos: '🆘 Sauve-moi', sosTip: (n: string) => `Clique pour demander de l’aide à ${n}`,
+    parcourir: '🔍 Parcourir', parcoursTitre: 'Revue de ton code', parcoursEnCours: 'Mes assistants lisent ton code…', parcoursFerme: 'Fermer la revue',
+    sous: { bugs: ['Traque', 'Cherche les erreurs'], style: ['Stylia', 'Lisibilité et bonnes habitudes'], idees: ['Boost', 'Pour aller plus loin'] },
+    parcoursQ: 'Parcours mon code ligne par ligne. Réponds EXACTEMENT en trois blocs, chacun commençant par son étiquette seule sur une ligne : [BUGS], [STYLE], [IDEES]. Chaque bloc : 1 à 3 puces très courtes (une ligne chacune), avec le numéro de ligne quand c’est utile. [BUGS] : erreurs ou pièges réels (écris « Rien à signaler » s’il n’y en a pas). [STYLE] : noms, lisibilité, bonnes habitudes. [IDEES] : une ou deux idées pour aller plus loin. Ne donne jamais la solution complète de l’exercice.',
+    detail: 'Détail technique',
     sosQ: 'À l’aide, je suis bloqué ! Regarde mon code et ce que dit la console, dis-moi simplement ce qui ne va pas et où regarder, sans me donner la solution.',
   },
   en: {
@@ -74,6 +78,10 @@ const T = {
     copy: 'Copy', copied: 'Copied', apply: 'Apply', compare: 'Compare', yourAgents: 'Your agent', status: { none: 'not run', ok: 'passed', ko: 'to fix', err: 'error' },
     fileHint: 'Ctrl + Enter to run',
     sos: '🆘 Save me', sosTip: (n: string) => `Click to ask ${n} for help`,
+    parcourir: '🔍 Scan', parcoursTitre: 'Review of your code', parcoursEnCours: 'My assistants are reading your code…', parcoursFerme: 'Close the review',
+    sous: { bugs: ['Traque', 'Hunts errors'], style: ['Stylia', 'Readability and good habits'], idees: ['Boost', 'To go further'] },
+    parcoursQ: 'Go through my code line by line. Answer EXACTLY in three blocks, each starting with its label alone on a line: [BUGS], [STYLE], [IDEES]. Each block: 1 to 3 very short bullets (one line each), with the line number when useful. [BUGS]: real errors or traps (write “Nothing to report” if there are none). [STYLE]: names, readability, good habits. [IDEES]: one or two ideas to go further. Never give the full solution of the exercise.',
+    detail: 'Technical detail',
     sosQ: 'Help, I am stuck! Look at my code and what the console says, tell me simply what is wrong and where to look, without giving me the solution.',
   },
 } as const
@@ -128,6 +136,7 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
   const prof = prets.find((a) => a.id === profId) ?? prets[0]
   const choisirProf = (id: string) => { setProfId(id); ecrire('learn:prof:' + track, id) }
   const [diff, setDiff] = useState<string | null>(null)
+  const [revue, setRevue] = useState<{ etat: 'cours' | 'ok' | 'erreur'; blocs: Record<'bugs' | 'style' | 'idees', string>; brut: string } | null>(null)
   // La rangée des agents se replie (Beau, 26/10 : « je dois pouvoir fermer cette partie, pour que ça ne prenne pas trop de place »), et le choix est gardé.
   const [choixOuvert, setChoixOuvert] = useState(() => lire('learn:agentsOuverts') !== '0')
   const basculerChoix = () => { setChoixOuvert((o) => { ecrire('learn:agentsOuverts', o ? '0' : '1'); return !o }) }
@@ -189,6 +198,16 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
   const statut: keyof typeof t.status = !res ? 'none' : res.passed ? 'ok' : res.error ? 'err' : 'ko'
   const couleurStatut = { none: 'text-slate-400 border-slate-700', ok: 'text-emerald-300 border-emerald-500/50 bg-emerald-500/10', ko: 'text-amber-300 border-amber-500/50 bg-amber-500/10', err: 'text-rose-300 border-rose-500/50 bg-rose-500/10' }[statut]
   const explication = res?.error ? expliqueErreur(res.error, lang, code) : null
+  const parcourir = async () => {
+    if (!ai || !signedIn) { window.dispatchEvent(new Event('learn:login')); return }
+    if (revue?.etat === 'cours') return
+    setRevue({ etat: 'cours', blocs: { bugs: '', style: '', idees: '' }, brut: '' })
+    const faits = (() => { try { return JSON.parse(localStorage.getItem('learn:done') ?? '[]') as string[] } catch { return [] } })()
+    const r = await askTutor({ question: t.parcoursQ, code, lesson: contexteCours(lesson, lang, faits, estSql ? contexteSql(titre, setupSql, lang) : ''), output: res?.output.join('\n') ?? '', lang, agentId: prof.id })
+    if (!r.answer) { setRevue({ etat: 'erreur', blocs: { bugs: '', style: '', idees: '' }, brut: r.error === 'quota' ? t.quota : t.down(prof.name) }); return }
+    const bloc = (nom: string) => new RegExp('\\[' + nom + '\\]\\s*([\\s\\S]*?)(?=\\[(?:BUGS|STYLE|IDEES)\\]|$)', 'i').exec(r.answer!)?.[1]?.trim() ?? ''
+    setRevue({ etat: 'ok', blocs: { bugs: bloc('BUGS'), style: bloc('STYLE'), idees: bloc('IDEES') }, brut: r.answer })
+  }
   const sauveMoi = () => {
     if (!ai || !signedIn) { window.dispatchEvent(new Event('learn:login')); return }
     setVue('agent')
@@ -246,6 +265,7 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
         {centre === 'code' && (
           <div className="flex items-center gap-2 pr-2">
             <span className="hidden xl:inline text-[11px] text-slate-500">{t.fileHint}</span>
+            <button onClick={() => void parcourir()} disabled={revue?.etat === 'cours'} className="h-8 px-3 rounded-md border border-slate-700 bg-slate-900 hover:bg-slate-800 text-[13px] font-medium text-slate-200 disabled:opacity-60">{revue?.etat === 'cours' ? '⏳ ' : ''}{t.parcourir}</button>
             <button onClick={() => void onRun()} disabled={running}
               className="h-8 px-4 rounded-md bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-[13px] font-semibold text-white shadow shadow-sky-500/20 disabled:opacity-60">
               {running ? '⏳ ' + t.running : '▶ ' + t.run}
@@ -253,6 +273,27 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
           </div>
         )}
       </div>
+      {centre === 'code' && revue && (
+        <div className="shrink-0 max-h-[42%] overflow-y-auto border-b border-slate-800 bg-slate-900 p-3" aria-live="polite">
+          <div className="flex items-center mb-2"><p className={titreMini}>{t.parcoursTitre}</p><span className="flex-1" />
+            <button onClick={() => setRevue(null)} aria-label={t.parcoursFerme} className="size-7 grid place-items-center rounded text-slate-400 hover:bg-slate-800 hover:text-white">✕</button></div>
+          {revue.etat === 'cours' ? <p className="text-[13px] text-sky-300 animate-pulse">{t.parcoursEnCours}</p>
+            : revue.etat === 'erreur' ? <p className="text-[13px] text-rose-300">{revue.brut}</p>
+            : (revue.blocs.bugs || revue.blocs.style || revue.blocs.idees)
+              ? <div className="grid gap-3 xl:grid-cols-3">
+                {(['bugs', 'style', 'idees'] as const).map((k, i) => (
+                  <section key={k} className="min-w-0 rounded-lg border border-slate-800 bg-slate-950/70 p-2.5">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <img src={import.meta.env.BASE_URL + 'visages/' + ['09', '10', '11'][i] + '.jpg'} alt="" className="size-6 rounded-full object-cover border border-slate-700" />
+                      <div className="min-w-0"><p className="text-[12px] font-semibold text-slate-100 leading-tight">{t.sous[k][0]}</p><p className="text-[10.5px] text-slate-400 leading-tight truncate">{t.sous[k][1]}</p></div>
+                    </div>
+                    {revue.blocs[k] ? <Md text={revue.blocs[k]} className="md-sombre text-[12.5px]" /> : <p className="text-[12px] text-slate-500">—</p>}
+                  </section>
+                ))}
+              </div>
+              : <Md text={revue.brut} className="md-sombre" />}
+        </div>
+      )}
       {centre === 'code' && (
         <div className="flex-1 min-h-0 flex flex-col">
           {estSql && tables.length > 0 && (
@@ -262,14 +303,15 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
               <button onClick={() => setCentre('base')} className="ml-auto font-sans text-[12px] font-semibold text-sky-300 underline min-h-8">{t.viewRows}</button>
             </div>
           )}
-          <div className="flex-1 min-h-40 relative">
+          <div className="flex-1 min-h-40">
             <Suspense fallback={<div className="p-4 text-slate-500 text-[13px]">…</div>}>
-              <Editeur chemin={nomFichier} valeur={code} onChange={onCode} onCurseur={() => {}} onLancer={() => void onRun()} label={t.code} />
+              <Editeur chemin={nomFichier} valeur={code} onChange={onCode} onCurseur={() => {}} onLancer={() => void onRun()} label={t.code}
+                compagnon={
+                  <button onClick={sauveMoi} disabled={busy} title={t.sosTip(prof.name)} aria-label={t.sosTip(prof.name)}
+                    className={`rounded-full p-0.5 bg-slate-900/90 border shadow-lg transition hover:scale-110 disabled:opacity-60 ${statut === 'err' || statut === 'ko' ? 'border-amber-400 shadow-amber-400/30 animate-pulse' : 'border-slate-700'}`}>
+                    {avatar(prof, 'size-9')}
+                  </button>} />
             </Suspense>
-            <button onClick={sauveMoi} disabled={busy} title={t.sosTip(prof.name)} aria-label={t.sosTip(prof.name)}
-              className={`absolute bottom-3 right-4 z-10 rounded-full p-0.5 bg-slate-900/90 border shadow-lg transition hover:scale-105 disabled:opacity-60 ${statut === 'err' || statut === 'ko' ? 'border-amber-400 shadow-amber-400/30 animate-pulse' : 'border-slate-700'}`}>
-              {avatar(prof, 'size-11')}
-            </button>
           </div>
           <div className="shrink-0 h-[38%] min-h-36 border-t border-slate-800 flex flex-col bg-slate-950">
             <div className="shrink-0 flex items-center gap-2 h-9 px-3 border-b border-slate-800/80">
@@ -281,7 +323,14 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
             <div className="flex-1 min-h-0 overflow-y-auto px-3 py-2 font-mono text-[12.5px] leading-relaxed" aria-live="polite">
               {!res ? <p className="text-slate-500">{t.noRun}</p> : <>
                 <pre className="whitespace-pre-wrap text-slate-100">{res.output.length ? res.output.join('\n') : t.noOutput}</pre>
-                {res.error && <pre className="mt-1 whitespace-pre-wrap text-rose-300">{res.error}</pre>}
+                {res.error && (() => {
+                  const lignes = res.error.split('\n').filter(Boolean)
+                  const derniere = lignes[lignes.length - 1]
+                  return (<>
+                    <pre className="mt-1 whitespace-pre-wrap text-rose-300">{derniere}</pre>
+                    {lignes.length > 1 && <details className="mt-1 text-slate-500"><summary className="cursor-pointer text-[11.5px] font-sans">{t.detail}</summary><pre className="mt-1 whitespace-pre-wrap text-[11.5px]">{res.error}</pre></details>}
+                  </>)
+                })()}
                 {explication && (
                   <div className="mt-2 rounded-lg border border-sky-500/40 bg-sky-500/10 p-2.5 font-sans text-[13px] text-slate-100">
                     <p>💡 {explication}</p>
