@@ -12,7 +12,7 @@ export default function ProjetModule({ lang, moduleId, ai, signedIn, onClose, on
   lang: Lang; moduleId: string; ai: boolean; signedIn: boolean; onClose: () => void; onSuite: () => void
 }) {
   const variantes = PROJETS[moduleId]
-  const mi = MODULES.findIndex((m) => m.id === moduleId)
+  const mi = MODULES.findIndex((m) => m.id === moduleId.split('-')[0])
   const module = MODULES[mi]
   const [etat, setEtat] = useState(() => lireEtat(moduleId))
   const [valide, setValide] = useState(() => !!projetReussi(moduleId))

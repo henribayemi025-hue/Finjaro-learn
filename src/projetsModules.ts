@@ -313,7 +313,110 @@ const PM_M8_B = projet({
 })
 // ───────── fin généré ─────────
 
+// ───────── Jalons de module (Beau, 26/10 : un projet après les boucles, un autre plus loin, puis un qui regroupe tout) ─────────
+const J_pm_m1j1_a = projet({
+  id: "pm-m1j1-a", module: "m1-j1", variante: "A",
+  titre: t("Atelier de nombres", "Number workshop"),
+  brief: t("Premier vrai projet : cinq petits outils, uniquement avec ce que tu viens d’apprendre (variables, texte, conditions, boucles). Aucune liste ici : tout se construit avec du texte.\n1) table(n, k) : la table de multiplication de n jusqu’à k, une ligne par produit, séparées par un saut de ligne. table(3, 3) donne « 3 x 1 = 3 », « 3 x 2 = 6 », « 3 x 3 = 9 » (une par ligne). Si k vaut 0 : texte vide.\n2) somme_chiffres(n) : la somme des chiffres de n (1234 → 10).\n3) collatz(n) : le nombre d’étapes pour atteindre 1 en répétant : si n est pair, n // 2 ; sinon 3 * n + 1. collatz(1) vaut 0, collatz(6) vaut 8.\n4) triangle(h) : h lignes ; la ligne i contient i étoiles. triangle(3) = « * », « ** », « *** » (séparées par un saut de ligne). h = 0 : texte vide.\n5) fizzbuzz(n) : les nombres de 1 à n séparés par un espace, en remplaçant les multiples de 3 par Fizz, ceux de 5 par Buzz, ceux des deux par FizzBuzz. fizzbuzz(5) = « 1 2 Fizz 4 Buzz ».", "First real project: five small tools, using only what you just learned (variables, text, conditions, loops). No lists here: everything is built with text.\n1) table(n, k): the multiplication table of n up to k, one line per product, separated by a newline. table(3, 3) gives “3 x 1 = 3”, “3 x 2 = 6”, “3 x 3 = 9” (one per line). If k is 0: empty text.\n2) somme_chiffres(n): the sum of the digits of n (1234 → 10).\n3) collatz(n): the number of steps to reach 1 by repeating: if n is even, n // 2; otherwise 3 * n + 1. collatz(1) is 0, collatz(6) is 8.\n4) triangle(h): h lines; line i holds i stars. triangle(3) = “*”, “**”, “***” (separated by newlines). h = 0: empty text.\n5) fizzbuzz(n): the numbers 1 to n separated by a space, replacing multiples of 3 with Fizz, of 5 with Buzz, of both with FizzBuzz. fizzbuzz(5) = “1 2 Fizz 4 Buzz”."),
+  indices: [
+    t("Pour construire un texte ligne par ligne : texte = \"\" puis texte += ... dans la boucle. Le saut de ligne s’écrit \"\\n\". Attention à ne pas en mettre un de trop au début ou à la fin.", "To build text line by line: texte = \"\" then texte += ... in the loop. A newline is written \"\\n\". Do not add an extra one at the start or the end."),
+    t("somme_chiffres : for c in str(n): total += int(c). collatz : une boucle while n != 1, avec un compteur d’étapes.", "somme_chiffres: for c in str(n): total += int(c). collatz: a while n != 1 loop, with a step counter."),
+    t("fizzbuzz : teste d’abord le cas « multiple de 15 » (ou de 3 ET de 5), sinon tu n’y arriveras jamais. Sépare les mots par un espace sans en laisser un à la fin.", "fizzbuzz: test the “multiple of 15” case first (3 AND 5), or you will never reach it. Separate words with a space without leaving one at the end."),
+  ],
+  rappels: ["py-vars", "py-str", "py-cond", "py-loops"],
+  starter: "def table(n, k):\n    pass\n\ndef somme_chiffres(n):\n    pass\n\ndef collatz(n):\n    pass\n\ndef triangle(h):\n    pass\n\ndef fizzbuzz(n):\n    pass\n",
+  solution: "def table(n, k):\n    texte = \"\"\n    for i in range(1, k + 1):\n        if texte:\n            texte += \"\\n\"\n        texte += f\"{n} x {i} = {n * i}\"\n    return texte\n\ndef somme_chiffres(n):\n    total = 0\n    for c in str(n):\n        total += int(c)\n    return total\n\ndef collatz(n):\n    etapes = 0\n    while n != 1:\n        if n % 2 == 0:\n            n = n // 2\n        else:\n            n = 3 * n + 1\n        etapes += 1\n    return etapes\n\ndef triangle(h):\n    texte = \"\"\n    for i in range(1, h + 1):\n        if texte:\n            texte += \"\\n\"\n        texte += \"*\" * i\n    return texte\n\ndef fizzbuzz(n):\n    texte = \"\"\n    for i in range(1, n + 1):\n        if i % 15 == 0:\n            mot = \"FizzBuzz\"\n        elif i % 3 == 0:\n            mot = \"Fizz\"\n        elif i % 5 == 0:\n            mot = \"Buzz\"\n        else:\n            mot = str(i)\n        texte += (\" \" if texte else \"\") + mot\n    return texte",
+  checks: [
+    "table(3, 3) == \"3 x 1 = 3\\n3 x 2 = 6\\n3 x 3 = 9\"",
+    "table(7, 1) == \"7 x 1 = 7\" and table(2, 0) == \"\"",
+    "somme_chiffres(1234) == 10 and somme_chiffres(0) == 0 and somme_chiffres(9999) == 36",
+    "collatz(1) == 0 and collatz(6) == 8 and collatz(7) == 16",
+    "collatz(27) == 111",
+    "triangle(3) == \"*\\n**\\n***\" and triangle(1) == \"*\" and triangle(0) == \"\"",
+    "fizzbuzz(5) == \"1 2 Fizz 4 Buzz\"",
+    "fizzbuzz(15) == \"1 2 Fizz 4 Buzz Fizz 7 8 Fizz Buzz 11 Fizz 13 14 FizzBuzz\"",
+    "fizzbuzz(1) == \"1\" and fizzbuzz(0) == \"\"",
+  ],
+})
+
+const J_pm_m1j1_b = projet({
+  id: "pm-m1j1-b", module: "m1-j1", variante: "B",
+  titre: t("Caisse de magasin", "Shop till"),
+  brief: t("Cinq outils d’une petite caisse de magasin, avec ce que tu as appris jusqu’aux boucles (texte, conditions, boucles ; pas encore de listes).\n1) rendre_monnaie(montant) : rend la monnaie avec les pièces 50, 20, 10, 5, 2 et 1, en commençant par les plus grosses. Le résultat est un texte « pièce:nombre » séparé par des espaces, sans les pièces à zéro. rendre_monnaie(87) = « 50:1 20:1 10:1 5:1 2:1 ». Pour 0 : texte vide.\n2) mot_de_passe_ok(mdp) : True si le mot de passe a au moins 8 caractères ET au moins un chiffre ET au moins une majuscule ET au moins une minuscule ; sinon False.\n3) compte_a_rebours(n) : « 3 2 1 Partez ! » pour n = 3 ; pour 0 : « Partez ! ».\n4) nb_voyelles(texte) : le nombre de voyelles (a e i o u y et leurs formes accentuées àâäéèêëîïôöùûü), majuscules comprises.\n5) bissextile(annee) : True si l’année est bissextile (divisible par 4, sauf les siècles, sauf ceux divisibles par 400).", "Five tools for a small shop till, with what you learned up to loops (text, conditions, loops; no lists yet).\n1) rendre_monnaie(montant): gives change with coins 50, 20, 10, 5, 2 and 1, biggest first. The result is a text “coin:count” separated by spaces, leaving out coins with a zero count. rendre_monnaie(87) = “50:1 20:1 10:1 5:1 2:1”. For 0: empty text.\n2) mot_de_passe_ok(mdp): True if the password has at least 8 characters AND at least one digit AND at least one uppercase AND at least one lowercase letter; otherwise False.\n3) compte_a_rebours(n): “3 2 1 Partez !” for n = 3; for 0: “Partez !”.\n4) nb_voyelles(texte): the number of vowels (a e i o u y and accented forms àâäéèêëîïôöùûü), uppercase included.\n5) bissextile(annee): True if the year is a leap year (divisible by 4, except centuries, except those divisible by 400)."),
+  indices: [
+    t("rendre_monnaie : for p in (50, 20, 10, 5, 2, 1): nombre = montant // p ; puis montant = montant % p. N’écris que si nombre > 0.", "rendre_monnaie: for p in (50, 20, 10, 5, 2, 1): count = montant // p; then montant = montant % p. Only write when count > 0."),
+    t("mot_de_passe_ok : trois « drapeaux » (chiffre, majuscule, minuscule) à False au départ ; parcours le mot, et passe-les à True avec c.isdigit(), c.isupper(), c.islower().", "mot_de_passe_ok: three “flags” (digit, uppercase, lowercase) set to False at first; walk through the word and set them to True with c.isdigit(), c.isupper(), c.islower()."),
+    t("bissextile tient en une ligne de conditions : (a % 4 == 0 and a % 100 != 0) or a % 400 == 0. nb_voyelles : mets le texte en minuscules avec .lower() avant de compter.", "bissextile fits in one line of conditions: (a % 4 == 0 and a % 100 != 0) or a % 400 == 0. nb_voyelles: lowercase the text with .lower() before counting."),
+  ],
+  rappels: ["py-str", "py-cond", "py-loops"],
+  starter: "def rendre_monnaie(montant):\n    pass\n\ndef mot_de_passe_ok(mdp):\n    pass\n\ndef compte_a_rebours(n):\n    pass\n\ndef nb_voyelles(texte):\n    pass\n\ndef bissextile(annee):\n    pass\n",
+  solution: "def rendre_monnaie(montant):\n    texte = \"\"\n    for p in (50, 20, 10, 5, 2, 1):\n        nombre = montant // p\n        montant = montant % p\n        if nombre > 0:\n            texte += (\" \" if texte else \"\") + f\"{p}:{nombre}\"\n    return texte\n\ndef mot_de_passe_ok(mdp):\n    chiffre = majuscule = minuscule = False\n    for c in mdp:\n        if c.isdigit():\n            chiffre = True\n        if c.isupper():\n            majuscule = True\n        if c.islower():\n            minuscule = True\n    return len(mdp) >= 8 and chiffre and majuscule and minuscule\n\ndef compte_a_rebours(n):\n    texte = \"\"\n    for i in range(n, 0, -1):\n        texte += f\"{i} \"\n    return texte + \"Partez !\"\n\ndef nb_voyelles(texte):\n    total = 0\n    for c in texte.lower():\n        if c in \"aeiouyàâäéèêëîïôöùûü\":\n            total += 1\n    return total\n\ndef bissextile(annee):\n    return (annee % 4 == 0 and annee % 100 != 0) or annee % 400 == 0",
+  checks: [
+    "rendre_monnaie(87) == \"50:1 20:1 10:1 5:1 2:1\"",
+    "rendre_monnaie(100) == \"50:2\" and rendre_monnaie(0) == \"\"",
+    "rendre_monnaie(99) == \"50:1 20:2 5:1 2:2\"",
+    "mot_de_passe_ok(\"Abcdefg1\") is True and mot_de_passe_ok(\"Abc1\") is False",
+    "mot_de_passe_ok(\"abcdefg1\") is False and mot_de_passe_ok(\"ABCDEFG1\") is False and mot_de_passe_ok(\"Abcdefgh\") is False",
+    "compte_a_rebours(3) == \"3 2 1 Partez !\" and compte_a_rebours(0) == \"Partez !\" and compte_a_rebours(1) == \"1 Partez !\"",
+    "nb_voyelles(\"Bonjour\") == 3 and nb_voyelles(\"Été\") == 2 and nb_voyelles(\"rythme\") == 2 and nb_voyelles(\"\") == 0",
+    "nb_voyelles(\"PYTHON\") == 2",
+    "bissextile(2000) is True and bissextile(1900) is False and bissextile(2024) is True and bissextile(2023) is False and bissextile(2100) is False",
+  ],
+})
+
+const J_pm_m1j2_a = projet({
+  id: "pm-m1j2-a", module: "m1-j2", variante: "A",
+  titre: t("Carnet de notes", "Gradebook"),
+  brief: t("Un carnet de notes d’une classe, avec des listes et des dictionnaires imbriqués. Le carnet est un dictionnaire {élève: {matière: [notes]}}.\n1) ajouter_note(carnet, eleve, matiere, note) : ajoute la note (l’élève et la matière sont créés s’ils n’existent pas) et renvoie le carnet. Une note hors de 0 à 20 lève ValueError(\"note invalide\").\n2) moyenne_matiere(carnet, eleve, matiere) : la moyenne arrondie à 2 décimales, ou None si l’élève ou la matière n’existe pas.\n3) moyenne_generale(carnet, eleve) : la moyenne des moyennes de ses matières, arrondie à 2 décimales ; None s’il n’a aucune note.\n4) meilleur(carnet) : le nom de l’élève avec la meilleure moyenne générale (à égalité : ordre alphabétique) ; None si le carnet est vide.\n5) bulletin(carnet, eleve) : la liste des lignes « matière: 14.50 » dans l’ordre alphabétique des matières, puis une dernière ligne « Moyenne: 13.25 » ; liste vide si l’élève n’existe pas.", "A class gradebook, with nested lists and dictionaries. The gradebook is a dictionary {student: {subject: [grades]}}.\n1) ajouter_note(carnet, eleve, matiere, note): adds the grade (student and subject are created if missing) and returns the gradebook. A grade outside 0 to 20 raises ValueError(\"note invalide\").\n2) moyenne_matiere(carnet, eleve, matiere): the average rounded to 2 decimals, or None if the student or subject does not exist.\n3) moyenne_generale(carnet, eleve): the average of the averages of their subjects, rounded to 2 decimals; None if they have no grade.\n4) meilleur(carnet): the name of the student with the best overall average (tie: alphabetical order); None if the gradebook is empty.\n5) bulletin(carnet, eleve): the list of lines “subject: 14.50” in alphabetical order of subjects, then a last line “Moyenne: 13.25”; empty list if the student does not exist."),
+  indices: [
+    t("ajouter_note : carnet.setdefault(eleve, {}).setdefault(matiere, []).append(note) crée tout ce qui manque en une ligne.", "ajouter_note: carnet.setdefault(eleve, {}).setdefault(matiere, []).append(note) creates everything missing in one line."),
+    t("Écris moyenne_matiere d’abord, puis moyenne_generale s’appuie dessus : une boucle sur les matières de l’élève, et tu fais la moyenne des résultats.", "Write moyenne_matiere first, then moyenne_generale builds on it: a loop over the student’s subjects, then average the results."),
+    t("meilleur : max(eleves, key=lambda e: (moyenne, ...)) ou trie par (−moyenne, nom). bulletin : sorted(carnet[eleve]) donne les matières dans l’ordre alphabétique.", "meilleur: max(students, key=...) or sort by (−average, name). bulletin: sorted(carnet[eleve]) gives the subjects in alphabetical order."),
+  ],
+  rappels: ["py-lists", "py-dict", "py-sortkey"],
+  starter: "def ajouter_note(carnet, eleve, matiere, note):\n    pass\n\ndef moyenne_matiere(carnet, eleve, matiere):\n    pass\n\ndef moyenne_generale(carnet, eleve):\n    pass\n\ndef meilleur(carnet):\n    pass\n\ndef bulletin(carnet, eleve):\n    pass\n",
+  solution: "def ajouter_note(carnet, eleve, matiere, note):\n    if not 0 <= note <= 20:\n        raise ValueError(\"note invalide\")\n    carnet.setdefault(eleve, {}).setdefault(matiere, []).append(note)\n    return carnet\n\ndef moyenne_matiere(carnet, eleve, matiere):\n    notes = carnet.get(eleve, {}).get(matiere)\n    if not notes:\n        return None\n    return round(sum(notes) / len(notes), 2)\n\ndef moyenne_generale(carnet, eleve):\n    matieres = carnet.get(eleve)\n    if not matieres:\n        return None\n    moyennes = [sum(n) / len(n) for n in matieres.values()]\n    return round(sum(moyennes) / len(moyennes), 2)\n\ndef meilleur(carnet):\n    if not carnet:\n        return None\n    return sorted(carnet, key=lambda e: (-moyenne_generale(carnet, e), e))[0]\n\ndef bulletin(carnet, eleve):\n    if eleve not in carnet:\n        return []\n    lignes = [f\"{m}: {moyenne_matiere(carnet, eleve, m):.2f}\" for m in sorted(carnet[eleve])]\n    lignes.append(f\"Moyenne: {moyenne_generale(carnet, eleve):.2f}\")\n    return lignes",
+  checks: [
+    "(lambda c: (ajouter_note(c, \"Awa\", \"maths\", 14), ajouter_note(c, \"Awa\", \"maths\", 15), ajouter_note(c, \"Awa\", \"fr\", 12), c)[3])({}) == {\"Awa\": {\"maths\": [14, 15], \"fr\": [12]}}",
+    "__raises(lambda: ajouter_note({}, \"Awa\", \"maths\", 21), ValueError) and __raises(lambda: ajouter_note({}, \"Awa\", \"maths\", -1), ValueError)",
+    "moyenne_matiere((lambda c: [ajouter_note(c, *a) for a in [(\"Awa\", \"maths\", 14), (\"Awa\", \"maths\", 15), (\"Awa\", \"fr\", 12), (\"Paul\", \"maths\", 9), (\"Paul\", \"fr\", 11), (\"Paul\", \"fr\", 13), (\"Zoe\", \"maths\", 20)]] and c)({}), \"Awa\", \"maths\") == 14.5 and moyenne_matiere((lambda c: [ajouter_note(c, *a) for a in [(\"Awa\", \"maths\", 14), (\"Awa\", \"maths\", 15), (\"Awa\", \"fr\", 12), (\"Paul\", \"maths\", 9), (\"Paul\", \"fr\", 11), (\"Paul\", \"fr\", 13), (\"Zoe\", \"maths\", 20)]] and c)({}), \"Paul\", \"fr\") == 12.0",
+    "moyenne_matiere((lambda c: [ajouter_note(c, *a) for a in [(\"Awa\", \"maths\", 14), (\"Awa\", \"maths\", 15), (\"Awa\", \"fr\", 12), (\"Paul\", \"maths\", 9), (\"Paul\", \"fr\", 11), (\"Paul\", \"fr\", 13), (\"Zoe\", \"maths\", 20)]] and c)({}), \"Awa\", \"histoire\") is None and moyenne_matiere((lambda c: [ajouter_note(c, *a) for a in [(\"Awa\", \"maths\", 14), (\"Awa\", \"maths\", 15), (\"Awa\", \"fr\", 12), (\"Paul\", \"maths\", 9), (\"Paul\", \"fr\", 11), (\"Paul\", \"fr\", 13), (\"Zoe\", \"maths\", 20)]] and c)({}), \"Inconnu\", \"fr\") is None",
+    "moyenne_generale((lambda c: [ajouter_note(c, *a) for a in [(\"Awa\", \"maths\", 14), (\"Awa\", \"maths\", 15), (\"Awa\", \"fr\", 12), (\"Paul\", \"maths\", 9), (\"Paul\", \"fr\", 11), (\"Paul\", \"fr\", 13), (\"Zoe\", \"maths\", 20)]] and c)({}), \"Awa\") == 13.25 and moyenne_generale((lambda c: [ajouter_note(c, *a) for a in [(\"Awa\", \"maths\", 14), (\"Awa\", \"maths\", 15), (\"Awa\", \"fr\", 12), (\"Paul\", \"maths\", 9), (\"Paul\", \"fr\", 11), (\"Paul\", \"fr\", 13), (\"Zoe\", \"maths\", 20)]] and c)({}), \"Paul\") == 10.5",
+    "moyenne_generale((lambda c: [ajouter_note(c, *a) for a in [(\"Awa\", \"maths\", 14), (\"Awa\", \"maths\", 15), (\"Awa\", \"fr\", 12), (\"Paul\", \"maths\", 9), (\"Paul\", \"fr\", 11), (\"Paul\", \"fr\", 13), (\"Zoe\", \"maths\", 20)]] and c)({}), \"Inconnu\") is None",
+    "meilleur((lambda c: [ajouter_note(c, *a) for a in [(\"Awa\", \"maths\", 14), (\"Awa\", \"maths\", 15), (\"Awa\", \"fr\", 12), (\"Paul\", \"maths\", 9), (\"Paul\", \"fr\", 11), (\"Paul\", \"fr\", 13), (\"Zoe\", \"maths\", 20)]] and c)({})) == \"Zoe\" and meilleur({}) is None",
+    "meilleur(ajouter_note((lambda c: [ajouter_note(c, *a) for a in [(\"Awa\", \"maths\", 14), (\"Awa\", \"maths\", 15), (\"Awa\", \"fr\", 12), (\"Paul\", \"maths\", 9), (\"Paul\", \"fr\", 11), (\"Paul\", \"fr\", 13), (\"Zoe\", \"maths\", 20)]] and c)({}), \"Ali\", \"maths\", 20)) == \"Ali\"",
+    "bulletin((lambda c: [ajouter_note(c, *a) for a in [(\"Awa\", \"maths\", 14), (\"Awa\", \"maths\", 15), (\"Awa\", \"fr\", 12), (\"Paul\", \"maths\", 9), (\"Paul\", \"fr\", 11), (\"Paul\", \"fr\", 13), (\"Zoe\", \"maths\", 20)]] and c)({}), \"Awa\") == [\"fr: 12.00\", \"maths: 14.50\", \"Moyenne: 13.25\"]",
+    "bulletin((lambda c: [ajouter_note(c, *a) for a in [(\"Awa\", \"maths\", 14), (\"Awa\", \"maths\", 15), (\"Awa\", \"fr\", 12), (\"Paul\", \"maths\", 9), (\"Paul\", \"fr\", 11), (\"Paul\", \"fr\", 13), (\"Zoe\", \"maths\", 20)]] and c)({}), \"Inconnu\") == []",
+  ],
+})
+
+const J_pm_m1j2_b = projet({
+  id: "pm-m1j2-b", module: "m1-j2", variante: "B",
+  titre: t("Inventaire de boutique", "Shop inventory"),
+  brief: t("Le stock d’une boutique, avec des dictionnaires et des listes. Le stock est un dictionnaire {article: quantité}.\n1) entrer(stock, article, qte) : ajoute qte à l’article (créé s’il n’existe pas) et renvoie le stock. Une quantité qui n’est pas strictement positive lève ValueError(\"quantité invalide\").\n2) sortir(stock, article, qte) : retire qte ; si l’article est inconnu ou si le stock est insuffisant, ValueError(\"stock insuffisant\") ; quand la quantité tombe à 0, l’article disparaît du stock. Renvoie le stock.\n3) valeur(stock, prix) : la valeur totale, sum(quantité × prix de l’article), arrondie à 2 décimales ; prix est un dictionnaire {article: prix unitaire}.\n4) a_reapprovisionner(stock, seuil) : la liste, triée par ordre alphabétique, des articles dont la quantité est strictement inférieure au seuil.\n5) fusion(stock1, stock2) : un NOUVEAU stock qui additionne les deux ; les deux stocks de départ ne changent pas.", "A shop’s stock, with dictionaries and lists. The stock is a dictionary {item: quantity}.\n1) entrer(stock, article, qte): adds qte to the item (created if missing) and returns the stock. A quantity that is not strictly positive raises ValueError(\"quantité invalide\").\n2) sortir(stock, article, qte): removes qte; if the item is unknown or stock is insufficient, ValueError(\"stock insuffisant\"); when the quantity drops to 0, the item disappears from the stock. Returns the stock.\n3) valeur(stock, prix): the total value, sum(quantity × unit price), rounded to 2 decimals; prix is a dictionary {item: unit price}.\n4) a_reapprovisionner(stock, seuil): the list, sorted alphabetically, of items whose quantity is strictly below the threshold.\n5) fusion(stock1, stock2): a NEW stock adding both; the two original stocks do not change."),
+  indices: [
+    t("entrer : stock[article] = stock.get(article, 0) + qte. sortir : vérifie d’abord (article inconnu ? quantité trop forte ?), retire ensuite, et del stock[article] quand ça tombe à 0.", "entrer: stock[article] = stock.get(article, 0) + qte. sortir: check first (unknown item? too large?), remove after, and del stock[article] when it hits 0."),
+    t("valeur : une boucle sur stock.items() qui cumule q * prix[a]. a_reapprovisionner : une liste en compréhension [a for a, q in stock.items() if q < seuil], puis sorted.", "valeur: a loop over stock.items() accumulating q * prix[a]. a_reapprovisionner: a list comprehension [a for a, q in stock.items() if q < seuil], then sorted."),
+    t("fusion : pars d’une copie (dict(stock1)) puis ajoute les articles de stock2 ; ne modifie jamais les arguments reçus.", "fusion: start from a copy (dict(stock1)) then add the items of stock2; never modify the arguments you receive."),
+  ],
+  rappels: ["py-lists", "py-dict"],
+  starter: "def entrer(stock, article, qte):\n    pass\n\ndef sortir(stock, article, qte):\n    pass\n\ndef valeur(stock, prix):\n    pass\n\ndef a_reapprovisionner(stock, seuil):\n    pass\n\ndef fusion(stock1, stock2):\n    pass\n",
+  solution: "def entrer(stock, article, qte):\n    if qte <= 0:\n        raise ValueError(\"quantité invalide\")\n    stock[article] = stock.get(article, 0) + qte\n    return stock\n\ndef sortir(stock, article, qte):\n    if stock.get(article, 0) < qte:\n        raise ValueError(\"stock insuffisant\")\n    stock[article] -= qte\n    if stock[article] == 0:\n        del stock[article]\n    return stock\n\ndef valeur(stock, prix):\n    total = 0\n    for a, q in stock.items():\n        total += q * prix[a]\n    return round(total, 2)\n\ndef a_reapprovisionner(stock, seuil):\n    return sorted(a for a, q in stock.items() if q < seuil)\n\ndef fusion(stock1, stock2):\n    res = dict(stock1)\n    for a, q in stock2.items():\n        res[a] = res.get(a, 0) + q\n    return res",
+  checks: [
+    "entrer({}, \"stylo\", 5) == {\"stylo\": 5} and entrer({\"stylo\": 5}, \"stylo\", 2) == {\"stylo\": 7}",
+    "__raises(lambda: entrer({}, \"x\", 0), ValueError)",
+    "sortir({\"stylo\": 10, \"cahier\": 3}, \"stylo\", 4) == {\"stylo\": 6, \"cahier\": 3}",
+    "sortir({\"stylo\": 10, \"cahier\": 3}, \"cahier\", 3) == {\"stylo\": 10}",
+    "__raises(lambda: sortir({\"stylo\": 10, \"cahier\": 3}, \"cahier\", 4), ValueError) and __raises(lambda: sortir({\"stylo\": 10, \"cahier\": 3}, \"gomme\", 1), ValueError)",
+    "valeur({\"stylo\": 10, \"cahier\": 3}, {\"stylo\": 1.5, \"cahier\": 2.25}) == 21.75 and valeur({}, {}) == 0",
+    "a_reapprovisionner({\"stylo\": 10, \"cahier\": 3, \"gomme\": 1}, 5) == [\"cahier\", \"gomme\"] and a_reapprovisionner({\"a\": 9}, 5) == []",
+    "(lambda a, b: (fusion(a, b), a, b))({\"x\": 1, \"y\": 2}, {\"y\": 3, \"z\": 4}) == ({\"x\": 1, \"y\": 5, \"z\": 4}, {\"x\": 1, \"y\": 2}, {\"y\": 3, \"z\": 4})",
+  ],
+})
+
 export const PROJETS: Record<string, Lesson[]> = {
+  'm1-j1': [J_pm_m1j1_a, J_pm_m1j1_b],
+  'm1-j2': [J_pm_m1j2_a, J_pm_m1j2_b],
   m1: [M1A, M1B, M1C],
   m2: [PM_M2_A, PM_M2_B],
   m3: [PM_M3_A, PM_M3_B],
@@ -321,6 +424,12 @@ export const PROJETS: Record<string, Lesson[]> = {
   m7: [PM_M7_A, PM_M7_B],
   m8: [PM_M8_A, PM_M8_B],
 }
+
+/** Projets d'étape : proposés au milieu d'un module, juste après la leçon `apres` (Beau, 26/10 : un projet après les boucles, un autre après les listes, puis celui qui regroupe tout). */
+export const JALONS: { id: string; apres: string }[] = [
+  { id: 'm1-j1', apres: 'py-loops' },
+  { id: 'm1-j2', apres: 'py-dict' },
+]
 
 // ───────── État de l'élève : où il en est dans les projets d'un module (gardé sur son appareil) ─────────
 export interface EtatProjet {

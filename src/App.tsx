@@ -7,7 +7,7 @@ import Cursus from './Cursus'
 import ExpliqueIci from './ExpliqueIci'
 import { Ico } from './Icones'
 import ProjetModule from './ProjetModule'
-import { PROJETS, projetEnAttente } from './projetsModules'
+import { JALONS, PROJETS, projetEnAttente } from './projetsModules'
 import { MODULES } from './cursusData'
 import { contexteCours } from './contexteCours'
 import Atelier from './Atelier'
@@ -257,7 +257,8 @@ export default function App() {
   // Le dernier exercice d'un module ouvre son projet : on ne passe au niveau suivant qu'une fois le projet réussi (Beau, 26/10).
   const moduleDe = MODULES.find((m) => m.groups.includes(lesson.group ?? 'js'))
   const dernierDuModule = !!moduleDe && lessons.filter((l) => moduleDe.groups.includes(l.group ?? 'js')).slice(-1)[0]?.id === lesson.id
-  const portailProjet = dernierDuModule && moduleDe && projetEnAttente(moduleDe.id) ? moduleDe.id : null
+  const jalon = JALONS.find((j) => j.apres === lesson.id && projetEnAttente(j.id))
+  const portailProjet = jalon ? jalon.id : dernierDuModule && moduleDe && projetEnAttente(moduleDe.id) ? moduleDe.id : null
   const verslasuite = (i: number | null) => { if (portailProjet) nav('#/projet/' + portailProjet); else if (i !== null) ouvre(i) }
   const terminer = async () => {
     const suivante = pos < trackLessons.length ? trackLessons[pos].i : null
@@ -434,7 +435,7 @@ export default function App() {
       )}
       {route.v === 'projet' && (
         <ProjetModule key={route.m} lang={lang} moduleId={route.m} ai={ai} signedIn={!!session} onClose={() => nav('#/cursus')}
-          onSuite={() => { const n = MODULES[MODULES.findIndex((m) => m.id === route.m) + 1]; const premiere = n ? lessons.findIndex((l) => n.groups.includes(l.group ?? 'js')) : -1; if (premiere >= 0) ouvre(premiere); else nav('#/cursus') }} />
+          onSuite={() => { const jl = JALONS.find((j) => j.id === route.m); if (jl) { const k = lessons.findIndex((l) => l.id === jl.apres); const ml = MODULES.find((m) => m.id === jl.id.split('-')[0]); const suiv = lessons.findIndex((l, i) => i > k && !!ml && ml.groups.includes(l.group ?? 'js')); ouvre(suiv >= 0 ? suiv : k); return } const n = MODULES[MODULES.findIndex((m) => m.id === route.m) + 1]; const premiere = n ? lessons.findIndex((l) => n.groups.includes(l.group ?? 'js')) : -1; if (premiere >= 0) ouvre(premiere); else nav('#/cursus') }} />
       )}
       {route.v === 'cursus' && (
         <div className="max-w-6xl mx-auto px-4 py-5 outline-none">
