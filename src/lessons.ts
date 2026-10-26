@@ -61,6 +61,12 @@ export interface Lesson {
   packages?: string[]
   /** Code de l'exercice en anglais (Beau, 14/10 : « tu mets du français alors qu'on est en mode anglais ») : remplace starter, example, solution, checks en mode anglais. */
   en?: { starter: string; example?: string; solution: string; checks: string[] }
+  /** Projet de module : à quel module et quelle variante il appartient. */
+  moduleProjet?: { module: string; variante: string }
+  /** Projet de module : indices qui se dévoilent un par un (du plus léger au plus précis). */
+  indices?: T[]
+  /** Projet de module : les leçons à revoir avant de se lancer (ids). */
+  rappels?: string[]
   /** Fin de module : trois exercices de difficulté croissante, puis le projet (lessonsFins.ts). */
   niveau?: 'facile' | 'moyen' | 'difficile' | 'projet'
 }

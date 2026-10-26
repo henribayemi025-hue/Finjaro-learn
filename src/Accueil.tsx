@@ -7,6 +7,7 @@ import type { Lang } from './i18n'
 import { chargerIndex, type Numero } from './Lettre'
 import Carrousel, { type Diapo } from './Carrousel'
 import { cursusTotal, modulesVus } from './cursusData'
+import { Ico } from './Icones'
 
 type Niveau = 'debutant' | 'intermediaire' | 'avance'
 /** Niveau conseillé de chaque parcours (une indication de difficulté, pas une note). */
@@ -97,7 +98,7 @@ export default function Accueil({ lang, done, idx, onOpen, onTrack, onResume, on
       <Carrousel lang={lang} diapos={diapos} />
       {/* Le cursus : un seul chemin, de la première ligne de code au niveau d'un ingénieur IA. */}
       <button onClick={onCursus} className="card w-full p-4 text-left flex items-center gap-4 hover:-translate-y-0.5 transition">
-        <span aria-hidden="true" className="size-12 shrink-0 rounded-2xl grad grid place-items-center text-2xl shadow-md">🎓</span>
+        <span aria-hidden="true" className="size-12 shrink-0 rounded-2xl grad grid place-items-center text-white shadow-md"><Ico n="cap" className="size-6" /></span>
         <span className="min-w-0 flex-1">
           <span className="block text-[11px] font-bold uppercase tracking-wider text-terracotta-dark">{lang === 'fr' ? 'Cursus' : 'Path'}</span>
           <span className="block font-display text-lg leading-tight">{lang === 'fr' ? 'De zéro à chercheur IA' : 'From zero to AI researcher'}</span>
@@ -124,7 +125,7 @@ export default function Accueil({ lang, done, idx, onOpen, onTrack, onResume, on
 
       {/* La Lettre de l'IA */}
       <button onClick={onLettre} className="card w-full p-4 text-left flex items-center gap-4 hover:-translate-y-0.5 transition">
-        <span aria-hidden="true" className="size-12 shrink-0 rounded-2xl grad grid place-items-center text-2xl shadow-md">📰</span>
+        <span aria-hidden="true" className="size-12 shrink-0 rounded-2xl grad grid place-items-center text-white shadow-md"><Ico n="news" className="size-6" /></span>
         <span className="min-w-0 flex-1">
           <span className="block text-[11px] font-bold uppercase tracking-wider text-terracotta-dark">{lang === 'fr' ? 'Chaque matin' : 'Every morning'}</span>
           <span className="block font-display text-lg leading-tight">{lang === 'fr' ? 'La Lettre de l’IA' : 'The AI Letter'}</span>

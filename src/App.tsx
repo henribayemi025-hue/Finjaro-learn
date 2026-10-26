@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import Espaces from './Espaces'
-import { TRACK_ICON } from './Curriculum'
 import Accueil from './Accueil'
 import Parcours from './Parcours'
 import Cursus from './Cursus'
 import ExpliqueIci from './ExpliqueIci'
+import { Ico } from './Icones'
+import ProjetModule from './ProjetModule'
+import { PROJETS, projetEnAttente } from './projetsModules'
+import { MODULES } from './cursusData'
 import { contexteCours } from './contexteCours'
 import Atelier from './Atelier'
 import { nouvelId, sauverProjet } from './atelierStore'
@@ -77,7 +80,7 @@ function save(key: string, v: string) {
   try { localStorage.setItem('learn:' + key, v) } catch { /* ignoré */ }
 }
 
-type Route = { v: 'accueil' } | { v: 'cursus' } | { v: 'parcours'; k: string } | { v: 'lecon'; id: string } | { v: 'lettre'; date: string | null } | { v: 'atelier'; id: string | null } | { v: 'progression' | 'espaces' | 'outils' | 'entraide' }
+type Route = { v: 'accueil' } | { v: 'cursus' } | { v: 'projet'; m: string } | { v: 'parcours'; k: string } | { v: 'lecon'; id: string } | { v: 'lettre'; date: string | null } | { v: 'atelier'; id: string | null } | { v: 'progression' | 'espaces' | 'outils' | 'entraide' }
 function lireRoute(): Route {
   const h = decodeURIComponent(window.location.hash.replace(/^#\/?/, ''))
   const [a, b] = h.split('/')
@@ -85,6 +88,7 @@ function lireRoute(): Route {
   if (a === 'parcours' && b && trackFromSlug(b)) return { v: 'parcours', k: trackFromSlug(b)! }
   if (a === 'parcours') return { v: 'accueil' }
   if (a === 'cursus') return { v: 'cursus' }
+  if (a === 'projet' && b && PROJETS[b]) return { v: 'projet', m: b }
   if (a === 'lecon' && b && lessons.some((l) => l.id === b)) return { v: 'lecon', id: b }
   if (a === 'atelier') return { v: 'atelier', id: b && /^[a-z0-9]{4,40}$/.test(b) ? b : null }
   if (a === 'progression' || a === 'espaces' || a === 'outils' || a === 'entraide') return { v: a }
@@ -102,7 +106,7 @@ export default function App() {
     window.addEventListener('hashchange', h)
     return () => window.removeEventListener('hashchange', h)
   }, [])
-  const view = route.v === 'accueil' || route.v === 'cursus' || route.v === 'parcours' || route.v === 'lecon' ? 'lecons' : route.v
+  const view = route.v === 'accueil' || route.v === 'cursus' || route.v === 'projet' || route.v === 'parcours' || route.v === 'lecon' ? 'lecons' : route.v
   const lettreDate = route.v === 'lettre' ? route.date : null
   const nav = (h: string) => { if (window.location.hash !== h) window.location.hash = h; else window.scrollTo({ top: 0 }) }
   const setView = (v: typeof VIEWS[number]) => nav(v === 'lecons' ? '#/' : '#/' + v)
@@ -128,6 +132,10 @@ export default function App() {
   const [fixNote, setFixNote] = useState('')
   const [showHint, setShowHint] = useState(false)
   const [chrono, setChrono] = useState(false)
+  // Le verdict du bouton « J'ai terminé » : on ne coche une leçon que si ses tests passent, et on le dit clairement.
+  const [verdict, setVerdict] = useState<{ etat: 'verif' | 'ok' | 'ko'; texte: string } | null>(null)
+  useEffect(() => { setVerdict(null) }, [idx])
+  useEffect(() => { if (!verdict || verdict.etat === 'verif') return; const h = setTimeout(() => setVerdict(null), 9000); return () => clearTimeout(h) }, [verdict])
   const [running, setRunning] = useState<'' | 'run' | 'py'>('')
   // Changement de langue pendant une leçon : le code (et ses tests) change de langue avec elle.
   const langPrec = useRef(lang)
@@ -246,12 +254,28 @@ export default function App() {
 
   // « Où dire que c'est terminé » (Beau, 14/10) : un bouton toujours visible dans la barre de la leçon.
   // Le code est vérifié avant : on ne coche jamais une leçon dont les tests ne passent pas.
+  // Le dernier exercice d'un module ouvre son projet : on ne passe au niveau suivant qu'une fois le projet réussi (Beau, 26/10).
+  const moduleDe = MODULES.find((m) => m.groups.includes(lesson.group ?? 'js'))
+  const dernierDuModule = !!moduleDe && lessons.filter((l) => moduleDe.groups.includes(l.group ?? 'js')).slice(-1)[0]?.id === lesson.id
+  const portailProjet = dernierDuModule && moduleDe && projetEnAttente(moduleDe.id) ? moduleDe.id : null
+  const verslasuite = (i: number | null) => { if (portailProjet) nav('#/projet/' + portailProjet); else if (i !== null) ouvre(i) }
   const terminer = async () => {
     const suivante = pos < trackLessons.length ? trackLessons[pos].i : null
-    if (done.includes(lesson.id)) { if (suivante !== null) ouvre(suivante); return }
-    if (lesson.predict || lesson.lecture) { document.getElementById('exercice')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); return }
+    if (done.includes(lesson.id)) { verslasuite(suivante); return }
+    if (lesson.predict || lesson.lecture) {
+      document.getElementById('exercice')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      setVerdict({ etat: 'ko', texte: lang === 'fr' ? 'Pas encore : réponds d’abord à l’exercice de la leçon, puis valide-le.' : 'Not yet: answer the lesson’s exercise first, then validate it.' })
+      return
+    }
+    setVerdict({ etat: 'verif', texte: lang === 'fr' ? 'Vérification de ton travail…' : 'Checking your work…' })
     const r = await run()
-    if (r?.passed && suivante !== null) setTimeout(() => ouvre(suivante), 900)
+    if (r?.passed) {
+      setVerdict({ etat: 'ok', texte: lang === 'fr' ? 'Vérifié : tous les tests passent, la leçon est terminée.' : 'Checked: all tests pass, the lesson is done.' })
+      if (suivante !== null || portailProjet) setTimeout(() => verslasuite(suivante), 1200)
+    } else {
+      const err = r?.error ? (expliqueErreur(r.error, lang, code) ?? r.error.split('\n').filter(Boolean).pop() ?? '') : ''
+      setVerdict({ etat: 'ko', texte: (lang === 'fr' ? 'Pas encore terminé : ton code ne passe pas tous les tests. ' : 'Not finished yet: your code does not pass all the tests. ') + err })
+    }
   }
 
   // Après 3 échecs, l'agent propose de lui-même un indice, puis un exercice sur mesure (si connecté et IA activée).
@@ -276,6 +300,7 @@ export default function App() {
   const track = trackOf(lesson.group)
   const trackLessons = lessons.map((l, i) => ({ l, i })).filter(({ l }) => trackOf(l.group) === track)
   const pos = trackLessons.findIndex(({ i }) => i === idx) + 1
+  const profBouton = agents.find((a) => a.id === profDe(track, lesson.lang ?? 'js')) ?? agents[0]
   const tabLabel = (v: typeof VIEWS[number]) => v === 'lecons' ? t.lessonsTab : v === 'atelier' ? (lang === 'fr' ? 'Atelier' : 'Workshop') : v === 'lettre' ? (lang === 'fr' ? 'Lettre IA' : 'AI Letter') : v === 'progression' ? t.progressTab : v === 'espaces' ? t.spaces : v === 'entraide' ? entraideUi(lang).tab : outilsUi[lang].tab
   const serie = streaks(loadDays()).cur
   const G = {
@@ -407,9 +432,13 @@ export default function App() {
             onResume={() => ouvre(idx)} onCursus={() => nav('#/cursus')} />
         </div>
       )}
+      {route.v === 'projet' && (
+        <ProjetModule key={route.m} lang={lang} moduleId={route.m} ai={ai} signedIn={!!session} onClose={() => nav('#/cursus')}
+          onSuite={() => { const n = MODULES[MODULES.findIndex((m) => m.id === route.m) + 1]; const premiere = n ? lessons.findIndex((l) => n.groups.includes(l.group ?? 'js')) : -1; if (premiere >= 0) ouvre(premiere); else nav('#/cursus') }} />
+      )}
       {route.v === 'cursus' && (
         <div className="max-w-6xl mx-auto px-4 py-5 outline-none">
-          <Cursus lang={lang} done={done} signedIn={!!session} onOpen={ouvre} onBack={() => nav('#/')} />
+          <Cursus lang={lang} done={done} signedIn={!!session} onOpen={ouvre} onBack={() => nav('#/')} onProjet={(m) => nav('#/projet/' + m)} />
         </div>
       )}
       {route.v === 'parcours' && (
@@ -422,25 +451,33 @@ export default function App() {
       {route.v === 'lecon' && travail && (
         <TravailSujet key={lesson.id} lang={lang} lesson={lesson} track={track} code={code} onCode={(v) => { setCode(v); save(cleCode(lesson, lang), v) }}
           onRun={run} res={res} running={!!running} ai={ai} signedIn={!!session} onClose={() => setTravail(false)}
-          onPrev={pos > 1 ? () => ouvre(trackLessons[pos - 2].i) : undefined} onNext={pos < trackLessons.length ? () => ouvre(trackLessons[pos].i) : undefined} />
+          onPrev={pos > 1 ? () => ouvre(trackLessons[pos - 2].i) : undefined} onNext={pos < trackLessons.length || portailProjet ? () => verslasuite(pos < trackLessons.length ? trackLessons[pos].i : null) : undefined} />
       )}
       {route.v === 'lecon' && <div id="lecon" className="max-w-6xl mx-auto px-4 py-4">
         <div className="space-y-4 min-w-0">
           <div className="sticky top-16 xl:top-[4.75rem] z-20 -mx-4 px-4 py-2 bg-[color-mix(in_srgb,var(--color-cream)_88%,transparent)] backdrop-blur-xl border-b border-brass flex items-center gap-2">
-            <button className="btn px-3" onClick={() => nav('#/parcours/' + trackSlug(track))} aria-label={(lang === 'fr' ? 'Retour au parcours ' : 'Back to track ') + acuName(lang, track)}>←<span className="hidden sm:inline"> {TRACK_ICON[track]} {acuName(lang, track)}</span></button>
+            <button className="btn px-3 gap-1.5" onClick={() => nav('#/parcours/' + trackSlug(track))} aria-label={(lang === 'fr' ? 'Retour au parcours ' : 'Back to track ') + acuName(lang, track)}><Ico n="left" className="size-4" /><span className="hidden sm:inline">{acuName(lang, track)}</span></button>
             <span className="flex-1 text-center text-sm font-semibold text-ink/70 truncate">{lang === 'fr' ? 'Leçon' : 'Lesson'} {pos} / {trackLessons.length}</span>
-            <button className={`btn px-3 text-sm ${done.includes(lesson.id) ? '' : 'btn-primary'}`} onClick={() => void terminer()} disabled={!!running}
+            <button className={`btn px-3 text-sm gap-1.5 ${done.includes(lesson.id) ? '' : 'btn-primary'}`} onClick={() => void terminer()} disabled={!!running}
               aria-label={done.includes(lesson.id) ? (lang === 'fr' ? 'Leçon terminée, passer à la suivante' : 'Lesson done, go to the next one') : (lang === 'fr' ? 'J’ai terminé : vérifier et passer à la suite' : 'I’m done: check and move on')}>
-              ✓<span className="hidden sm:inline"> {done.includes(lesson.id) ? (lang === 'fr' ? 'Terminé · suite' : 'Done · next') : (lang === 'fr' ? 'J’ai terminé' : 'I’m done')}</span></button>
-            <button className="btn px-3 text-sm" onClick={() => setTravail(true)} aria-label={lang === 'fr' ? 'Travailler avec les agents IA' : 'Work with AI agents'}>🤖<span className="hidden sm:inline"> {lang === 'fr' ? 'Avec les agents IA' : 'With AI agents'}</span></button>
-            <button className="icon-btn" disabled={pos <= 1} onClick={() => ouvre(trackLessons[pos - 2].i)} aria-label={lang === 'fr' ? 'Leçon précédente' : 'Previous lesson'}>‹</button>
-            <button className="icon-btn" disabled={pos >= trackLessons.length} onClick={() => ouvre(trackLessons[pos].i)} aria-label={lang === 'fr' ? 'Leçon suivante' : 'Next lesson'}>›</button>
+              <Ico n={running ? 'spin' : 'check'} className="size-4" /><span className="hidden sm:inline">{done.includes(lesson.id) ? (lang === 'fr' ? 'Terminé · suite' : 'Done · next') : (lang === 'fr' ? 'J’ai terminé' : 'I’m done')}</span></button>
+            <button className="btn pl-1.5 pr-3 text-sm gap-2" onClick={() => setTravail(true)} aria-label={lang === 'fr' ? 'Travailler avec les agents IA' : 'Work with AI agents'}>
+              {profBouton.face ? <img src={profBouton.face} alt="" className="size-7 rounded-full object-cover ring-1 ring-brass" /> : <span className="size-7 rounded-full bg-terracotta/15 grid place-items-center text-xs font-bold text-terracotta-dark">{profBouton.name[0]}</span>}
+              <span className="hidden sm:inline">{lang === 'fr' ? 'Avec les agents IA' : 'With AI agents'}</span></button>
+            <button className="icon-btn" disabled={pos <= 1} onClick={() => ouvre(trackLessons[pos - 2].i)} aria-label={lang === 'fr' ? 'Leçon précédente' : 'Previous lesson'}><Ico n="left" className="size-4" /></button>
+            <button className="icon-btn" disabled={pos >= trackLessons.length && !portailProjet} onClick={() => verslasuite(pos < trackLessons.length ? trackLessons[pos].i : null)} aria-label={lang === 'fr' ? 'Leçon suivante' : 'Next lesson'}><Ico n="right" className="size-4" /></button>
           </div>
+          {verdict && (
+            <div role="status" aria-live="polite" className={`rounded-xl border px-4 py-3 text-sm flex items-start gap-3 ${verdict.etat === 'ok' ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-900' : verdict.etat === 'ko' ? 'border-terracotta/50 bg-terracotta/10 text-ink' : 'border-brass bg-paper text-ink/80'}`}>
+              <Ico n={verdict.etat === 'ok' ? 'ok' : verdict.etat === 'ko' ? 'bulb' : 'spin'} className="size-5 mt-0.5" /><span className="flex-1">{verdict.texte}</span>
+              {verdict.etat !== 'verif' && <button onClick={() => setVerdict(null)} aria-label={lang === 'fr' ? 'Fermer' : 'Close'} className="opacity-60 hover:opacity-100"><Ico n="x" className="size-4" /></button>}
+            </div>
+          )}
           <div className="card p-5 sm:p-6 space-y-4">
           <div className="flex items-start justify-between gap-3">
             <h2 className="text-xl sm:text-2xl leading-tight">{lesson.title[lang]}</h2>
-            {lesson.niveau && <span className="chip shrink-0">🏁 {({ facile: { fr: 'Facile', en: 'Easy' }, moyen: { fr: 'Moyen', en: 'Medium' }, difficile: { fr: 'Difficile', en: 'Hard' }, projet: { fr: 'Projet', en: 'Project' } } as const)[lesson.niveau][lang]}</span>}
-            <span className="chip shrink-0">{lesson.langue === 'c' ? '⚙️ C' : lesson.langue === 'cpp' ? '⚙️ C++' : lesson.lang === 'sql' ? '🗄️ SQL' : lesson.lang === 'py' ? '🐍 Python' : '⚡ JavaScript'}</span>
+            {lesson.niveau && <span className="chip shrink-0"><Ico n="flag" className="size-3.5" />{({ facile: { fr: 'Facile', en: 'Easy' }, moyen: { fr: 'Moyen', en: 'Medium' }, difficile: { fr: 'Difficile', en: 'Hard' }, projet: { fr: 'Projet', en: 'Project' } } as const)[lesson.niveau][lang]}</span>}
+            <span className="chip shrink-0">{lesson.langue === 'c' ? 'C' : lesson.langue === 'cpp' ? 'C++' : lesson.lang === 'sql' ? 'SQL' : lesson.lang === 'py' ? 'Python' : 'JavaScript'}</span>
           </div>
           <Classe key={lesson.id} lang={lang} titre={lesson.title[lang]} pos={pos} total={trackLessons.length} parcours={acuName(lang, track)} track={track} langage={lesson.lang ?? 'js'}
             contexte={contexteCours(lesson, lang, done, lesson.lang === 'sql' && lesson.sql ? contexteSql(lesson.title[lang], lesson.sql.setup, lang) : '')}

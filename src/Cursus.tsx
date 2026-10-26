@@ -4,13 +4,15 @@ import AgentFace from './AgentFace'
 import { Md } from './Md'
 import { askTutor } from './tutor'
 import { cursusTotal, moduleCourant, modulesVus, type ModuleVu } from './cursusData'
+import { PROJETS } from './projetsModules'
+import { Ico } from './Icones'
 import type { Lang } from './i18n'
 
 const T = {
   fr: {
     back: 'Accueil', titre: 'De zéro à chercheur IA', sous: 'Tu pars de zéro, sans rien connaître : la première leçon, c’est une seule ligne de code. Tu lis, tu t’exerces, tu construis, tu avances, jusqu’au niveau d’un ingénieur IA sérieux.',
     prog: 'Progression', faites: 'leçons réussies', reprendre: 'Reprendre', commencer: 'Commencer', module: 'Module', projet: 'Projet', exo: 'Exercice', lecon: 'Leçon',
-    sauras: 'Tu sauras', fini: 'Terminé', ouvrir: 'Voir les leçons', fermer: 'Replier', certif: 'Certificat', certifLocked: 'Se débloque quand tout est réussi',
+    sauras: 'Tu sauras', projetOk: 'projet validé', projetDe: 'projet du module', projetFaire: 'Projet du module', projetRevoir: 'Revoir le projet du module', fini: 'Terminé', ouvrir: 'Voir les leçons', fermer: 'Replier', certif: 'Certificat', certifLocked: 'Se débloque quand tout est réussi',
     coach: 'Ton coach', coachSous: 'Il connaît où tu en es.', ph: 'Pose ta question…', envoyer: 'Envoyer', connecte: 'Connecte-toi pour parler au coach.', attente: 'Il réfléchit…', erreur: 'Le coach ne répond pas pour l’instant, réessaie dans un instant.',
     q1: 'Que faire aujourd’hui ?', q2: 'Teste-moi sur ce module', q3: 'Explique-moi ce module simplement',
     nom: 'Ton nom sur le certificat', imprimer: 'Imprimer / enregistrer en PDF', fermerC: 'Fermer',
@@ -20,7 +22,7 @@ const T = {
   en: {
     back: 'Home', titre: 'From zero to AI researcher', sous: 'You start from zero, knowing nothing: the first lesson is one single line of code. You read, practise, build, move forward, up to the level of a serious AI engineer.',
     prog: 'Progress', faites: 'lessons passed', reprendre: 'Resume', commencer: 'Start', module: 'Module', projet: 'Project', exo: 'Exercise', lecon: 'Lesson',
-    sauras: 'You will be able to', fini: 'Done', ouvrir: 'See lessons', fermer: 'Collapse', certif: 'Certificate', certifLocked: 'Unlocks when everything is passed',
+    sauras: 'You will be able to', projetOk: 'project validated', projetDe: 'project of the module', projetFaire: 'Module project', projetRevoir: 'Review the module project', fini: 'Done', ouvrir: 'See lessons', fermer: 'Collapse', certif: 'Certificate', certifLocked: 'Unlocks when everything is passed',
     coach: 'Your coach', coachSous: 'He knows where you are.', ph: 'Ask your question…', envoyer: 'Send', connecte: 'Sign in to talk to the coach.', attente: 'Thinking…', erreur: 'The coach is not answering right now, try again in a moment.',
     q1: 'What should I do today?', q2: 'Quiz me on this module', q3: 'Explain this module simply',
     nom: 'Your name on the certificate', imprimer: 'Print / save as PDF', fermerC: 'Close',
@@ -35,6 +37,9 @@ const COACH = {
   en: 'Coach of the “From zero to AI researcher” path. Direct, warm, demanding: he gives one next step at a time, makes the learner practise before explaining, asks short test questions, and never gives an exercise solution straight away. He knows the learner’s progress (current module, lessons passed) and sticks to it.',
 }
 
+/** Le prof a validé le projet de synthèse de ce module (gardé sur l'appareil). */
+export const projetValide = (moduleId: string) => { try { return !!localStorage.getItem('learn:projetValide:' + moduleId) } catch { return false } }
+
 function etat(vus: ModuleVu[], lang: Lang) {
   const { total, fait } = cursusTotal(vus)
   const cur = moduleCourant(vus)
@@ -43,13 +48,15 @@ function etat(vus: ModuleVu[], lang: Lang) {
     : `[Path] ${fait}/${total} lessons passed. Current module: ${cur ? cur.m.titre.en + ' (' + cur.fait + '/' + cur.ls.length + ')' : 'none, everything is done'}.`
 }
 
-export default function Cursus({ lang, done, signedIn, onOpen, onBack }: { lang: Lang; done: string[]; signedIn: boolean; onOpen: (i: number) => void; onBack: () => void }) {
+export default function Cursus({ lang, done, signedIn, onOpen, onBack, onProjet }: { lang: Lang; done: string[]; signedIn: boolean; onOpen: (i: number) => void; onBack: () => void; onProjet: (moduleId: string) => void }) {
   const t = T[lang]
   const vus = modulesVus(done)
   const { total, fait } = cursusTotal(vus)
   const pct = total ? Math.round((fait / total) * 100) : 0
   const cur = moduleCourant(vus)
   const prochaine = cur ? (cur.ls.find(({ l }) => !done.includes(l.id)) ?? cur.ls[0]) : null
+  // Un module dont toutes les leçons sont faites mais dont le projet n'est pas réussi : c'est la prochaine étape.
+  const projetAFaire = vus.find((v) => PROJETS[v.m.id] && v.ls.length > 0 && v.fait === v.ls.length && !projetValide(v.m.id)) ?? null
   const [ouvert, setOuvert] = useState<string | null>(cur?.m.id ?? null)
   const [certif, setCertif] = useState<ModuleVu | 'tout' | null>(null)
   const prof = (id: string) => agents.find((a) => a.id === id)
@@ -69,8 +76,10 @@ export default function Cursus({ lang, done, signedIn, onOpen, onBack }: { lang:
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          {prochaine && <button className="btn btn-primary px-5 py-3" onClick={() => onOpen(prochaine.i)}>▶ {fait ? t.reprendre : t.commencer} : {prochaine.l.title[lang]}</button>}
-          <button className="btn px-4" disabled={fait < total || total === 0} onClick={() => setCertif('tout')} title={fait < total ? t.certifLocked : ''}>🎓 {t.certif}</button>
+          {projetAFaire
+            ? <button className="btn btn-primary px-5 py-3 gap-2" onClick={() => onProjet(projetAFaire.m.id)}><Ico n="flag" className="size-4" />{t.reprendre} : {t.projetDe} {projetAFaire.m.titre[lang]}</button>
+            : prochaine && <button className="btn btn-primary px-5 py-3 gap-2" onClick={() => onOpen(prochaine.i)}><Ico n="play" className="size-4" />{fait ? t.reprendre : t.commencer} : {prochaine.l.title[lang]}</button>}
+          <button className="btn px-4 gap-2" disabled={fait < total || total === 0} onClick={() => setCertif('tout')} title={fait < total ? t.certifLocked : ''}><Ico n="cap" className="size-4" />{t.certif}</button>
         </div>
       </header>
 
@@ -85,7 +94,7 @@ export default function Cursus({ lang, done, signedIn, onOpen, onBack }: { lang:
                 <button className="w-full text-left p-4 flex items-center gap-3 min-h-16" aria-expanded={on} onClick={() => setOuvert(on ? null : v.m.id)}>
                   <span className={`shrink-0 size-10 rounded-full grid place-items-center font-bold ${fini ? 'grad text-white' : 'bg-ink/8 text-ink/70'}`}>{fini ? '✓' : n + 1}</span>
                   <span className="flex-1 min-w-0">
-                    <span className="block text-[11px] font-bold uppercase tracking-wider text-ink/50">{t.module} {n + 1}{p ? ' · ' + p.name : ''}</span>
+                    <span className="block text-[11px] font-bold uppercase tracking-wider text-ink/50">{t.module} {n + 1}{p ? ' · ' + p.name : ''}{projetValide(v.m.id) ? ' · ' + t.projetOk : ''}</span>
                     <span className="block font-display text-lg leading-tight">{v.m.titre[lang]}</span>
                     <span className="mt-1.5 flex items-center gap-2">
                       <span className="flex-1 h-1.5 rounded-full bg-ink/10 overflow-hidden"><span className="block h-full grad rounded-full" style={{ width: v.pct + '%' }} /></span>
@@ -112,7 +121,10 @@ export default function Cursus({ lang, done, signedIn, onOpen, onBack }: { lang:
                         )
                       })}
                     </ul>
-                    <button className="btn px-4" disabled={!fini} onClick={() => setCertif(v)} title={fini ? '' : t.certifLocked}>🎓 {t.certif} · {v.m.titre[lang]}</button>
+                    <div className="flex flex-wrap gap-2">
+                      {PROJETS[v.m.id] && <button className="btn px-4 gap-2" onClick={() => onProjet(v.m.id)}><Ico n="flag" className="size-4" />{projetValide(v.m.id) ? t.projetRevoir : t.projetFaire}</button>}
+                      <button className="btn px-4 gap-2" disabled={!fini} onClick={() => setCertif(v)} title={fini ? '' : t.certifLocked}><Ico n="cap" className="size-4" />{t.certif}</button>
+                    </div>
                   </div>
                 )}
               </li>

@@ -50,10 +50,12 @@ const couleurs = HighlightStyle.define([
   { tag: tags.invalid, color: '#FB7185' },
 ])
 
-export default function Editeur({ chemin, valeur, onChange, onCurseur, onLancer, label, compagnon }: {
+export default function Editeur({ chemin, valeur, onChange, onCurseur, onLancer, label, compagnon, assistants }: {
   chemin: string; valeur: string; onChange: (v: string) => void; onCurseur: (ligne: number, colonne: number) => void; onLancer: () => void; label: string
   /** Un petit élément (le visage d'un agent) qui suit la dernière ligne du code, dans la marge de droite. */
   compagnon?: ReactNode
+  /** Un groupe de petits éléments (les assistants) fixé en bas à droite de l'éditeur. */
+  assistants?: ReactNode
 }) {
   const [topC, setTopC] = useState(20)
   const hote = useRef<HTMLDivElement>(null)
@@ -129,6 +131,7 @@ export default function Editeur({ chemin, valeur, onChange, onCurseur, onLancer,
     <div className="relative h-full min-h-0">
       <div ref={hote} className="h-full min-h-0 overflow-hidden" />
       <div className="absolute right-2 -translate-y-1/2 transition-[top] duration-150" style={{ top: topC }}>{compagnon}</div>
+      {assistants && <div className="absolute right-3 bottom-2 flex flex-col-reverse items-center gap-1.5">{assistants}</div>}
     </div>
   )
 }
