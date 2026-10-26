@@ -337,7 +337,7 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
           <button onClick={() => fixerLarg(large ? 380 : 640)} aria-label={large ? t.narrow : t.widen} title={large ? t.narrow : t.widen}
             className="hidden lg:grid size-7 place-items-center rounded text-[14px] text-slate-400 hover:bg-slate-800 hover:text-white">{large ? '⤡' : '⤢'}</button>
         </div>
-        <div className="flex gap-1.5 overflow-x-auto" role="tablist" aria-label={t.yourAgents}>
+        <div className="flex gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="tablist" aria-label={t.yourAgents}>
           {agentsProposes.map((a) => {
             const actif = a.id === prof.id
             return (
@@ -381,7 +381,7 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
           </div>
         ))}
       </div>
-      <div className="shrink-0 px-3 py-1.5 border-t border-slate-800/70 bg-slate-950/40 flex gap-1.5 overflow-x-auto">
+      <div className="shrink-0 px-3 py-1.5 border-t border-slate-800/70 bg-slate-950/40 flex gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {t.chips.map(([label, q]) => (
           <button key={label} onClick={() => void poser(q)} disabled={busy || !ai || !signedIn}
             className="shrink-0 text-[11.5px] px-2.5 py-1 rounded-full bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/60 disabled:opacity-40">{label}</button>
