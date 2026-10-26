@@ -131,7 +131,7 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
     enBas.current = true; setBusy(true); setQuestion('')
     setFil((f) => [...f, { q, a: '', prof: prof.id }])
     const history = fil.filter((e) => e.prof === prof.id && e.ok !== false && e.a).slice(-3).flatMap((e) => [{ role: 'user' as const, text: e.q }, { role: 'model' as const, text: e.a }])
-    const r = await askTutor({ question: q, code: aCode ? code : notes, lesson: contexteCours(lesson, lang, (() => { try { return JSON.parse(localStorage.getItem('learn:done') ?? '[]') as string[] } catch { return [] } })(), estSql ? contexteSql(titre, setupSql, lang) : ''), output: res?.output.join('\n') ?? '', lang, agentId: prof.id, history })
+    const r = await askTutor({ question: q, code: aCode ? code : notes, lesson: contexteCours(lesson, lang, (() => { try { return JSON.parse(localStorage.getItem('learn:done') ?? '[]') as string[] } catch { return [] } })(), (estSql ? contexteSql(titre, setupSql, lang) : '') + '\n' + (lang === 'fr' ? 'Où il en est : ' : 'Where he is: ') + (!res ? (lang === 'fr' ? 'il n’a pas encore lancé son code' : 'he has not run his code yet') : res.passed ? (lang === 'fr' ? 'exercice réussi' : 'exercise passed') : res.error ? (lang === 'fr' ? 'son code a une erreur : ' : 'his code has an error: ') + res.error.slice(0, 200) : (lang === 'fr' ? 'il a lancé son code, le résultat n’est pas bon' : 'he ran his code, the result is wrong'))), output: res?.output.join('\n') ?? '', lang, agentId: prof.id, history })
     const a = r.answer ?? (r.error === 'quota' ? t.quota : t.down(prof.name))
     setFil((f) => {
       const suite = [...f.slice(0, -1), { q, a, prof: prof.id, ok: !!r.answer }].slice(-20)

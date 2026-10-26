@@ -58,7 +58,14 @@ function motProche(nom: string, code: string): string | null {
 export function expliqueErreur(err: string, lang: Lang, code = ''): string | null {
   let texte: string | null = null
   const nom = err.match(/name '([^']+)' is not defined/)
-  if (nom) {
+  const dernier = [...err.matchAll(/File "([^"]+)", line/g)].pop()?.[1]
+  if (nom && dernier === '<string>') {
+    // Le test cherche ce nom dans le code de l'élève : l'exercice demande exactement ce nom.
+    texte = lang === 'fr'
+      ? `Le test cherche « ${nom[1]} » dans ton code et ne le trouve pas. L'exercice demande exactement ce nom : écris « def ${nom[1]}(…) » (vérifie aussi que tu travailles bien l'exercice de cette leçon, pas un autre).`
+      : `The test looks for “${nom[1]}” in your code and cannot find it. The exercise asks for exactly that name: write “def ${nom[1]}(…)” (also check you are working on this lesson’s exercise, not another one).`
+    return texte
+  } else if (nom) {
     const proche = motProche(nom[1], code)
     if (proche && !/^(Print|Input|Len|Range|Int|Str|Float|List|Dict|Set|Sum|Max|Min|Sorted|Abs|Round|Type|Open|true|false|none)$/.test(nom[1])) {
       texte = lang === 'fr'
@@ -71,7 +78,9 @@ export function expliqueErreur(err: string, lang: Lang, code = ''): string | nul
     if (m) { texte = r[lang](m); break }
   }
   if (!texte) return null
-  const n = [...err.matchAll(/File "<(?:exec|eleve)>", line (\d+)/g)].pop()?.[1]
+  // La ligne n'est citée que si le dernier cadre de la trace est le code de l'élève : sinon c'est le test qui a planté, sa ligne n'a aucun sens pour lui.
+  const cadre = [...err.matchAll(/File "([^"]+)", line (\d+)/g)].pop()
+  const n = cadre && /^<(?:exec|eleve)>$/.test(cadre[1]) ? cadre[2] : undefined
   const ligne = n ? code.split('\n')[Number(n) - 1]?.trim() : ''
   if (!n) return texte
   const quoi = ligne ? ` « ${ligne.slice(0, 60)} »` : ''

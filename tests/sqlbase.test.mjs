@@ -68,4 +68,6 @@ const e5 = expliqueErreur("Traceback (most recent call last):\n  File \"<exec>\"
 ok(e5 && e5.startsWith('Ligne 2 « prnt(x) » : ') && e5.includes('« print »'), 'faute de frappe + ligne : ' + e5)
 const e6 = expliqueErreur("NameError: name 'totl' is not defined", 'fr', 'total = 3\nprint(totl)')
 ok(e6 && e6.includes('« total »') && !e6.startsWith('Ligne'), 'nom de son code : ' + e6)
+const e7 = expliqueErreur('Traceback (most recent call last):\n  File "<exec>", line 1, in <module>\n  File "<string>", line 1, in <module>\nNameError: name \'signe\' is not defined', 'fr', 'def compare(a,b):\n  return 1')
+ok(e7 && !e7.startsWith('Ligne') && e7.includes('def signe(') && e7.includes('Le test cherche'), 'NameError du test : ' + e7)
 console.log(`sqlbase : ${n} vérifications passées`)
