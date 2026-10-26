@@ -5,7 +5,10 @@ export const cppLessons: Lesson[] = [
   {
     id: "cpp-cout", lang: 'py', langue: "cpp", group: "cpp",
     title: { fr: "C++ : cout et string", en: "C++: cout and string" },
-    explain: { fr: "Le C++ ajoute au C des outils de haut niveau tout en restant très rapide (jeux vidéo, finance, robotique, navigateurs). std::cout << affiche, std::endl ou '\\n' passe à la ligne. std::string est un vrai type texte : on peut concaténer avec + et connaître sa taille avec .size(). (Dans le navigateur on ne compile pas encore le C++ : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)", en: "C++ adds high-level tools to C while staying very fast (video games, finance, robotics, browsers). std::cout << prints, std::endl or '\\n' starts a new line. std::string is a real text type: concatenate with + and get its length with .size(). (The browser does not compile C++ yet: here you learn to READ it. The answer was checked with a real compiler.)" },
+    explain: {
+      fr: "Le C++ ajoute au C des outils de plus haut niveau tout en restant très rapide (jeux vidéo, finance, robotique, navigateurs). std::cout << affiche ; std::endl ou '\\n' passe à la ligne.\nstd::string est un vrai type texte : on colle deux textes avec +, et .size() donne la longueur. (Dans le navigateur on ne compile pas encore le C++ : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)",
+      en: "C++ adds higher-level tools to C while staying very fast (video games, finance, robotics, browsers). std::cout << prints; std::endl or '\\n' starts a new line.\nstd::string is a real text type: you glue two texts with +, and .size() gives the length. (The browser does not compile C++ yet: here you learn to READ it. The answer was checked with a real compiler.)",
+    },
     example: '',
     task: { fr: 'Que va afficher ce programme ?', en: 'What will this program print?' },
     starter: '',
@@ -17,7 +20,10 @@ export const cppLessons: Lesson[] = [
   {
     id: "cpp-references", lang: 'py', langue: "cpp", group: "cpp",
     title: { fr: "C++ : les références", en: "C++: references" },
-    explain: { fr: "Une RÉFÉRENCE (int& r = x) est un autre nom pour la même variable : modifier r modifie x. En paramètre (void f(int& n)), elle permet à une fonction de modifier l'original sans écrire de pointeurs. const int& permet de lire sans copier et sans risque de modifier. (Dans le navigateur on ne compile pas encore le C++ : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)", en: "A REFERENCE (int& r = x) is another name for the same variable: changing r changes x. As a parameter (void f(int& n)), it lets a function change the original without writing pointers. const int& lets you read without copying and without any risk of modifying. (The browser does not compile C++ yet: here you learn to READ it. The answer was checked with a real compiler.)" },
+    explain: {
+      fr: "Une référence (int& r = x) est un deuxième nom pour la même variable, comme un surnom : modifier r modifie x.\nEn paramètre (void f(int& n)), elle permet à une fonction de changer l’original sans écrire de pointeurs. const int& permet de lire sans copier et sans risque de modifier. (Dans le navigateur on ne compile pas encore le C++ : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)",
+      en: "A reference (int& r = x) is a second name for the same variable, like a nickname: changing r changes x.\nAs a parameter (void f(int& n)), it lets a function change the original without writing pointers. const int& lets you read without copying and with no risk of changing it. (The browser does not compile C++ yet: here you learn to READ it. The answer was checked with a real compiler.)",
+    },
     example: '',
     task: { fr: 'Que va afficher ce programme ?', en: 'What will this program print?' },
     starter: '',
@@ -29,7 +35,10 @@ export const cppLessons: Lesson[] = [
   {
     id: "cpp-vector", lang: 'py', langue: "cpp", group: "cpp",
     title: { fr: "C++ : vector", en: "C++: vector" },
-    explain: { fr: "std::vector est un tableau qui grandit tout seul : push_back ajoute à la fin, size() donne le nombre d'éléments, et la boucle for (int v : t) parcourt tous les éléments. C'est la structure la plus utilisée du C++, l'équivalent des listes Python. (Dans le navigateur on ne compile pas encore le C++ : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)", en: "std::vector is an array that grows by itself: push_back appends, size() gives the number of elements, and the loop for (int v : t) walks all the elements. It is the most used C++ structure, the equivalent of Python lists. (The browser does not compile C++ yet: here you learn to READ it. The answer was checked with a real compiler.)" },
+    explain: {
+      fr: "std::vector est un tableau qui grandit tout seul : push_back ajoute à la fin, size() donne le nombre d’éléments, et for (int v : t) parcourt tous les éléments un par un.\nC’est la structure la plus utilisée en C++, l’équivalent des listes de Python. (Dans le navigateur on ne compile pas encore le C++ : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)",
+      en: "std::vector is an array that grows by itself: push_back adds at the end, size() gives the number of items, and for (int v : t) walks through every item one by one.\nIt is the most used structure in C++, the equivalent of Python lists. (The browser does not compile C++ yet: here you learn to READ it. The answer was checked with a real compiler.)",
+    },
     example: '',
     task: { fr: 'Que va afficher ce programme ?', en: 'What will this program print?' },
     starter: '',
@@ -41,7 +50,10 @@ export const cppLessons: Lesson[] = [
   {
     id: "cpp-classes", lang: 'py', langue: "cpp", group: "cpp",
     title: { fr: "C++ : classes et constructeurs", en: "C++: classes and constructors" },
-    explain: { fr: "Une classe regroupe des données (attributs) et des actions (méthodes). Le CONSTRUCTEUR initialise l'objet à sa création. private cache les données : on ne les modifie que par les méthodes, ce qui garantit que l'objet reste cohérent (ici, un solde jamais négatif). (Dans le navigateur on ne compile pas encore le C++ : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)", en: "A class groups data (attributes) and actions (methods). The CONSTRUCTOR initialises the object when it is created. private hides the data: it can only be changed through methods, which guarantees the object stays consistent (here, a balance never negative). (The browser does not compile C++ yet: here you learn to READ it. The answer was checked with a real compiler.)" },
+    explain: {
+      fr: "Une classe regroupe des données (les attributs) et des actions (les méthodes). Le constructeur prépare l’objet quand on le crée.\nprivate cache les données : on ne les change qu’à travers les méthodes, ce qui garantit que l’objet reste cohérent (ici, un solde jamais négatif). (Dans le navigateur on ne compile pas encore le C++ : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)",
+      en: "A class groups data (attributes) and actions (methods). The constructor sets up the object when it is created.\nprivate hides the data: you only change it through the methods, which guarantees the object stays consistent (here, a balance never negative). (The browser does not compile C++ yet: here you learn to READ it. The answer was checked with a real compiler.)",
+    },
     example: '',
     task: { fr: 'Que va afficher ce programme ?', en: 'What will this program print?' },
     starter: '',
@@ -53,7 +65,10 @@ export const cppLessons: Lesson[] = [
   {
     id: "cpp-raii", lang: 'py', langue: "cpp", group: "cpp",
     title: { fr: "C++ : destructeurs et RAII", en: "C++: destructors and RAII" },
-    explain: { fr: "Quand un objet sort de sa portée (fin d'un bloc { }), son DESTRUCTEUR (~Nom) est appelé automatiquement, dans l'ordre INVERSE de création. C'est le principe RAII : une ressource (fichier, mémoire, verrou) est libérée automatiquement, même en cas d'erreur. Plus besoin d'oublier un free. (Dans le navigateur on ne compile pas encore le C++ : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)", en: "When an object goes out of scope (end of a { } block), its DESTRUCTOR (~Name) is called automatically, in REVERSE order of creation. That's the RAII principle: a resource (file, memory, lock) is released automatically, even on error. No more forgotten free. (The browser does not compile C++ yet: here you learn to READ it. The answer was checked with a real compiler.)" },
+    explain: {
+      fr: "Quand un objet sort de sa portée (la fin d’un bloc { }), son destructeur (~Nom) est appelé automatiquement, dans l’ordre inverse de création : comme on range les assiettes dans l’ordre inverse où on les a sorties.\nC’est le principe RAII : une ressource (fichier, mémoire, verrou) est libérée toute seule, même en cas d’erreur. Plus besoin de penser à un free. (Dans le navigateur on ne compile pas encore le C++ : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)",
+      en: "When an object leaves its scope (the end of a { } block), its destructor (~Name) is called automatically, in reverse order of creation: like putting plates away in the reverse order you took them out.\nThis is the RAII principle: a resource (file, memory, lock) is released by itself, even on error. No need to remember a free. (The browser does not compile C++ yet: here you learn to READ it. The answer was checked with a real compiler.)",
+    },
     example: '',
     task: { fr: 'Que va afficher ce programme ?', en: 'What will this program print?' },
     starter: '',
@@ -65,7 +80,10 @@ export const cppLessons: Lesson[] = [
   {
     id: "cpp-templates", lang: 'py', langue: "cpp", group: "cpp",
     title: { fr: "C++ : templates", en: "C++: templates" },
-    explain: { fr: "Un TEMPLATE écrit une fonction une seule fois pour TOUS les types : template <typename T> T plus_grand(T a, T b). Le compilateur fabrique une version pour int, une pour double, une pour std::string… La bibliothèque standard (vector, map, sort) est entièrement faite de templates. (Dans le navigateur on ne compile pas encore le C++ : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)", en: "A TEMPLATE writes a function once for ALL types: template <typename T> T plus_grand(T a, T b). The compiler generates a version for int, one for double, one for std::string… The standard library (vector, map, sort) is built entirely from templates. (The browser does not compile C++ yet: here you learn to READ it. The answer was checked with a real compiler.)" },
+    explain: {
+      fr: "Un template écrit une fonction une seule fois pour tous les types : template <typename T> T plus_grand(T a, T b). C’est un moule à fonctions.\nLe compilateur fabrique une version pour les int, une pour les double, une pour les std::string… La bibliothèque standard (vector, map, sort) est entièrement faite de templates. (Dans le navigateur on ne compile pas encore le C++ : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)",
+      en: "A template writes a function once for all types: template <typename T> T bigger(T a, T b). It is a function mould.\nThe compiler makes one version for ints, one for doubles, one for std::strings… The standard library (vector, map, sort) is entirely made of templates. (The browser does not compile C++ yet: here you learn to READ it. The answer was checked with a real compiler.)",
+    },
     example: '',
     task: { fr: 'Que va afficher ce programme ?', en: 'What will this program print?' },
     starter: '',
@@ -77,7 +95,10 @@ export const cppLessons: Lesson[] = [
   {
     id: "cpp-stl", lang: 'py', langue: "cpp", group: "cpp",
     title: { fr: "C++ : la bibliothèque standard", en: "C++: the standard library" },
-    explain: { fr: "La STL fournit des structures et des algorithmes prêts à l'emploi et très rapides : std::sort trie, std::map associe des clés triées à des valeurs (comme un dictionnaire, mais parcouru dans l'ordre des clés), std::count compte. Les connaître évite de réécrire (et de rater) ce qui existe déjà. (Dans le navigateur on ne compile pas encore le C++ : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)", en: "The STL provides ready-made, very fast structures and algorithms: std::sort sorts, std::map maps sorted keys to values (like a dictionary, but walked in key order), std::count counts. Knowing them avoids rewriting (and getting wrong) what already exists. (The browser does not compile C++ yet: here you learn to READ it. The answer was checked with a real compiler.)" },
+    explain: {
+      fr: "La STL est une boîte à outils déjà prête : std::sort trie, std::map associe des clés à des valeurs (comme un dictionnaire, mais rangé dans l’ordre des clés), std::count compte.\nLes connaître évite de réécrire (et de rater) ce qui existe déjà et qui est très rapide. (Dans le navigateur on ne compile pas encore le C++ : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)",
+      en: "The STL is a ready-made toolbox: std::sort sorts, std::map links keys to values (like a dictionary, but kept in key order), std::count counts.\nKnowing them saves you from rewriting (and getting wrong) what already exists and is very fast. (The browser does not compile C++ yet: here you learn to READ it. The answer was checked with a real compiler.)",
+    },
     example: '',
     task: { fr: 'Que va afficher ce programme ?', en: 'What will this program print?' },
     starter: '',
@@ -89,7 +110,10 @@ export const cppLessons: Lesson[] = [
   {
     id: "cpp-unique-ptr", lang: 'py', langue: "cpp", group: "cpp",
     title: { fr: "C++ : unique_ptr, la mémoire sans oubli", en: "C++: unique_ptr, memory without forgetting" },
-    explain: { fr: "En C++ moderne, on n'écrit (presque) jamais new et delete à la main : std::unique_ptr possède un objet et le détruit automatiquement quand il sort de la portée (RAII). Il ne se copie pas, il se DÉPLACE (std::move) : un seul propriétaire à la fois. Résultat : pas de fuite de mémoire, pas de double libération. (Dans le navigateur on ne compile pas encore le C++ : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)", en: "In modern C++ you (almost) never write new and delete by hand: std::unique_ptr owns an object and destroys it automatically when it leaves scope (RAII). It cannot be copied, it is MOVED (std::move): only one owner at a time. Result: no memory leak, no double free. (The browser does not compile C++ yet: here you learn to READ it. The answer was checked with a real compiler.)" },
+    explain: {
+      fr: "En C++ moderne, on n’écrit presque jamais new et delete à la main. std::unique_ptr possède un objet et le détruit automatiquement quand il sort de la portée (RAII).\nIl ne se copie pas, il se déplace (std::move) : un seul propriétaire à la fois, comme un seul porteur de la clé. Résultat : pas de fuite de mémoire, pas de double libération. (Dans le navigateur on ne compile pas encore le C++ : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)",
+      en: "In modern C++, you almost never write new and delete by hand. std::unique_ptr owns an object and destroys it automatically when it leaves scope (RAII).\nIt cannot be copied, it is moved (std::move): only one owner at a time, like a single key holder. Result: no memory leak, no double free. (The browser does not compile C++ yet: here you learn to READ it. The answer was checked with a real compiler.)",
+    },
     example: '',
     task: { fr: 'Que va afficher ce programme ?', en: 'What will this program print?' },
     starter: '',
@@ -101,7 +125,10 @@ export const cppLessons: Lesson[] = [
   {
     id: "cpp-algos", lang: 'py', langue: "cpp", group: "cpp",
     title: { fr: "C++ : les algorithmes plutôt que la boucle", en: "C++: algorithms instead of hand loops" },
-    explain: { fr: "Une boucle écrite à la main, c'est un risque de bug (borne, initialisation). La bibliothèque standard a déjà tout : std::accumulate (somme), std::count_if (compter selon une condition), std::max_element, std::transform (appliquer une fonction à chaque élément). Le code dit CE qu'on fait, pas COMMENT, et il est vérifié par des millions d'utilisateurs. (Dans le navigateur on ne compile pas encore le C++ : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)", en: "A hand-written loop is a bug risk (bound, initialisation). The standard library already has it all: std::accumulate (sum), std::count_if (count by condition), std::max_element, std::transform (apply a function to each element). The code says WHAT you do, not HOW, and it is tested by millions of users. (The browser does not compile C++ yet: here you learn to READ it. The answer was checked with a real compiler.)" },
+    explain: {
+      fr: "Une boucle écrite à la main, c’est un risque de bug (une borne, une initialisation). La bibliothèque standard a déjà tout : std::accumulate (somme), std::count_if (compter selon une condition), std::max_element (le plus grand), std::transform (appliquer une fonction à chaque élément).\nLe code dit ce qu’on fait, pas comment, et il est vérifié par des millions d’utilisateurs. (Dans le navigateur on ne compile pas encore le C++ : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)",
+      en: "A hand-written loop is a bug risk (a bound, an initialisation). The standard library already has it all: std::accumulate (sum), std::count_if (count by a condition), std::max_element (the largest), std::transform (apply a function to each item).\nThe code says what you do, not how, and it is checked by millions of users. (The browser does not compile C++ yet: here you learn to READ it. The answer was checked with a real compiler.)",
+    },
     example: '',
     task: { fr: 'Que va afficher ce programme ?', en: 'What will this program print?' },
     starter: '',
@@ -113,7 +140,10 @@ export const cppLessons: Lesson[] = [
   {
     id: "cpp-optional", lang: 'py', langue: "cpp", group: "cpp",
     title: { fr: "C++ : std::optional et les exceptions", en: "C++: std::optional and exceptions" },
-    explain: { fr: "Deux façons propres de dire « ça n'a pas marché ». std::optional<T> : la fonction renvoie une valeur… ou rien (std::nullopt), et l'appelant DOIT vérifier. C'est pour les cas normaux (« pas trouvé »). Les EXCEPTIONS (throw / try / catch) sont pour les cas anormaux qu'on ne peut pas traiter sur place (« capteur débranché ») : le programme saute directement au catch le plus proche. (Dans le navigateur on ne compile pas encore le C++ : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)", en: "Two clean ways to say “it didn't work”. std::optional<T>: the function returns a value… or nothing (std::nullopt), and the caller MUST check. It is for normal cases (“not found”). EXCEPTIONS (throw / try / catch) are for abnormal cases that cannot be handled on the spot (“sensor unplugged”): the program jumps straight to the nearest catch. (The browser does not compile C++ yet: here you learn to READ it. The answer was checked with a real compiler.)" },
+    explain: {
+      fr: "Deux façons propres de dire « ça n’a pas marché ». std::optional<T> : la fonction renvoie une valeur… ou rien (std::nullopt), et l’appelant doit vérifier. C’est pour les cas normaux (« pas trouvé »).\nLes exceptions (throw / try / catch) sont pour les cas anormaux qu’on ne peut pas régler sur place (« capteur débranché ») : le programme saute directement au catch le plus proche. (Dans le navigateur on ne compile pas encore le C++ : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)",
+      en: "Two clean ways to say “it did not work”. std::optional<T>: the function returns a value… or nothing (std::nullopt), and the caller must check. It is for normal cases (“not found”).\nExceptions (throw / try / catch) are for abnormal cases that cannot be handled on the spot (“sensor unplugged”): the program jumps straight to the nearest catch. (The browser does not compile C++ yet: here you learn to READ it. The answer was checked with a real compiler.)",
+    },
     example: '',
     task: { fr: 'Que va afficher ce programme ?', en: 'What will this program print?' },
     starter: '',

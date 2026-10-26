@@ -5,7 +5,10 @@ export const cLessons: Lesson[] = [
   {
     id: "c-printf", lang: 'py', langue: "c", group: "c",
     title: { fr: "C : afficher et calculer", en: "C: printing and computing" },
-    explain: { fr: "Le C est le langage des systèmes : Linux, les microcontrôleurs, les moteurs de jeux. Chaque programme commence par main(). printf affiche du texte ; %d y insère un entier, %f un nombre à virgule, \\n passe à la ligne. Attention : entre deux entiers, / fait une division ENTIÈRE (7 / 2 vaut 3). (Dans le navigateur on ne compile pas encore le C : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)", en: "C is the systems language: Linux, microcontrollers, game engines. Every program starts with main(). printf prints text; %d inserts an integer, %f a decimal number, \\n starts a new line. Careful: between two integers, / is INTEGER division (7 / 2 is 3). (The browser does not compile C yet: here you learn to READ it. The answer was checked with a real compiler.)" },
+    explain: {
+      fr: "Le C est le langage des systèmes : Linux, les microcontrôleurs, les moteurs de jeux. Tout programme commence par main(). printf affiche du texte : %d y glisse un entier, %f un nombre à virgule, \\n passe à la ligne.\nPiège : entre deux entiers, / fait une division entière : 7 / 2 vaut 3, pas 3,5. (Dans le navigateur on ne compile pas encore le C : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)",
+      en: "C is the language of systems: Linux, microcontrollers, game engines. Every program starts with main(). printf prints text: %d slips in an integer, %f a decimal number, \\n starts a new line.\nTrap: between two integers, / does integer division: 7 / 2 is 3, not 3.5. (The browser does not compile C yet: here you learn to READ it. The answer was checked with a real compiler.)",
+    },
     example: '',
     task: { fr: 'Que va afficher ce programme ?', en: 'What will this program print?' },
     starter: '',
@@ -17,7 +20,10 @@ export const cLessons: Lesson[] = [
   {
     id: "c-boucles", lang: 'py', langue: "c", group: "c",
     title: { fr: "C : boucles for et while", en: "C: for and while loops" },
-    explain: { fr: "La boucle for du C regroupe trois parties : départ ; condition ; pas. for (int i = 0; i < 3; i++) répète avec i = 0, 1, 2. while répète tant que la condition est vraie. printf sans \\n reste sur la même ligne. (Dans le navigateur on ne compile pas encore le C : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)", en: "C's for loop gathers three parts: start; condition; step. for (int i = 0; i < 3; i++) repeats with i = 0, 1, 2. while repeats as long as the condition holds. printf without \\n stays on the same line. (The browser does not compile C yet: here you learn to READ it. The answer was checked with a real compiler.)" },
+    explain: {
+      fr: "La boucle for du C a trois parties entre parenthèses : le départ ; la condition pour continuer ; le pas. for (int i = 0; i < 3; i++) répète avec i = 0, puis 1, puis 2.\nwhile répète tant que la condition est vraie. printf sans \\n reste sur la même ligne. (Dans le navigateur on ne compile pas encore le C : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)",
+      en: "The C for loop has three parts in the parentheses: the start; the condition to keep going; the step. for (int i = 0; i < 3; i++) repeats with i = 0, then 1, then 2.\nwhile repeats as long as the condition is true. printf without \\n stays on the same line. (The browser does not compile C yet: here you learn to READ it. The answer was checked with a real compiler.)",
+    },
     example: '',
     task: { fr: 'Que va afficher ce programme ?', en: 'What will this program print?' },
     starter: '',
@@ -29,7 +35,10 @@ export const cLessons: Lesson[] = [
   {
     id: "c-tableaux", lang: 'py', langue: "c", group: "c",
     title: { fr: "C : tableaux", en: "C: arrays" },
-    explain: { fr: "Un tableau C a une taille FIXE, choisie à la déclaration : int t[5]. Les cases vont de t[0] à t[4]. Le C ne vérifie pas les bornes : lire t[5] est une erreur grave (comportement indéfini) que le compilateur ne signale pas toujours. sizeof(t) / sizeof(t[0]) donne le nombre de cases. (Dans le navigateur on ne compile pas encore le C : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)", en: "A C array has a FIXED size, chosen at declaration: int t[5]. Cells go from t[0] to t[4]. C does not check bounds: reading t[5] is a serious error (undefined behaviour) the compiler doesn't always report. sizeof(t) / sizeof(t[0]) gives the number of cells. (The browser does not compile C yet: here you learn to READ it. The answer was checked with a real compiler.)" },
+    explain: {
+      fr: "Un tableau C a une taille fixe, choisie quand on le crée : int t[5] fait 5 cases, numérotées t[0] à t[4].\nDanger : le C ne vérifie pas les bornes. Lire t[5] est une grave erreur (comportement indéfini), et le compilateur ne la signale pas toujours. sizeof(t) / sizeof(t[0]) donne le nombre de cases. (Dans le navigateur on ne compile pas encore le C : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)",
+      en: "A C array has a fixed size, chosen when you create it: int t[5] makes 5 cells, numbered t[0] to t[4].\nDanger: C does not check bounds. Reading t[5] is a serious error (undefined behaviour), and the compiler does not always flag it. sizeof(t) / sizeof(t[0]) gives the number of cells. (The browser does not compile C yet: here you learn to READ it. The answer was checked with a real compiler.)",
+    },
     example: '',
     task: { fr: 'Que va afficher ce programme ?', en: 'What will this program print?' },
     starter: '',
@@ -41,7 +50,10 @@ export const cLessons: Lesson[] = [
   {
     id: "c-chaines", lang: 'py', langue: "c", group: "c",
     title: { fr: "C : chaînes de caractères", en: "C: strings" },
-    explain: { fr: "En C, un texte est un tableau de char terminé par le caractère nul '\\0'. \"Finjaro\" occupe donc 8 octets : 7 lettres + le zéro final. strlen compte les lettres sans le zéro. Chaque char est aussi un petit nombre : 'A' vaut 65, et 'A' + 2 donne 'C'. (Dans le navigateur on ne compile pas encore le C : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)", en: "In C, text is a char array ended by the null character '\\0'. \"Finjaro\" therefore takes 8 bytes: 7 letters + the final zero. strlen counts the letters without the zero. Each char is also a small number: 'A' is 65, and 'A' + 2 gives 'C'. (The browser does not compile C yet: here you learn to READ it. The answer was checked with a real compiler.)" },
+    explain: {
+      fr: "En C, un texte est un tableau de caractères (char) qui se termine par un caractère spécial, le zéro nul '\\0'. \"Finjaro\" occupe donc 8 octets : 7 lettres plus le zéro final. strlen compte les lettres sans le zéro.\nChaque char est aussi un petit nombre : 'A' vaut 65, donc 'A' + 2 donne 'C'. (Dans le navigateur on ne compile pas encore le C : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)",
+      en: "In C, a text is an array of characters (char) ending with a special character, the null zero '\\0'. \"Finjaro\" thus takes 8 bytes: 7 letters plus the final zero. strlen counts the letters without the zero.\nEach char is also a small number: 'A' is 65, so 'A' + 2 gives 'C'. (The browser does not compile C yet: here you learn to READ it. The answer was checked with a real compiler.)",
+    },
     example: '',
     task: { fr: 'Que va afficher ce programme ?', en: 'What will this program print?' },
     starter: '',
@@ -53,7 +65,10 @@ export const cLessons: Lesson[] = [
   {
     id: "c-pointeurs", lang: 'py', langue: "c", group: "c",
     title: { fr: "C : les pointeurs", en: "C: pointers" },
-    explain: { fr: "Un POINTEUR contient l'ADRESSE d'une variable en mémoire. &x donne l'adresse de x ; si p = &x, alors *p désigne x lui-même : modifier *p modifie x. C'est la notion clé du C — et la source de beaucoup de bugs. Les tableaux se manipulent aussi par pointeurs : *(t + 2) est t[2]. (Dans le navigateur on ne compile pas encore le C : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)", en: "A POINTER holds the ADDRESS of a variable in memory. &x gives x's address; if p = &x, then *p means x itself: changing *p changes x. This is C's key notion — and the source of many bugs. Arrays are also handled through pointers: *(t + 2) is t[2]. (The browser does not compile C yet: here you learn to READ it. The answer was checked with a real compiler.)" },
+    explain: {
+      fr: "Un pointeur est une variable qui contient l’adresse d’une autre : comme un papier où tu notes l’adresse d’une maison, pas la maison. &x donne l’adresse de x. Si p = &x, alors *p est x lui-même : changer *p change x.\nC’est LA notion clé du C, et la source de beaucoup de bugs. Un tableau se manipule aussi avec des pointeurs : *(t + 2) est t[2]. (Dans le navigateur on ne compile pas encore le C : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)",
+      en: "A pointer is a variable that holds the address of another: like a note with a house’s address, not the house. &x gives the address of x. If p = &x, then *p is x itself: changing *p changes x.\nThis is THE key notion of C, and the source of many bugs. An array can also be handled with pointers: *(t + 2) is t[2]. (The browser does not compile C yet: here you learn to READ it. The answer was checked with a real compiler.)",
+    },
     example: '',
     task: { fr: 'Que va afficher ce programme ?', en: 'What will this program print?' },
     starter: '',
@@ -65,7 +80,10 @@ export const cLessons: Lesson[] = [
   {
     id: "c-fonctions", lang: 'py', langue: "c", group: "c",
     title: { fr: "C : passage par valeur ou par adresse", en: "C: passing by value or by address" },
-    explain: { fr: "En C, une fonction reçoit une COPIE de ses arguments : la modifier ne change pas l'original. Pour qu'une fonction modifie une variable de l'appelant, on lui passe son ADRESSE (un pointeur). C'est ainsi qu'on écrit une fonction « échange ». (Dans le navigateur on ne compile pas encore le C : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)", en: "In C, a function receives a COPY of its arguments: changing it does not change the original. For a function to change a caller's variable, you pass its ADDRESS (a pointer). That's how you write a “swap” function. (The browser does not compile C yet: here you learn to READ it. The answer was checked with a real compiler.)" },
+    explain: {
+      fr: "En C, une fonction reçoit une copie de ses arguments : si elle la modifie, l’original ne change pas. C’est comme donner une photocopie : tu peux la gribouiller, l’original reste intact.\nPour qu’une fonction change vraiment une variable, on lui donne son adresse (un pointeur). C’est ainsi qu’on écrit une fonction « échange ». (Dans le navigateur on ne compile pas encore le C : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)",
+      en: "In C, a function receives a copy of its arguments: if it changes it, the original does not change. It is like handing over a photocopy: you can scribble on it, the original stays intact.\nFor a function to really change a variable, you give it its address (a pointer). That is how you write a “swap” function. (The browser does not compile C yet: here you learn to READ it. The answer was checked with a real compiler.)",
+    },
     example: '',
     task: { fr: 'Que va afficher ce programme ?', en: 'What will this program print?' },
     starter: '',
@@ -77,7 +95,10 @@ export const cLessons: Lesson[] = [
   {
     id: "c-struct", lang: 'py', langue: "c", group: "c",
     title: { fr: "C : structures", en: "C: structs" },
-    explain: { fr: "Une struct regroupe plusieurs valeurs sous un même nom, comme une petite fiche : struct Point { int x; int y; }. On accède aux champs avec un point (p.x) ; à travers un pointeur, avec une flèche (pp->x, qui veut dire (*pp).x). Copier une struct copie tous ses champs. (Dans le navigateur on ne compile pas encore le C : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)", en: "A struct groups several values under one name, like a small record: struct Point { int x; int y; }. Access fields with a dot (p.x); through a pointer, with an arrow (pp->x, meaning (*pp).x). Copying a struct copies all its fields. (The browser does not compile C yet: here you learn to READ it. The answer was checked with a real compiler.)" },
+    explain: {
+      fr: "Une struct range plusieurs valeurs sous un même nom, comme une fiche : struct Point { int x; int y; } est une fiche avec deux cases.\nOn lit un champ avec un point : p.x. À travers un pointeur, on utilise une flèche : pp->x (c’est la même chose que (*pp).x). Copier une struct copie tous ses champs. (Dans le navigateur on ne compile pas encore le C : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)",
+      en: "A struct stores several values under one name, like a card: struct Point { int x; int y; } is a card with two boxes.\nYou read a field with a dot: p.x. Through a pointer, you use an arrow: pp->x (the same as (*pp).x). Copying a struct copies all its fields. (The browser does not compile C yet: here you learn to READ it. The answer was checked with a real compiler.)",
+    },
     example: '',
     task: { fr: 'Que va afficher ce programme ?', en: 'What will this program print?' },
     starter: '',
@@ -89,7 +110,10 @@ export const cLessons: Lesson[] = [
   {
     id: "c-debordement", lang: 'py', langue: "c", group: "c",
     title: { fr: "C : la mémoire et ses limites", en: "C: memory and its limits" },
-    explain: { fr: "Un unsigned char tient sur 8 bits : de 0 à 255. Au-delà, il « fait le tour » : 255 + 1 donne 0 (débordement). La mémoire dynamique se réserve avec malloc et DOIT être rendue avec free : l'oublier crée une fuite de mémoire ; s'en servir après free est une faille de sécurité classique. (Dans le navigateur on ne compile pas encore le C : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)", en: "An unsigned char fits in 8 bits: 0 to 255. Beyond that it “wraps around”: 255 + 1 gives 0 (overflow). Dynamic memory is reserved with malloc and MUST be given back with free: forgetting creates a memory leak; using it after free is a classic security flaw. (The browser does not compile C yet: here you learn to READ it. The answer was checked with a real compiler.)" },
+    explain: {
+      fr: "Un unsigned char tient sur 8 bits : de 0 à 255. Au-delà, il fait le tour, comme un compteur kilométrique : 255 + 1 donne 0. C’est le débordement.\nLa mémoire dynamique se réserve avec malloc et doit être rendue avec free. L’oublier crée une fuite de mémoire ; s’en servir après free est une faille de sécurité classique. (Dans le navigateur on ne compile pas encore le C : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)",
+      en: "An unsigned char fits in 8 bits: from 0 to 255. Beyond that, it wraps around, like an odometer: 255 + 1 gives 0. That is overflow.\nDynamic memory is reserved with malloc and must be given back with free. Forgetting it creates a memory leak; using it after free is a classic security hole. (The browser does not compile C yet: here you learn to READ it. The answer was checked with a real compiler.)",
+    },
     example: '',
     task: { fr: 'Que va afficher ce programme ?', en: 'What will this program print?' },
     starter: '',
@@ -101,7 +125,10 @@ export const cLessons: Lesson[] = [
   {
     id: "c-bornes", lang: 'py', langue: "c", group: "c",
     title: { fr: "C : tableaux, bornes et débordement", en: "C: arrays, bounds and overflow" },
-    explain: { fr: "L'erreur la plus dangereuse du C : écrire « i <= 5 » au lieu de « i < 5 » sur un tableau de 5 cases. La 6e écriture déborde dans la mémoire voisine : rien ne s'affiche, le programme continue… et un pirate peut s'en servir (c'est un « dépassement de tampon »). Deux défenses : toujours borner avec la taille réelle (sizeof), et vérifier un indice AVANT de s'en servir. Pour attraper ces bugs, on compile avec -fsanitize=address : le programme fautif s'arrête net en signalant la ligne (vérifié pour cette leçon). (Dans le navigateur on ne compile pas encore le C : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)", en: "C's most dangerous error: writing “i <= 5” instead of “i < 5” on a 5-cell array. The 6th write overflows into neighbouring memory: nothing shows, the program carries on… and an attacker can exploit it (a “buffer overflow”). Two defences: always bound with the real size (sizeof), and check an index BEFORE using it. To catch these bugs, compile with -fsanitize=address: the faulty program stops right away and reports the line (checked for this lesson). (The browser does not compile C yet: here you learn to READ it. The answer was checked with a real compiler.)" },
+    explain: {
+      fr: "L’erreur la plus dangereuse du C : écrire « i <= 5 » au lieu de « i < 5 » sur un tableau de 5 cases. La 6e écriture déborde dans la mémoire voisine. Rien ne s’affiche, le programme continue… et un pirate peut s’en servir (un « dépassement de tampon »).\nDeux défenses : toujours borner avec la vraie taille (sizeof), et vérifier un indice AVANT de s’en servir. Pour attraper ces bugs, on compile avec -fsanitize=address : le programme s’arrête net en indiquant la ligne. (Dans le navigateur on ne compile pas encore le C : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)",
+      en: "The most dangerous error in C: writing “i <= 5” instead of “i < 5” on a 5-cell array. The 6th write spills into neighbouring memory. Nothing shows, the program carries on… and a hacker can exploit it (a “buffer overflow”).\nTwo defences: always bound with the real size (sizeof), and check an index BEFORE using it. To catch these bugs, compile with -fsanitize=address: the program stops dead and points to the line. (The browser does not compile C yet: here you learn to READ it. The answer was checked with a real compiler.)",
+    },
     example: '',
     task: { fr: 'Que va afficher ce programme ?', en: 'What will this program print?' },
     starter: '',
@@ -113,7 +140,10 @@ export const cLessons: Lesson[] = [
   {
     id: "c-entrees", lang: 'py', langue: "c", group: "c",
     title: { fr: "C : les entrées piégées", en: "C: tricky inputs" },
-    explain: { fr: "Tout ce qui vient de l'extérieur (clavier, fichier, réseau) peut être faux ou malveillant : « 4x2 », un texte vide, un nombre géant. atoi(\"4x2\") renvoie 4 sans prévenir ! La bonne fonction est strtol : elle indique où la lecture s'est arrêtée (fin) et signale un débordement (errno = ERANGE). On accepte la valeur seulement si TOUT le texte était un nombre et qu'il est dans les bornes attendues. (Dans le navigateur on ne compile pas encore le C : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)", en: "Everything that comes from outside (keyboard, file, network) can be wrong or malicious: “4x2”, an empty string, a giant number. atoi(\"4x2\") returns 4 without warning! The right function is strtol: it tells where reading stopped (end) and reports overflow (errno = ERANGE). Accept the value only if the WHOLE text was a number and it is within the expected bounds. (The browser does not compile C yet: here you learn to READ it. The answer was checked with a real compiler.)" },
+    explain: {
+      fr: "Tout ce qui vient de l’extérieur (clavier, fichier, réseau) peut être faux ou malveillant : « 4x2 », un texte vide, un nombre géant. atoi(\"4x2\") renvoie 4 sans prévenir !\nLa bonne fonction est strtol : elle dit où la lecture s’est arrêtée et signale un débordement (errno = ERANGE). On accepte la valeur seulement si tout le texte était un nombre et s’il est dans les bornes attendues. (Dans le navigateur on ne compile pas encore le C : ici tu apprends à le LIRE. La réponse a été vérifiée avec un vrai compilateur.)",
+      en: "Everything coming from outside (keyboard, file, network) can be wrong or malicious: “4x2”, an empty text, a giant number. atoi(\"4x2\") returns 4 without warning!\nThe right function is strtol: it tells where reading stopped and flags an overflow (errno = ERANGE). Accept the value only if the whole text was a number and it is within the expected bounds. (The browser does not compile C yet: here you learn to READ it. The answer was checked with a real compiler.)",
+    },
     example: '',
     task: { fr: 'Que va afficher ce programme ?', en: 'What will this program print?' },
     starter: '',
