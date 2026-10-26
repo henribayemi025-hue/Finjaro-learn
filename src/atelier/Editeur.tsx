@@ -1,11 +1,14 @@
 import { useEffect, useRef } from 'react'
 import { EditorView, basicSetup } from 'codemirror'
-import { EditorState, Compartment } from '@codemirror/state'
+import { EditorState, Compartment, Prec } from '@codemirror/state'
+import { keymap } from '@codemirror/view'
+import { acceptCompletion } from '@codemirror/autocomplete'
+import { indentMore, indentLess } from '@codemirror/commands'
 import { javascript } from '@codemirror/lang-javascript'
 import { python } from '@codemirror/lang-python'
 import { html } from '@codemirror/lang-html'
 import { css } from '@codemirror/lang-css'
-import { HighlightStyle, syntaxHighlighting } from '@codemirror/language'
+import { HighlightStyle, syntaxHighlighting, indentUnit } from '@codemirror/language'
 import { tags } from '@lezer/highlight'
 
 // L'éditeur de l'Atelier : CodeMirror 6 (licence MIT), le même que l'Atelier de Léo, parce qu'il marche au doigt sur téléphone.
@@ -63,6 +66,13 @@ export default function Editeur({ chemin, valeur, onChange, onCurseur, onLancer,
         doc: valeur,
         extensions: [
           basicSetup, theme, syntaxHighlighting(couleurs), EditorView.lineWrapping,
+          // Tab comme dans VS Code (Beau, 26/10 : « j'appuie sur Tab et tout se dérègle ») : il accepte la suggestion si elle est ouverte,
+          // sinon il décale de 4 espaces (Maj+Tab : dans l'autre sens). Il ne sort plus de l'éditeur, et jamais de caractère Tab dans le code.
+          indentUnit.of('    '), EditorState.tabSize.of(4),
+          Prec.highest(keymap.of([
+            { key: 'Tab', run: (v) => acceptCompletion(v) || indentMore(v) },
+            { key: 'Shift-Tab', run: indentLess },
+          ])),
           langage.current.of(LANGAGES[langageDe(chemin)]()),
           EditorView.contentAttributes.of({ 'aria-label': label, autocapitalize: 'off', autocorrect: 'off', spellcheck: 'false' }),
           EditorView.domEventHandlers({ keydown: (e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); rappel.current.onLancer(); return true } return false } }),
