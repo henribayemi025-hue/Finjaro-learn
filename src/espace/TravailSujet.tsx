@@ -620,9 +620,12 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
           : !signedIn ? <div className="flex items-center gap-2 text-[12px] text-slate-400"><span className="flex-1">{t.needLogin}</span>
             <button className="rounded-md bg-gradient-to-r from-sky-500 to-blue-600 px-3 min-h-9 font-semibold text-white" onClick={() => window.dispatchEvent(new Event('learn:login'))}>{t.login}</button></div>
           : null}
-        <form onSubmit={(e) => { e.preventDefault(); void poser() }} className="flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-900 p-1.5 focus-within:border-sky-500">
-          <input value={question} onChange={(e) => setQuestion(e.target.value)} maxLength={2000} placeholder={t.ask} aria-label={t.ask} disabled={!ai || !signedIn}
-            className="flex-1 min-w-0 bg-transparent px-2 py-1 text-[16px] lg:text-[13px] text-slate-100 outline-none placeholder:text-slate-500 disabled:opacity-50" />
+        <form onSubmit={(e) => { e.preventDefault(); void poser() }} className="flex items-end gap-2 rounded-lg border border-slate-800 bg-slate-900 p-1.5 focus-within:border-sky-500">
+          <textarea value={question} rows={1} maxLength={2000} placeholder={t.ask} aria-label={t.ask} disabled={!ai || !signedIn}
+            onChange={(e) => { setQuestion(e.target.value); e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight, 140) + 'px' }}
+            ref={(el) => { if (el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 140) + 'px' } }}
+            onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); void poser() } }}
+            className="flex-1 min-w-0 resize-none bg-transparent px-2 py-1 text-[16px] lg:text-[13px] leading-snug text-slate-100 outline-none placeholder:text-slate-500 disabled:opacity-50" />
           <button disabled={!question.trim() || busy || !ai || !signedIn} aria-label={t.send}
             className="size-9 shrink-0 grid place-items-center rounded-md bg-sky-500 hover:bg-sky-400 text-white font-bold disabled:opacity-40"><Ico n="send" className="size-4" /></button>
         </form>
