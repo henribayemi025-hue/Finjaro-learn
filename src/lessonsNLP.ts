@@ -5,7 +5,10 @@ export const nlpLessons: Lesson[] = [
   {
     id: "nlp-normalise", lang: 'py', group: "nlp",
     title: { fr: "Nettoyer et découper un texte", en: "Cleaning and splitting text" },
-    explain: { fr: "Avant qu'une IA lise un texte, on le NORMALISE : minuscules, ponctuation retirée, puis découpage en mots (« tokens »). « Bonjour, le Monde ! » devient ['bonjour', 'le', 'monde']. Ce choix n'est pas anodin : garder ou non la casse, les accents ou la ponctuation change ce que le modèle peut apprendre. On garde les lettres accentuées (é, à…) : elles portent du sens en français.", en: "Before an AI reads text, we NORMALIZE it: lowercase, punctuation removed, then split into words (“tokens”). “Bonjour, le Monde !” becomes ['bonjour', 'le', 'monde']. The choice matters: keeping case, accents or punctuation changes what the model can learn. We keep accented letters (é, à…): they carry meaning in French." },
+    explain: {
+      fr: "Avant qu’une IA lise un texte, on le nettoie : minuscules, ponctuation retirée, puis découpage en mots (les « tokens »). « Bonjour, le Monde ! » devient ['bonjour', 'le', 'monde'].\nCe choix compte : garder ou non les majuscules, les accents, la ponctuation change ce que le modèle peut apprendre. Ici on garde les lettres accentuées (é, à…), car elles portent du sens en français.",
+      en: "Before an AI reads a text, we clean it: lowercase, punctuation removed, then splitting into words (the “tokens”). “Hello, the World!” becomes ['hello', 'the', 'world'].\nThis choice matters: keeping or not capitals, accents, punctuation changes what the model can learn. Here we keep accented letters (é, à…), because they carry meaning in French.",
+    },
     example: "print('Bonjour, Monde !'.lower())",
     task: { fr: "Écris mots(texte) : minuscules, tout caractère qui n'est ni une lettre (isalpha) ni un chiffre devient un espace, puis split().", en: "Write mots(texte): lowercase, every character that is neither a letter (isalpha) nor a digit becomes a space, then split()." },
     starter: "def mots(texte):\n    pass\n",
@@ -16,7 +19,10 @@ export const nlpLessons: Lesson[] = [
   {
     id: "nlp-ngrammes", lang: 'py', group: "nlp",
     title: { fr: "N-grammes : prédire le mot suivant", en: "N-grams: predicting the next word" },
-    explain: { fr: "Le tout premier « modèle de langage » est simple : compter, dans un corpus, quel mot suit quel autre. Ce sont les BIGRAMMES (paires de mots consécutifs). Pour prédire après « le », on prend le mot qui l'a suivi le plus souvent. Les grands modèles actuels font la même tâche — prédire le mot suivant — avec des réseaux de neurones au lieu de simples comptes.", en: "The very first “language model” is simple: count, in a corpus, which word follows which. These are BIGRAMS (pairs of consecutive words). To predict after “the”, take the word that most often followed it. Today's large models do the same task — predict the next word — with neural networks instead of simple counts." },
+    explain: {
+      fr: "Le tout premier « modèle de langage » est très simple : compter, dans un gros texte, quel mot suit quel autre. Ces paires de mots qui se suivent s’appellent des bigrammes. Pour prédire le mot après « le », on prend celui qui l’a suivi le plus souvent.\nLes grands modèles actuels font la même tâche, prédire le mot suivant, avec des réseaux de neurones au lieu de simples comptes.",
+      en: "The very first “language model” is very simple: count, in a big text, which word follows which. These pairs of consecutive words are called bigrams. To predict the word after “the”, take the one that followed it most often.\nToday’s large models do the same task, predicting the next word, with neural networks instead of simple counts.",
+    },
     example: "m = ['le', 'chat', 'dort']\nprint(list(zip(m, m[1:])))",
     task: { fr: "Écris bigrammes(mots) → dict {mot: {suivant: compte}} et predit(table, mot) → le suivant le plus fréquent (en cas d'égalité, le premier dans l'ordre alphabétique), ou None si le mot est inconnu.", en: "Write bigrammes(mots) → dict {word: {next: count}} and predit(table, mot) → the most frequent next word (ties: first alphabetically), or None if the word is unknown." },
     starter: "def bigrammes(mots):\n    pass\n\ndef predit(table, mot):\n    pass\n",
@@ -27,7 +33,10 @@ export const nlpLessons: Lesson[] = [
   {
     id: "nlp-tfidf", lang: 'py', group: "nlp",
     title: { fr: "TF-IDF : les mots qui comptent", en: "TF-IDF: the words that matter" },
-    explain: { fr: "Dans un document, « le » apparaît partout et ne dit rien ; « photosynthèse » est rare et très informatif. TF-IDF le mesure : TF = fréquence du mot dans le document (compte / nombre de mots) ; IDF = log(N / nombre de documents qui contiennent le mot). Score = TF × IDF. Un mot présent dans TOUS les documents a un IDF nul. C'est la base des moteurs de recherche classiques.", en: "In a document, “the” appears everywhere and says nothing; “photosynthesis” is rare and very informative. TF-IDF measures it: TF = word frequency in the document (count / number of words); IDF = log(N / number of documents containing the word). Score = TF × IDF. A word present in ALL documents has zero IDF. It underlies classic search engines." },
+    explain: {
+      fr: "Dans un document, « le » apparaît partout et ne dit rien ; « photosynthèse » est rare et très informatif. TF-IDF mesure ça. TF = à quelle fréquence le mot apparaît dans ce document (son nombre / le nombre de mots). IDF = log(N / nombre de documents qui contiennent le mot). Score = TF × IDF.\nUn mot présent dans tous les documents a un IDF nul, donc un score nul. C’est la base des moteurs de recherche classiques.",
+      en: "In a document, “the” appears everywhere and says nothing; “photosynthesis” is rare and very informative. TF-IDF measures that. TF = how often the word appears in this document (its count / number of words). IDF = log(N / number of documents containing the word). Score = TF × IDF.\nA word present in all documents has a zero IDF, so a zero score. It is the basis of classic search engines.",
+    },
     example: "import math\nprint(math.log(3 / 1))",
     task: { fr: "Écris tfidf(doc, docs, mot) : doc est une liste de mots, docs une liste de documents (listes de mots). Utilise math.log. Si aucun document ne contient le mot, renvoie 0.0.", en: "Write tfidf(doc, docs, mot): doc is a list of words, docs a list of documents (lists of words). Use math.log. If no document contains the word, return 0.0." },
     starter: "import math\n\ndef tfidf(doc, docs, mot):\n    pass\n",
@@ -38,7 +47,10 @@ export const nlpLessons: Lesson[] = [
   {
     id: "nlp-bpe", lang: 'py', group: "nlp",
     title: { fr: "Tokenisation BPE : comment les modèles lisent", en: "BPE tokenization: how models read" },
-    explain: { fr: "Les grands modèles ne lisent ni des lettres ni des mots entiers, mais des SOUS-MOTS. L'algorithme BPE (Byte Pair Encoding) les fabrique : on part des caractères, on compte les PAIRES voisines les plus fréquentes dans le corpus, et on les FUSIONNE en un nouveau symbole. On répète. Des morceaux fréquents comme « ment » ou « tion » deviennent des jetons ; un mot inconnu reste découpable en morceaux connus.", en: "Large models read neither letters nor whole words, but SUBWORDS. The BPE (Byte Pair Encoding) algorithm builds them: start from characters, count the most frequent neighbouring PAIRS in the corpus, and MERGE them into a new symbol. Repeat. Frequent pieces like “ing” or “tion” become tokens; an unknown word can still be split into known pieces." },
+    explain: {
+      fr: "Les grands modèles ne lisent ni des lettres ni des mots entiers, mais des morceaux de mots. L’algorithme BPE les fabrique : on part des lettres, on compte les paires voisines les plus fréquentes dans le texte, et on les fusionne en un nouveau symbole. On répète.\nDes morceaux fréquents comme « ment » ou « tion » deviennent des jetons ; un mot inconnu reste découpable en morceaux connus.",
+      en: "Large models read neither letters nor whole words, but pieces of words. The BPE algorithm makes them: start from letters, count the most frequent neighbouring pairs in the text, and merge them into a new symbol. Repeat.\nFrequent pieces like “ing” or “tion” become tokens; an unknown word can still be cut into known pieces.",
+    },
     example: "mot = ['l', 'o', 'w']\nprint(list(zip(mot, mot[1:])))",
     task: { fr: "Écris paire_frequente(corpus) : corpus = liste de mots, chaque mot = liste de symboles ; renvoie la paire voisine la plus fréquente (égalité : la plus petite dans l'ordre des tuples), ou None. Puis fusionne(corpus, paire) : remplace chaque occurrence de la paire par le symbole concaténé (de gauche à droite, sans chevauchement).", en: "Write paire_frequente(corpus): corpus = list of words, each word = list of symbols; return the most frequent neighbouring pair (ties: the smallest tuple), or None. Then fusionne(corpus, paire): replace each occurrence of the pair with the concatenated symbol (left to right, no overlap)." },
     starter: "def paire_frequente(corpus):\n    pass\n\ndef fusionne(corpus, paire):\n    pass\n",
@@ -49,7 +61,10 @@ export const nlpLessons: Lesson[] = [
   {
     id: "nlp-embedding", lang: 'py', group: "nlp",
     title: { fr: "Plongements de mots (embeddings)", en: "Word embeddings" },
-    explain: { fr: "Pour un réseau de neurones, un mot doit devenir un VECTEUR de nombres : son plongement (embedding). Des mots de sens proche ont des vecteurs proches. Le célèbre exemple : roi − homme + femme ≈ reine. On le vérifie ici avec de petits vecteurs ÉCRITS À LA MAIN (pas un vrai modèle) : on cherche le mot dont le vecteur est le plus proche (similarité cosinus) du résultat.", en: "For a neural network, a word must become a VECTOR of numbers: its embedding. Words with close meanings have close vectors. The famous example: king − man + woman ≈ queen. We check it here with small HAND-WRITTEN vectors (not a real model): find the word whose vector is closest (cosine similarity) to the result." },
+    explain: {
+      fr: "Pour un réseau de neurones, un mot doit devenir une liste de nombres : son plongement (embedding). Des mots de sens proche ont des listes proches. Exemple célèbre : roi − homme + femme ≈ reine.\nOn le vérifie ici avec de petits vecteurs écrits à la main (ce n’est pas un vrai modèle) : on cherche le mot dont le vecteur est le plus proche du résultat, avec la similarité cosinus.",
+      en: "For a neural network, a word must become a list of numbers: its embedding. Words with close meaning have close lists. Famous example: king − man + woman ≈ queen.\nWe check it here with small hand-written vectors (not a real model): we look for the word whose vector is closest to the result, using cosine similarity.",
+    },
     example: "import math\na, b = [1, 0], [1, 1]\nprint(sum(x * y for x, y in zip(a, b)))",
     task: { fr: "Écris analogie(vecs, a, b, c) : calcule vecs[a] − vecs[b] + vecs[c] et renvoie le mot le plus proche (cosinus) parmi ceux qui ne sont ni a, ni b, ni c.", en: "Write analogie(vecs, a, b, c): compute vecs[a] − vecs[b] + vecs[c] and return the closest word (cosine) among those that are none of a, b, c." },
     starter: "import math\n\ndef analogie(vecs, a, b, c):\n    pass\n",
@@ -60,7 +75,10 @@ export const nlpLessons: Lesson[] = [
   {
     id: "nlp-sentiment", lang: 'py', group: "nlp",
     title: { fr: "Classer des avis : Bayes naïf", en: "Classifying reviews: naive Bayes" },
-    explain: { fr: "Avis positif ou négatif ? Le classifieur BAYÉSIEN NAÏF compte, dans des exemples étiquetés, combien de fois chaque mot apparaît dans chaque classe. Pour un nouveau texte, il additionne pour chaque classe log P(classe) + Σ log P(mot | classe), et choisit la classe au plus haut score. LISSAGE de Laplace : on ajoute 1 à chaque compte, sinon un mot jamais vu annulerait tout. Simple, rapide, étonnamment efficace.", en: "Positive or negative review? The NAIVE BAYES classifier counts, in labelled examples, how often each word appears in each class. For a new text it sums for each class log P(class) + Σ log P(word | class), and picks the highest score. Laplace SMOOTHING: add 1 to each count, otherwise a never-seen word would zero everything. Simple, fast, surprisingly effective." },
+    explain: {
+      fr: "Un avis est-il positif ou négatif ? Le classifieur bayésien naïf compte, dans des exemples déjà étiquetés, combien de fois chaque mot apparaît dans chaque classe. Pour un nouveau texte, il additionne pour chaque classe log P(classe) + Σ log P(mot | classe), et choisit la classe au score le plus haut.\nLissage de Laplace : on ajoute 1 à chaque compte, sinon un mot jamais vu annulerait tout. Simple, rapide, étonnamment efficace.",
+      en: "Is a review positive or negative? The naive Bayes classifier counts, in already labelled examples, how often each word appears in each class. For a new text, it adds for each class log P(class) + Σ log P(word | class), and picks the class with the highest score.\nLaplace smoothing: add 1 to each count, otherwise a never-seen word would wipe everything out. Simple, fast, surprisingly effective.",
+    },
     example: "import math\nprint(math.log(0.5))",
     task: { fr: "Écris entraine(exemples) avec exemples = liste de (liste_de_mots, classe) → modèle de ton choix, et classe(modele, mots) → la classe la plus probable. P(mot|c) = (compte(mot, c) + 1) / (total_mots(c) + taille_vocabulaire).", en: "Write entraine(exemples) with exemples = list of (word_list, class) → a model of your choice, and classe(modele, mots) → the most likely class. P(word|c) = (count(word, c) + 1) / (total_words(c) + vocabulary_size)." },
     starter: "import math\n\ndef entraine(exemples):\n    pass\n\ndef classe(modele, mots):\n    pass\n",
@@ -72,7 +90,10 @@ export const nlpLessons: Lesson[] = [
     id: "nlp-transformer", lang: 'py', group: "nlp",
     packages: ["numpy"],
     title: { fr: "Un bloc Transformer en miniature", en: "A miniature Transformer block" },
-    explain: { fr: "Le Transformer, cœur des grands modèles de langage, empile des blocs. Chaque bloc : (1) AUTO-ATTENTION — chaque mot regarde tous les autres et en fait une moyenne pondérée par la ressemblance (softmax des produits scalaires divisés par √d) ; (2) CONNEXION RÉSIDUELLE — on ajoute l'entrée à la sortie, pour ne rien perdre ; (3) NORMALISATION — on centre et réduit chaque vecteur. Ici avec NumPy, des matrices Q = K = V = X (sans poids appris) pour voir le mécanisme nu.", en: "The Transformer, heart of large language models, stacks blocks. Each block: (1) SELF-ATTENTION — every word looks at all the others and takes an average weighted by similarity (softmax of dot products divided by √d); (2) RESIDUAL CONNECTION — add the input to the output so nothing is lost; (3) NORMALIZATION — center and scale each vector. Here with NumPy, Q = K = V = X (no learned weights) to see the bare mechanism." },
+    explain: {
+      fr: "Le Transformer est le cœur des grands modèles de langage. Il empile des blocs. Dans chaque bloc : (1) l’auto-attention, où chaque mot regarde tous les autres et en fait une moyenne pondérée par la ressemblance ; (2) la connexion résiduelle, où l’on ajoute l’entrée à la sortie pour ne rien perdre ; (3) la normalisation, où l’on centre et réduit chaque vecteur.\nIci, en NumPy, avec Q = K = V = X (sans poids appris), pour voir le mécanisme à nu.",
+      en: "The Transformer is the heart of large language models. It stacks blocks. In each block: (1) self-attention, where each word looks at all the others and takes a weighted average by similarity; (2) the residual connection, where the input is added to the output so nothing is lost; (3) normalisation, where each vector is centred and scaled.\nHere, in NumPy, with Q = K = V = X (no learned weights), to see the bare mechanism.",
+    },
     example: "import numpy as np\nX = np.array([[1.0, 0.0], [0.0, 1.0]])\nprint(X @ X.T)",
     task: { fr: "Écris bloc(X) (X : tableau NumPy n×d) : S = X @ X.T / √d ; A = softmax ligne par ligne de S (stable : retire le max de chaque ligne) ; Y = A @ X + X ; puis normalise chaque ligne : (y − moyenne) / (écart-type + 1e-6). Renvoie le résultat.", en: "Write bloc(X) (X: n×d NumPy array): S = X @ X.T / √d; A = row-wise softmax of S (stable: subtract each row's max); Y = A @ X + X; then normalize each row: (y − mean) / (std + 1e-6). Return the result." },
     starter: "import numpy as np\n\ndef bloc(X):\n    pass\n",

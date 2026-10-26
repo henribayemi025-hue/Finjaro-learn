@@ -5,7 +5,10 @@ export const vizLessons: Lesson[] = [
   {
     id: "viz-courbe", lang: 'py', group: "ds-viz",
     title: { fr: "Tracer une courbe", en: "Plotting a curve" },
-    explain: { fr: "Un graphique raconte ce que cent nombres ne montrent pas. Dans Finjaro Learn, tu disposes de trois fonctions de tracé : courbe(x, y, titre), nuage(x, y, titre) et barres(etiquettes, valeurs, titre). Elles dessinent sous ton code. Une courbe relie des points dans l'ordre : parfaite pour une fonction ou une évolution dans le temps.", en: "A chart tells what a hundred numbers cannot. In Finjaro Learn you have three plotting functions: courbe(x, y, titre), nuage(x, y, titre) and barres(etiquettes, valeurs, titre). They draw under your code. A curve joins points in order: perfect for a function or a trend over time." },
+    explain: {
+      fr: "Un graphique raconte ce que cent nombres ne montrent pas. Dans Finjaro Learn, tu as trois fonctions de tracé : courbe(x, y, titre), nuage(x, y, titre) et barres(etiquettes, valeurs, titre). Elles dessinent sous ton code.\nUne courbe relie des points dans l’ordre : parfaite pour une fonction ou une évolution dans le temps.",
+      en: "A chart tells what a hundred numbers do not show. In Finjaro Learn, you have three drawing functions: courbe(x, y, title), nuage(x, y, title) and barres(labels, values, title). They draw under your code.\nA curve links points in order: perfect for a function or a change over time.",
+    },
     example: "courbe([0, 1, 2], [0, 1, 4], 'y = x au carré')",
     task: { fr: "Écris trace_carres(n) : trace la courbe de y = x² pour x = 0, 1, …, n (n+1 points) avec le titre « Carrés ».", en: "Write trace_carres(n): plot the curve y = x² for x = 0, 1, …, n (n+1 points) with the title “Carrés”." },
     starter: "def trace_carres(n):\n    pass\n",
@@ -17,7 +20,10 @@ export const vizLessons: Lesson[] = [
     id: "viz-histo", lang: 'py', group: "ds-viz",
     packages: ["numpy"],
     title: { fr: "Histogramme : voir la distribution", en: "Histogram: seeing the distribution" },
-    explain: { fr: "Avant tout modèle, un analyste regarde la distribution de ses données : où se concentrent les valeurs ? y a-t-il des valeurs aberrantes ? Un histogramme découpe l'axe en intervalles (« bacs ») et compte les valeurs de chacun : np.histogram(valeurs, bins=5) renvoie (comptes, bords). On le trace avec barres().", en: "Before any model, an analyst looks at the distribution of the data: where do values concentrate? are there outliers? A histogram splits the axis into intervals (“bins”) and counts the values in each: np.histogram(values, bins=5) returns (counts, edges). Plot it with barres()." },
+    explain: {
+      fr: "Avant tout modèle, un analyste regarde comment ses valeurs se répartissent : où se concentrent-elles ? y a-t-il des valeurs bizarres ?\nUn histogramme découpe l’axe en intervalles (les « bacs ») et compte combien de valeurs tombent dans chacun. np.histogram(valeurs, bins=5) renvoie les comptes et les bords. On le dessine avec barres().",
+      en: "Before any model, an analyst looks at how the values are spread: where do they cluster? are there odd values?\nA histogram cuts the axis into intervals (the “bins”) and counts how many values fall in each. np.histogram(values, bins=5) returns the counts and the edges. You draw it with barres().",
+    },
     example: "import numpy as np\ncomptes, bords = np.histogram([1, 2, 2, 3, 9], bins=4)\nprint(comptes, bords)",
     task: { fr: "Écris histo(valeurs, bacs) : calcule les comptes avec np.histogram et trace barres(étiquettes, comptes, « Distribution ») où l'étiquette de chaque bac est le début du bac arrondi à 1 décimale. Renvoie la liste des comptes.", en: "Write histo(valeurs, bacs): compute the counts with np.histogram and plot barres(labels, counts, “Distribution”) where each bin's label is the bin start rounded to 1 decimal. Return the list of counts." },
     starter: "import numpy as np\n\ndef histo(valeurs, bacs):\n    pass\n",
@@ -29,7 +35,10 @@ export const vizLessons: Lesson[] = [
     id: "viz-nuage", lang: 'py', group: "ds-viz",
     packages: ["numpy"],
     title: { fr: "Nuage de points et droite de régression", en: "Scatter plot and regression line" },
-    explain: { fr: "Un nuage de points montre la relation entre deux variables. On y superpose la droite de régression : si les points s'alignent autour, la relation est presque linéaire ; sinon la droite est un mauvais modèle. Toujours regarder le graphique avant de faire confiance à un coefficient de corrélation : des jeux de données très différents peuvent avoir la même corrélation.", en: "A scatter plot shows the relationship between two variables. Overlay the regression line: if points line up around it, the relation is nearly linear; otherwise the line is a poor model. Always look at the chart before trusting a correlation coefficient: very different datasets can have the same correlation." },
+    explain: {
+      fr: "Un nuage de points montre le lien entre deux variables : un point par personne, par exemple (taille, poids). On y ajoute la droite de régression : si les points s’alignent autour, le lien est presque une droite ; sinon, la droite est un mauvais modèle.\nRegarde toujours le graphique avant de te fier à un coefficient : des jeux de données très différents peuvent avoir la même corrélation.",
+      en: "A scatter plot shows the link between two variables: one dot per person, for example (height, weight). You add the regression line: if the dots line up around it, the link is nearly a straight line; otherwise, the line is a poor model.\nAlways look at the chart before trusting a coefficient: very different datasets can have the same correlation.",
+    },
     example: "nuage([1, 2, 3], [2, 4, 5])",
     task: { fr: "Écris nuage_et_droite(x, y) : trace d'abord nuage(x, y), puis courbe(x_trie, y_droite) avec la droite des moindres carrés (np.polyfit(x, y, 1)) évaluée aux x triés. Renvoie (pente, ordonnee).", en: "Write nuage_et_droite(x, y): first plot nuage(x, y), then courbe(sorted_x, line_y) with the least-squares line (np.polyfit(x, y, 1)) evaluated at the sorted x. Return (slope, intercept)." },
     starter: "import numpy as np\n\ndef nuage_et_droite(x, y):\n    pass\n",
@@ -41,7 +50,10 @@ export const vizLessons: Lesson[] = [
     id: "viz-perte", lang: 'py', group: "ds-viz",
     packages: ["numpy"],
     title: { fr: "Courbe d'apprentissage", en: "Learning curve" },
-    explain: { fr: "Quand on entraîne un modèle, on trace la perte à chaque époque : c'est la courbe d'apprentissage. Elle doit descendre. Si elle monte ou oscille fort, le taux d'apprentissage est trop grand ; si elle stagne tout en haut, le modèle n'apprend pas. C'est LE réflexe de diagnostic de tout ingénieur en apprentissage automatique.", en: "When training a model, you plot the loss at each epoch: the learning curve. It should go down. If it rises or oscillates wildly, the learning rate is too large; if it stagnates at the top, the model is not learning. It is THE diagnostic reflex of every machine learning engineer." },
+    explain: {
+      fr: "Quand on entraîne un modèle, on trace sa perte (son erreur) à chaque époque : c’est la courbe d’apprentissage. Elle doit descendre.\nSi elle monte ou oscille fort, le taux d’apprentissage est trop grand. Si elle reste bloquée tout en haut, le modèle n’apprend pas. C’est le premier réflexe de diagnostic de tout ingénieur en apprentissage automatique.",
+      en: "When training a model, you plot its loss (its error) at each epoch: this is the learning curve. It should go down.\nIf it goes up or swings wildly, the learning rate is too big. If it stays stuck at the top, the model is not learning. It is the first diagnostic reflex of every machine learning engineer.",
+    },
     example: "pertes = [4.0, 2.5, 1.7]\ncourbe(range(len(pertes)), pertes)",
     task: { fr: "Écris entraine_et_trace(x, y, lr, n) : descente de gradient sur y ≈ w·x + b (comme dans le parcours Deep learning), en mémorisant la perte MSE avant chaque pas ; trace courbe(époques, pertes, « Perte ») ; renvoie la liste des pertes (n valeurs).", en: "Write entraine_et_trace(x, y, lr, n): gradient descent on y ≈ w·x + b (as in the Deep learning track), recording the MSE loss before each step; plot courbe(epochs, losses, “Perte”); return the list of losses (n values)." },
     starter: "import numpy as np\n\ndef entraine_et_trace(x, y, lr, n):\n    x, y = np.array(x, dtype=float), np.array(y, dtype=float)\n    w, b = 0.0, 0.0\n    pertes = []\n    # n pas\n    return pertes\n",
@@ -52,7 +64,10 @@ export const vizLessons: Lesson[] = [
   {
     id: "viz-confusion", lang: 'py', group: "ds-viz",
     title: { fr: "Matrice de confusion", en: "Confusion matrix" },
-    explain: { fr: "Pour un classifieur, la matrice de confusion compte les quatre cas : vrais positifs (VP), faux positifs (FP), faux négatifs (FN), vrais négatifs (VN). Le diagramme en barres de ces quatre nombres montre d'un coup d'œil où le modèle se trompe — et pour un diagnostic médical, un FN (malade non détecté) n'a pas du tout le même coût qu'un FP.", en: "For a classifier, the confusion matrix counts the four cases: true positives (TP), false positives (FP), false negatives (FN), true negatives (TN). A bar chart of these four numbers shows at a glance where the model errs — and for a medical diagnosis, an FN (missed sick person) has a very different cost from an FP." },
+    explain: {
+      fr: "Pour un classifieur, la matrice de confusion compte les quatre cas : vrais positifs (VP : malade, détecté), faux positifs (FP : sain, déclaré malade), faux négatifs (FN : malade, raté), vrais négatifs (VN : sain, déclaré sain).\nUn diagramme en barres de ces quatre nombres montre d’un coup d’œil où le modèle se trompe. Et pour un diagnostic, un FN (malade non détecté) ne coûte pas du tout la même chose qu’un FP.",
+      en: "For a classifier, the confusion matrix counts the four cases: true positives (TP: ill, detected), false positives (FP: healthy, declared ill), false negatives (FN: ill, missed), true negatives (TN: healthy, declared healthy).\nA bar chart of these four numbers shows at a glance where the model goes wrong. And for a diagnosis, a FN (undetected ill person) does not cost the same as a FP.",
+    },
     example: "vrai, pred = [1, 0], [1, 1]\nprint(sum(1 for v, p in zip(vrai, pred) if v == 1 and p == 1))",
     task: { fr: "Écris confusion(y_vrai, y_pred) : renvoie le dictionnaire {'VP': …, 'FP': …, 'FN': …, 'VN': …} et trace barres(['VP', 'FP', 'FN', 'VN'], valeurs, « Confusion »).", en: "Write confusion(y_vrai, y_pred): return the dict {'VP': …, 'FP': …, 'FN': …, 'VN': …} and plot barres(['VP', 'FP', 'FN', 'VN'], values, “Confusion”)." },
     starter: "def confusion(y_vrai, y_pred):\n    pass\n",
@@ -64,7 +79,10 @@ export const vizLessons: Lesson[] = [
     id: "ds-projet-ventes", lang: 'py', group: "ds-viz",
     packages: ["numpy", "pandas"],
     title: { fr: "Projet : rapport de ventes", en: "Project: sales report" },
-    explain: { fr: "Projet de fin de parcours Data science : tu reçois une table de ventes (colonnes produit, mois, quantite, prix_unitaire) et tu produis un rapport. Tu combines pandas (colonne calculée, groupby, tri) et un graphique. C'est le quotidien d'un data analyst : transformer une table brute en réponses claires.", en: "Data science capstone: you receive a sales table (columns produit, mois, quantite, prix_unitaire) and produce a report. You combine pandas (computed column, groupby, sorting) and a chart. It is a data analyst's daily work: turning a raw table into clear answers." },
+    explain: {
+      fr: "Projet de fin de parcours Data science. Tu reçois une table de ventes (colonnes produit, mois, quantite, prix_unitaire) et tu en tires un rapport.\nTu combines ce que tu as appris : pandas (une colonne calculée, groupby, tri) et un graphique. C’est le quotidien d’un data analyst : transformer une table brute en réponses claires.",
+      en: "End-of-track Data science project. You receive a sales table (columns produit, mois, quantite, prix_unitaire) and turn it into a report.\nYou combine what you learned: pandas (a calculated column, groupby, sorting) and a chart. It is a data analyst’s daily job: turning a raw table into clear answers.",
+    },
     example: "import pandas as pd\ndf = pd.DataFrame({'quantite': [2, 3], 'prix_unitaire': [10, 5]})\ndf['ca'] = df['quantite'] * df['prix_unitaire']\nprint(df['ca'].sum())",
     task: { fr: "Écris rapport(df) : ajoute le chiffre d'affaires par ligne (quantite × prix_unitaire), puis renvoie {'ca_total': somme, 'meilleur_produit': le produit au plus grand chiffre d'affaires total, 'meilleur_mois': le mois au plus grand chiffre d'affaires total}. Trace barres(mois, ca_par_mois, « CA par mois ») (mois dans l'ordre alphabétique).", en: "Write rapport(df): add per-row revenue (quantite × prix_unitaire), then return {'ca_total': sum, 'meilleur_produit': the product with the highest total revenue, 'meilleur_mois': the month with the highest total revenue}. Plot barres(months, revenue_per_month, “CA par mois”) (months in alphabetical order)." },
     starter: "import numpy as np\nimport pandas as pd\n\ndef rapport(df):\n    pass\n",
