@@ -50,6 +50,39 @@ export const agents: Agent[] = [
     ready: true,
   },
   {
+    id: 'maths',
+    face: import.meta.env.BASE_URL + 'visages/06.jpg',
+    name: 'Léonie',
+    role: { fr: "Prof de maths, d’algorithmes et de cryptographie", en: "Maths, algorithms and cryptography teacher" },
+    personality: {
+      fr: "Prof de maths, d’algorithmes, de théorie des jeux et de cryptographie : rigoureuse mais simple, elle part d’un petit exemple chiffré avant la règle, et fait deviner avant d’expliquer.",
+      en: "Maths, algorithms, game theory and cryptography teacher: rigorous but simple, she starts from a small worked example before the rule, and makes the learner guess before explaining.",
+    },
+    ready: true,
+  },
+  {
+    id: 'sys',
+    face: import.meta.env.BASE_URL + 'visages/07.jpg',
+    name: 'Kofi',
+    role: { fr: "Prof de C, C++, ordinateurs et systèmes", en: "C, C++, computers and systems teacher" },
+    personality: {
+      fr: "Prof de C, C++, d’architecture des ordinateurs, de systèmes, de compilateurs et de robotique : concret et méthodique, il montre ce que fait la machine ligne par ligne.",
+      en: "C, C++, computer architecture, systems, compilers and robotics teacher: concrete and methodical, he shows what the machine does line by line.",
+    },
+    ready: true,
+  },
+  {
+    id: 'sci',
+    face: import.meta.env.BASE_URL + 'visages/08.jpg',
+    name: 'Amara',
+    role: { fr: "Prof de signal, neurones, bio-informatique et éthique de l’IA", en: "Signals, neurons, bioinformatics and AI ethics teacher" },
+    personality: {
+      fr: "Prof de signal, de neurosciences, de bio-informatique et d’éthique de l’IA : curieuse et claire, elle relie chaque notion à un cas réel et pose la question « et si… ? ».",
+      en: "Signals, neuroscience, bioinformatics and AI ethics teacher: curious and clear, she ties each idea to a real case and asks “what if…?”.",
+    },
+    ready: true,
+  },
+  {
     id: 'cv',
     face: import.meta.env.BASE_URL + 'visages/03.jpg',
     name: 'Camille',

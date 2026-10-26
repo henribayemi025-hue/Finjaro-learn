@@ -26,9 +26,13 @@ const lireFil = (k: string): Echange[] => {
   } catch { return [] }
 }
 
-/** Le prof de la matière : Maya pour JavaScript, Idris pour l'IA et Python, Samir pour SQL, Finia ailleurs. */
+/** Le prof de la matière : Maya pour JavaScript, Idris pour l'IA et Python, Samir pour SQL, Léonie (maths), Kofi (machines), Amara (sciences), Finia ailleurs. */
 export function profDe(track: string, langage: 'js' | 'py' | 'sql') {
   if (langage === 'sql') return 'sql'
+  if (['maths', 'algo', 'jeux', 'crypto', 'quant'].includes(track)) return 'maths'
+  if (['ccpp', 'archi', 'systemes', 'compil', 'robo'].includes(track)) return 'sys'
+  if (['signal', 'neuro', 'bio', 'ethique'].includes(track)) return 'sci'
+  if (langage === 'py') return 'ia'
   if (langage === 'js' && (track === 'prog' || track === 'projets')) return 'js'
   if (['dl', 'data', 'prompt', 'nlp', 'eng', 'outils'].includes(track)) return 'ia'
   return 'finia'
