@@ -33,10 +33,47 @@ const REGLES: R[] = [
   { re: /SyntaxError|Unexpected token/i, fr: () => 'Le code est mal écrit à un endroit (symbole en trop ou manquant). Regarde la ligne indiquée et celle juste avant.', en: () => 'The code is malformed somewhere (a symbol too many or missing). Look at the indicated line and the one just before.' },
 ]
 
-export function expliqueErreur(err: string, lang: Lang): string | null {
-  for (const r of REGLES) {
-    const m = err.match(r.re)
-    if (m) return r[lang](m)
+const CONNUS = ['print', 'input', 'len', 'range', 'int', 'str', 'float', 'list', 'dict', 'set', 'sum', 'max', 'min', 'sorted', 'abs', 'round', 'type', 'open', 'enumerate', 'zip', 'True', 'False', 'None']
+
+function distance(a: string, b: string): number {
+  const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)])
+  for (let j = 1; j <= b.length; j++) d[0][j] = j
+  for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++)
+    d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1))
+  return d[a.length][b.length]
+}
+
+/** Le mot que la personne voulait sans doute écrire : un mot de Python ou un nom déjà présent dans son code, à une faute près. */
+function motProche(nom: string, code: string): string | null {
+  const dansCode = [...new Set(code.match(/[A-Za-z_]\w*/g) ?? [])].filter((x) => x !== nom)
+  let best: string | null = null, bestD = 99
+  for (const c of [...CONNUS, ...dansCode]) {
+    const d = c.toLowerCase() === nom.toLowerCase() ? 0 : distance(nom.toLowerCase(), c.toLowerCase())
+    if (d < bestD && d <= (nom.length > 4 ? 2 : 1)) { best = c; bestD = d }
   }
-  return null
+  return best
+}
+
+/** Explication simple d'une erreur, avec la ligne fautive quand on la connaît. Le code de l'élève, s'il est donné, permet de nommer le bon mot. */
+export function expliqueErreur(err: string, lang: Lang, code = ''): string | null {
+  let texte: string | null = null
+  const nom = err.match(/name '([^']+)' is not defined/)
+  if (nom) {
+    const proche = motProche(nom[1], code)
+    if (proche && !/^(Print|Input|Len|Range|Int|Str|Float|List|Dict|Set|Sum|Max|Min|Sorted|Abs|Round|Type|Open|true|false|none)$/.test(nom[1])) {
+      texte = lang === 'fr'
+        ? `Python ne connaît pas « ${nom[1]} ». Tu voulais sans doute écrire « ${proche} » : corrige l’orthographe.`
+        : `Python does not know “${nom[1]}”. You probably meant “${proche}”: fix the spelling.`
+    }
+  }
+  if (!texte) for (const r of REGLES) {
+    const m = err.match(r.re)
+    if (m) { texte = r[lang](m); break }
+  }
+  if (!texte) return null
+  const n = [...err.matchAll(/File "<(?:exec|eleve)>", line (\d+)/g)].pop()?.[1]
+  const ligne = n ? code.split('\n')[Number(n) - 1]?.trim() : ''
+  if (!n) return texte
+  const quoi = ligne ? ` « ${ligne.slice(0, 60)} »` : ''
+  return (lang === 'fr' ? `Ligne ${n}${quoi} : ` : `Line ${n}${quoi}: `) + texte
 }

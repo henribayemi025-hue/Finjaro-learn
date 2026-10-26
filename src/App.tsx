@@ -444,7 +444,7 @@ export default function App() {
             contexte={lesson.lang === 'sql' && lesson.sql ? contexteSql(lesson.title[lang], lesson.sql.setup, lang) : undefined}
             tache={lesson.task[lang]} indice={lesson.hint[lang]} aExemple={!!lesson.example} signedIn={!!session} ai={ai} code={code} sortie={res?.output.join('\n') ?? ''}
             etat={!res ? 'rien' : res.passed ? 'ok' : res.error ? 'erreur' : res.passed === false ? 'ko' : 'rien'}
-            erreur={res?.error ? (expliqueErreur(res.error, lang) ?? res.error.split('\n').filter(Boolean).pop() ?? '') : ''}
+            erreur={res?.error ? (expliqueErreur(res.error, lang, code) ?? res.error.split('\n').filter(Boolean).pop() ?? '') : ''}
             aller={(id) => { const el = document.getElementById(id); el?.scrollIntoView({ behavior: 'smooth', block: 'start' }); if (id === 'exercice') setTimeout(() => document.getElementById('editeur')?.focus({ preventScroll: true }), 400) }} />
           <section id="explication" className="scroll-mt-32">
             <h3 className="text-sm uppercase tracking-wide text-ink/55 mb-1.5">{t.explain}</h3>
@@ -575,7 +575,7 @@ export default function App() {
                 </div>
                 {res.figures?.map((f, i) => <Chart key={i} fig={f} />)}
                 {res.error && (() => {
-                  const simple = expliqueErreur(res.error, lang)
+                  const simple = expliqueErreur(res.error, lang, code)
                   return (
                     <div className="rounded-xl bg-terracotta/10 border border-terracotta/40 p-3 text-sm space-y-1">
                       <p className="font-semibold text-terracotta-dark">⚠️ {simple ?? t.error + ' ' + res.error}</p>

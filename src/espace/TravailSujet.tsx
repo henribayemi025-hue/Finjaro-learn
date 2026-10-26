@@ -224,7 +224,7 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
               {!res ? <p className="text-[#64748B]">{t.noRun}</p> : <>
                 <pre className="whitespace-pre-wrap text-[#EDF1F8]">{res.output.length ? res.output.join('\n') : t.noOutput}</pre>
                 {res.error && <pre className="whitespace-pre-wrap text-[#FDA4AF]">{res.error}</pre>}
-                {res.error && expliqueErreur(res.error, lang) && <p className="mt-2 rounded-lg border border-[#FF8A3D]/40 bg-[#FF8A3D]/10 p-2 font-sans text-[13px] text-[#EDF1F8]">💡 {expliqueErreur(res.error, lang)}</p>}
+                {res.error && expliqueErreur(res.error, lang, code) && <p className="mt-2 rounded-lg border border-[#FF8A3D]/40 bg-[#FF8A3D]/10 p-2 font-sans text-[13px] text-[#EDF1F8]">💡 {expliqueErreur(res.error, lang, code)}</p>}
                 {res.passed === true && <p className="mt-1 font-sans font-semibold text-[#5FC8C0]">✅ {t.ok}</p>}
                 {res.passed === false && <p className="mt-1 font-sans text-[#FDA4AF]">{t.ko}</p>}
               </>}

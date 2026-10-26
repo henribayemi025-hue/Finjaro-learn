@@ -64,4 +64,8 @@ ok(mp && mp.includes('« print »') && /minuscules/.test(mp), 'Print majuscule (
 ok(/all in lowercase/.test(expliqueErreur("NameError: name 'Print' is not defined", 'en') ?? ''), 'Print majuscule (en)')
 ok(/« True »/.test(expliqueErreur("NameError: name 'true' is not defined", 'fr') ?? ''), 'true minuscule')
 ok(/est inconnu/.test(expliqueErreur("NameError: name 'monnom' is not defined", 'fr') ?? ''), 'autre nom inconnu inchangé')
+const e5 = expliqueErreur("Traceback (most recent call last):\n  File \"<exec>\", line 2, in <module>\nNameError: name 'prnt' is not defined", 'fr', 'x = 1\nprnt(x)')
+ok(e5 && e5.startsWith('Ligne 2 « prnt(x) » : ') && e5.includes('« print »'), 'faute de frappe + ligne : ' + e5)
+const e6 = expliqueErreur("NameError: name 'totl' is not defined", 'fr', 'total = 3\nprint(totl)')
+ok(e6 && e6.includes('« total »') && !e6.startsWith('Ligne'), 'nom de son code : ' + e6)
 console.log(`sqlbase : ${n} vérifications passées`)

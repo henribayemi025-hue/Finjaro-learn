@@ -271,7 +271,7 @@ export default function AtelierProjet({ lang, id, ai, signedIn, onBack }: { lang
     ajouter({ qui: 'action', texte: `annuler ${prop.fichier}`, fichier: prop.fichier, etat: t.undo })
   }
 
-  const simple = res?.error ? expliqueErreur(res.error, lang) : null
+  const simple = res?.error ? expliqueErreur(res.error, lang, code) : null
   const dirty = nonEnregistre(p)
   const langageNom = (c: string) => ({ py: 'Python', js: 'JavaScript', html: 'HTML', css: 'CSS', json: 'JSON', md: 'Markdown' } as Record<string, string>)[c.split('.').pop() ?? ''] ?? (lang === 'fr' ? 'Texte' : 'Text')
   const btnBarre = 'shrink-0 inline-flex items-center gap-1.5 rounded-full border border-white/12 px-3 min-h-9 text-[12px] font-semibold text-[#C9D4E5] hover:border-[#FF8A3D] hover:text-white'
