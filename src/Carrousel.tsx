@@ -49,14 +49,14 @@ export default function Carrousel({ lang, diapos }: { lang: Lang; diapos: Diapo[
       <div ref={piste} className="flex overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {diapos.map((d, k) => (
           <div key={d.key} role="group" aria-roledescription={fr ? 'diapositive' : 'slide'} aria-label={`${k + 1} / ${diapos.length}`}
-            className="relative shrink-0 w-full snap-start aspect-[4/5] sm:aspect-[16/7] bg-ink">
+            className="relative shrink-0 w-full snap-start aspect-[16/10] sm:aspect-[16/5] max-h-72 bg-ink">
             <img src={d.image} alt="" loading={k === 0 ? 'eager' : 'lazy'} decoding="async" className="absolute inset-0 size-full object-cover" />
             <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/5 sm:bg-gradient-to-r sm:from-black/80 sm:via-black/40 sm:to-transparent" />
-            <div className="absolute inset-x-0 bottom-0 p-5 pb-10 sm:p-9 sm:pb-12 sm:max-w-[60%] text-white space-y-2.5">
+            <div className="absolute inset-x-0 bottom-0 p-4 pb-9 sm:py-6 sm:pl-16 sm:pr-6 sm:pb-9 sm:max-w-[60%] text-white space-y-1.5">
               <span className="inline-block rounded-full bg-terracotta px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider shadow">{d.badge}</span>
-              <h2 className="font-display text-2xl sm:text-4xl leading-[1.1] drop-shadow">{d.titre}</h2>
-              <p className="text-sm sm:text-base text-white/85 line-clamp-2">{d.sousTitre}</p>
-              <button className="btn btn-primary text-base px-5 py-3 mt-1" onClick={d.onClick} tabIndex={k === i ? 0 : -1}>▶ {d.action}</button>
+              <h2 className="font-display text-xl sm:text-2xl leading-[1.1] drop-shadow">{d.titre}</h2>
+              <p className="hidden sm:block text-sm text-white/85 line-clamp-1">{d.sousTitre}</p>
+              <button className="btn btn-primary text-sm px-4 py-2 mt-1" onClick={d.onClick} tabIndex={k === i ? 0 : -1}>▶ {d.action}</button>
             </div>
           </div>
         ))}

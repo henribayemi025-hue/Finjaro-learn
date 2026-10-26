@@ -6,6 +6,7 @@ import { TRACK_ICON } from './Curriculum'
 import type { Lang } from './i18n'
 import { chargerIndex, type Numero } from './Lettre'
 import Carrousel, { type Diapo } from './Carrousel'
+import { cursusTotal, modulesVus } from './cursus'
 
 type Niveau = 'debutant' | 'intermediaire' | 'avance'
 /** Niveau conseillé de chaque parcours (une indication de difficulté, pas une note). */
@@ -43,9 +44,9 @@ const sansAccents = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').to
 const trackOf = (l: Lesson) => TRACKS.find((tr) => tr.groups.includes(l.group ?? 'js'))?.key ?? 'prog'
 
 
-export default function Accueil({ lang, done, idx, onOpen, onTrack, onResume, onChrono, onLettre }: {
+export default function Accueil({ lang, done, idx, onOpen, onTrack, onResume, onChrono, onLettre, onCursus }: {
   lang: Lang; done: string[]; idx: number
-  onOpen: (i: number) => void; onTrack: (k: string) => void; onResume: () => void; onChrono: () => void; onLettre: () => void
+  onOpen: (i: number) => void; onTrack: (k: string) => void; onResume: () => void; onChrono: () => void; onLettre: () => void; onCursus: () => void
 }) {
   const [dernier, setDernier] = useState<Numero | null>(null)
   useEffect(() => { chargerIndex().then((l) => setDernier(l[0] ?? null)).catch(() => { /* pas de lettre : la carte reste discrète */ }) }, [])
@@ -60,6 +61,8 @@ export default function Accueil({ lang, done, idx, onOpen, onTrack, onResume, on
   const pct = Math.round((done.length / lessons.length) * 100)
   // Personne n'a « repris » une leçon à 0/237 : à l'arrivée, une seule porte, « Commencer » (audit du 07/10, L1).
   const neuf = done.length === 0
+  const { fait: cursusFait, total: cursusN } = cursusTotal(modulesVus(done))
+  const cursusPct = cursusN ? Math.round((cursusFait / cursusN) * 100) : 0
   const img = (k: string) => import.meta.env.BASE_URL + 'images/parcours/' + k + '.jpg'
   const diapos: Diapo[] = useMemo(() => {
     const liste: Diapo[] = [{
@@ -92,6 +95,19 @@ export default function Accueil({ lang, done, idx, onOpen, onTrack, onResume, on
     <div className="space-y-6">
       {/* Carrousel : la leçon en cours d'abord, puis la prochaine leçon de chaque autre parcours. */}
       <Carrousel lang={lang} diapos={diapos} />
+      {/* Le cursus : un seul chemin, de la première ligne de code au niveau d'un ingénieur IA. */}
+      <button onClick={onCursus} className="card w-full p-4 text-left flex items-center gap-4 hover:-translate-y-0.5 transition">
+        <span aria-hidden="true" className="size-12 shrink-0 rounded-2xl grad grid place-items-center text-2xl shadow-md">🎓</span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-[11px] font-bold uppercase tracking-wider text-terracotta-dark">{lang === 'fr' ? 'Cursus' : 'Path'}</span>
+          <span className="block font-display text-lg leading-tight">{lang === 'fr' ? 'De zéro à chercheur IA' : 'From zero to AI researcher'}</span>
+          <span className="mt-1.5 flex items-center gap-2">
+            <span className="flex-1 h-1.5 rounded-full bg-ink/10 overflow-hidden"><span className="block h-full grad rounded-full" style={{ width: cursusPct + '%' }} /></span>
+            <span className="text-xs font-semibold text-ink/70">{cursusFait}/{cursusN}</span>
+          </span>
+        </span>
+        <span aria-hidden="true" className="text-terracotta-dark font-bold">→</span>
+      </button>
       <section className="card p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center gap-4">
         <div className="flex-1 min-w-0">
           <div className="flex justify-between text-sm font-semibold mb-1.5"><span>{t.global}</span><span className="font-mono text-terracotta-dark">{done.length}/{lessons.length} {t.done}</span></div>

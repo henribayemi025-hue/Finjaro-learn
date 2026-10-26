@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test:coop": "esbuild src/coop.ts --format=cjs --outfile=.test-build/coop.cjs --log-level=error && node tests/coop.test.cjs",
     "test:exos": "esbuild src/lessons.ts --bundle --platform=node --format=esm --outfile=.test-build/lessons.mjs --log-level=error --define:import.meta.env.BASE_URL='\"/\"' && node tests/exos.test.mjs",
-    "test:sqlbase": "esbuild src/lessons.ts --bundle --platform=node --format=esm --outfile=.test-build/lessons.mjs --log-level=error --define:import.meta.env.BASE_URL='\"/\"' && esbuild src/sqlBase.ts --bundle --platform=node --format=esm --outfile=.test-build/sqlbase.mjs --log-level=error && esbuild src/explainError.ts --bundle --platform=node --format=esm --outfile=.test-build/explainerror.mjs --log-level=error && node tests/sqlbase.test.mjs"
+    "test:sqlbase": "esbuild src/lessons.ts --bundle --platform=node --format=esm --outfile=.test-build/lessons.mjs --log-level=error --define:import.meta.env.BASE_URL='\"/\"' && esbuild src/sqlBase.ts --bundle --platform=node --format=esm --outfile=.test-build/sqlbase.mjs --log-level=error && esbuild src/explainError.ts --bundle --platform=node --format=esm --outfile=.test-build/explainerror.mjs --log-level=error && node tests/sqlbase.test.mjs",
+    "test:cursus": "esbuild src/cursus.ts --bundle --platform=node --format=esm --outfile=.test-build/cursus.mjs --log-level=error --define:import.meta.env.BASE_URL='\"/\"' && node tests/cursus.test.mjs"
   },
   "dependencies": {
     "@codemirror/lang-css": "^6.3.1",

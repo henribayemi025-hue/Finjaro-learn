@@ -4,6 +4,7 @@ import Espaces from './Espaces'
 import { TRACK_ICON } from './Curriculum'
 import Accueil from './Accueil'
 import Parcours from './Parcours'
+import Cursus from './Cursus'
 import Atelier from './Atelier'
 import { nouvelId, sauverProjet } from './atelierStore'
 import Lettre from './Lettre'
@@ -74,13 +75,14 @@ function save(key: string, v: string) {
   try { localStorage.setItem('learn:' + key, v) } catch { /* ignoré */ }
 }
 
-type Route = { v: 'accueil' } | { v: 'parcours'; k: string } | { v: 'lecon'; id: string } | { v: 'lettre'; date: string | null } | { v: 'atelier'; id: string | null } | { v: 'progression' | 'espaces' | 'outils' | 'entraide' }
+type Route = { v: 'accueil' } | { v: 'cursus' } | { v: 'parcours'; k: string } | { v: 'lecon'; id: string } | { v: 'lettre'; date: string | null } | { v: 'atelier'; id: string | null } | { v: 'progression' | 'espaces' | 'outils' | 'entraide' }
 function lireRoute(): Route {
   const h = decodeURIComponent(window.location.hash.replace(/^#\/?/, ''))
   const [a, b] = h.split('/')
   if (a === 'lettre') return { v: 'lettre', date: /^\d{4}-\d{2}-\d{2}$/.test(b ?? '') ? b : null }
   if (a === 'parcours' && b && trackFromSlug(b)) return { v: 'parcours', k: trackFromSlug(b)! }
   if (a === 'parcours') return { v: 'accueil' }
+  if (a === 'cursus') return { v: 'cursus' }
   if (a === 'lecon' && b && lessons.some((l) => l.id === b)) return { v: 'lecon', id: b }
   if (a === 'atelier') return { v: 'atelier', id: b && /^[a-z0-9]{4,40}$/.test(b) ? b : null }
   if (a === 'progression' || a === 'espaces' || a === 'outils' || a === 'entraide') return { v: a }
@@ -98,7 +100,7 @@ export default function App() {
     window.addEventListener('hashchange', h)
     return () => window.removeEventListener('hashchange', h)
   }, [])
-  const view = route.v === 'accueil' || route.v === 'parcours' || route.v === 'lecon' ? 'lecons' : route.v
+  const view = route.v === 'accueil' || route.v === 'cursus' || route.v === 'parcours' || route.v === 'lecon' ? 'lecons' : route.v
   const lettreDate = route.v === 'lettre' ? route.date : null
   const nav = (h: string) => { if (window.location.hash !== h) window.location.hash = h; else window.scrollTo({ top: 0 }) }
   const setView = (v: typeof VIEWS[number]) => nav(v === 'lecons' ? '#/' : '#/' + v)
@@ -400,7 +402,12 @@ export default function App() {
       {route.v === 'accueil' && (
         <div className="max-w-6xl mx-auto px-4 py-5 outline-none">
           <Accueil lang={lang} done={done} idx={idx} onOpen={ouvre} onTrack={(k) => nav('#/parcours/' + trackSlug(k))} onChrono={() => setChrono(true)} onLettre={() => nav('#/lettre')}
-            onResume={() => ouvre(idx)} />
+            onResume={() => ouvre(idx)} onCursus={() => nav('#/cursus')} />
+        </div>
+      )}
+      {route.v === 'cursus' && (
+        <div className="max-w-6xl mx-auto px-4 py-5 outline-none">
+          <Cursus lang={lang} done={done} signedIn={!!session} onOpen={ouvre} onBack={() => nav('#/')} />
         </div>
       )}
       {route.v === 'parcours' && (
