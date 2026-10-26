@@ -10,6 +10,8 @@ export interface RunResult {
   output: string[]
   error: string | null
   passed: boolean | null
+  /** Tests réussis / total (affichés à l'élève). */
+  tests?: { ok: number; total: number }
   figures?: Figure[]
 }
 
@@ -21,7 +23,7 @@ onmessage = (e) => {
   try {
     const run = new Function('console', '__out', code + '\\n;return [' + checks.join(',') + ']')
     const res = run(console, __out)
-    postMessage({ output: __out, error: null, passed: checks.length === 0 ? null : res.every(Boolean) })
+    postMessage({ output: __out, error: null, passed: checks.length === 0 ? null : res.every(Boolean), tests: { ok: res.filter(Boolean).length, total: checks.length } })
   } catch (err) {
     postMessage({ output: __out, error: String(err), passed: false })
   }
@@ -159,7 +161,7 @@ onmessage = async (e) => {
         if (!shown.length && after > before) shown = figures(py, ns, before, after)
         return ok
       })
-      postMessage({ type: 'done', output: out, error: null, passed: d.checks.length === 0 ? null : results.every(Boolean), figures: shown })
+      postMessage({ type: 'done', output: out, error: null, passed: d.checks.length === 0 ? null : results.every(Boolean), tests: { ok: results.filter(Boolean).length, total: d.checks.length }, figures: shown })
     } catch (err) {
       const msg = String(err && err.message ? err.message : err).trim().split('\\n').slice(-3).join('\\n')
       postMessage({ type: 'done', output: out, error: msg, passed: false, figures: figures(py, ns) })
@@ -213,7 +215,7 @@ export async function runPython(code: string, checks: string[], packages: string
   const w = pyWorker!
   return new Promise<RunResult>((resolve) => {
     const t = setTimeout(() => { reset(); resolve({ output: [], error: 'Timeout (boucle infinie ?)', passed: false }) }, 20000)
-    w.onmessage = (e) => { if (e.data.type === 'done') { clearTimeout(t); resolve({ output: e.data.output, error: e.data.error, passed: e.data.passed, figures: e.data.figures }) } }
+    w.onmessage = (e) => { if (e.data.type === 'done') { clearTimeout(t); resolve({ output: e.data.output, error: e.data.error, passed: e.data.passed, tests: e.data.tests, figures: e.data.figures }) } }
     w.onerror = (e) => { clearTimeout(t); reset(); resolve({ output: [], error: e.message, passed: false }) }
     w.postMessage({ type: 'run', code, checks })
   })

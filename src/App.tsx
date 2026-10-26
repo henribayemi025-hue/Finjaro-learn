@@ -451,7 +451,7 @@ export default function App() {
       {route.v === 'lecon' && travail && (
         <TravailSujet key={lesson.id} lang={lang} lesson={lesson} track={track} code={code} onCode={(v) => { setCode(v); save(cleCode(lesson, lang), v) }}
           onRun={run} res={res} running={!!running} ai={ai} signedIn={!!session} onClose={() => setTravail(false)}
-          onPrev={pos > 1 ? () => ouvre(trackLessons[pos - 2].i) : undefined} onNext={pos < trackLessons.length || portailProjet ? () => verslasuite(pos < trackLessons.length ? trackLessons[pos].i : null) : undefined} />
+          onPrev={pos > 1 ? () => ouvre(trackLessons[pos - 2].i) : undefined} onNext={pos < trackLessons.length || portailProjet ? () => void terminer() : undefined} />
       )}
       {route.v === 'lecon' && <div id="lecon" className="max-w-6xl mx-auto px-4 py-4">
         <div className="space-y-4 min-w-0">
@@ -465,7 +465,7 @@ export default function App() {
               {profBouton.face ? <img src={profBouton.face} alt="" className="size-7 rounded-full object-cover ring-1 ring-brass" /> : <span className="size-7 rounded-full bg-terracotta/15 grid place-items-center text-xs font-bold text-terracotta-dark">{profBouton.name[0]}</span>}
               <span className="hidden sm:inline">{lang === 'fr' ? 'Avec les agents IA' : 'With AI agents'}</span></button>
             <button className="icon-btn" disabled={pos <= 1} onClick={() => ouvre(trackLessons[pos - 2].i)} aria-label={lang === 'fr' ? 'Leçon précédente' : 'Previous lesson'}><Ico n="left" className="size-4" /></button>
-            <button className="icon-btn" disabled={pos >= trackLessons.length && !portailProjet} onClick={() => verslasuite(pos < trackLessons.length ? trackLessons[pos].i : null)} aria-label={lang === 'fr' ? 'Leçon suivante' : 'Next lesson'}><Ico n="right" className="size-4" /></button>
+            <button className="icon-btn" disabled={(pos >= trackLessons.length && !portailProjet) || !!running} onClick={() => void terminer()} aria-label={lang === 'fr' ? 'Leçon suivante' : 'Next lesson'}><Ico n="right" className="size-4" /></button>
           </div>
           {verdict && (
             <div role="status" aria-live="polite" className={`rounded-xl border px-4 py-3 text-sm flex items-start gap-3 ${verdict.etat === 'ok' ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-900' : verdict.etat === 'ko' ? 'border-terracotta/50 bg-terracotta/10 text-ink' : 'border-brass bg-paper text-ink/80'}`}>
@@ -629,6 +629,7 @@ export default function App() {
                     </div>
                   )
                 })()}
+                {res.tests && res.tests.total > 0 && <p className={`text-sm font-semibold ${res.tests.ok === res.tests.total ? 'text-emerald-800' : 'text-terracotta-dark'}`}>{lang === 'fr' ? 'Tests' : 'Tests'} : {res.tests.ok} / {res.tests.total} {lang === 'fr' ? (res.tests.total > 1 ? 'réussis' : 'réussi') : 'passed'}</p>}
                 {res.passed === true && <p className="rounded-xl p-3 font-semibold bg-[color-mix(in_srgb,#22c55e_14%,transparent)] border border-[color-mix(in_srgb,#22c55e_45%,transparent)]">✅ {t.ok}</p>}
                 {res.passed === true && lesson.niveau === 'projet' && <RetourProjet lang={lang} profId={profDe(track, lesson.lang ?? 'js')} titre={lesson.title[lang]} code={code} sortie={res.output.join('\n')} ai={ai} signedIn={!!session} />}
                 {res.passed === true && golf && <p className="text-xs text-ink/70">⛳ {t.golf} : {golf.n} {t.chars} · {t.bestGolf} : {golf.best}</p>}

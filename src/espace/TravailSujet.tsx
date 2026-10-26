@@ -456,6 +456,7 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
                     {ai && signedIn && <button onClick={demanderErreur} disabled={busy} className="mt-2 rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3 min-h-8 text-[12px] font-medium text-sky-300 disabled:opacity-50">{t.askErr(prof.name)}</button>}
                   </div>
                 )}
+                {res.tests && res.tests.total > 0 && <p className={`mt-1 font-sans font-semibold ${res.tests.ok === res.tests.total ? 'text-emerald-300' : 'text-amber-300'}`}>Tests : {res.tests.ok} / {res.tests.total}</p>}
                 {res.passed === true && <p className="mt-1 font-sans font-semibold text-emerald-300"><Gl>{'✅ ' + t.ok}</Gl></p>}
                 {projet && !projet.valide && projet.essai > 0 && <p className="mt-2 font-sans text-[13px] text-amber-300">{t.pj.echec(projet.essai, projet.max)}</p>}
                 {projet && !projet.valide && projet.essai >= projet.max && projet.onAutre && (
