@@ -105,8 +105,8 @@ export const pyLessons: Lesson[] = [
     id: 'py-recursion', lang: 'py', group: 'py-algo',
     title: { fr: 'Récursivité', en: 'Recursion' },
     explain: {
-      fr: 'Une fonction récursive s’appelle elle-même sur un problème plus petit. Il faut toujours un cas de base qui s’arrête. Exemple : 4! = 4 × 3!, et 0! = 1.',
-      en: 'A recursive function calls itself on a smaller problem. It always needs a base case that stops. Example: 4! = 4 × 3!, and 0! = 1.',
+      fr: "Récursion : une fonction qui s’appelle elle-même. Image : des poupées russes, chaque poupée contient une plus petite, jusqu’à la dernière qui est pleine.\nPour calculer 4! (4 × 3 × 2 × 1), on dit : 4! = 4 × 3!, et 3! se calcule pareil. On s’arrête à 0! = 1. Cet arrêt s’appelle le cas de base.\nSans cas de base, la fonction s’appelle sans fin. C’est la règle n°1 de la récursion.",
+      en: "Recursion: a function that calls itself. Picture Russian dolls, each doll holds a smaller one, until the last one is solid.\nTo compute 4! (4 × 3 × 2 × 1), we say: 4! = 4 × 3!, and 3! works the same way. We stop at 0! = 1. That stop is called the base case.\nWithout a base case, the function calls itself forever. That is rule number 1 of recursion.",
     },
     example: 'def compte_a_rebours(n):\n    if n == 0:\n        return\n    print(n)\n    compte_a_rebours(n - 1)',
     task: { fr: 'Écris factorielle(n) de façon récursive.', en: 'Write factorielle(n) recursively.' },
@@ -119,8 +119,8 @@ export const pyLessons: Lesson[] = [
     id: 'py-search', lang: 'py', group: 'py-algo',
     title: { fr: 'Recherche dichotomique', en: 'Binary search' },
     explain: {
-      fr: 'Dans une liste TRIÉE, on peut chercher en coupant l’intervalle en deux à chaque pas : au lieu de n comparaisons, il en faut environ log₂(n). On compare avec le milieu, puis on garde la moitié gauche ou droite.',
-      en: 'In a SORTED list you can search by halving the range at each step: instead of n comparisons you need about log₂(n). Compare with the middle, then keep the left or right half.',
+      fr: "Tu cherches un nom dans un dictionnaire papier : tu n’en lis pas toutes les pages, tu ouvres au milieu, puis tu choisis la moitié gauche ou droite. C’est la recherche par dichotomie.\nElle ne marche que si la liste est TRIÉE. À chaque pas, tu compares avec l’élément du milieu et tu jettes la moitié où ce n’est pas. Pour 1000 éléments, une dizaine de pas suffisent au lieu de 1000.",
+      en: "You look up a name in a paper dictionary: you do not read every page, you open in the middle, then pick the left or right half. That is binary search.\nIt only works if the list is SORTED. At each step, you compare with the middle item and throw away the half where it cannot be. For 1000 items, about ten steps are enough instead of 1000.",
     },
     example: 'milieu = (bas + haut) // 2   # division entière',
     task: { fr: 'Écris recherche(liste_triee, x) : renvoie l’indice de x, ou -1 s’il est absent.', en: 'Write recherche(liste_triee, x): return the index of x, or -1 if absent.' },
@@ -133,8 +133,8 @@ export const pyLessons: Lesson[] = [
     id: 'py-sort', lang: 'py', group: 'py-algo',
     title: { fr: 'Tri par sélection', en: 'Selection sort' },
     explain: {
-      fr: 'Le tri par sélection cherche le plus petit élément du reste de la liste et le place en tête, puis recommence. Il fait environ n² comparaisons : on dit qu’il est en O(n²).',
-      en: 'Selection sort finds the smallest item in the rest of the list and puts it first, then repeats. It does about n² comparisons: we say it is O(n²).',
+      fr: "Trier, c’est ranger du plus petit au plus grand. Le tri par sélection fait comme quand tu ranges des cartes : tu cherches la plus petite, tu la mets en premier ; puis la plus petite du reste, tu la mets en deuxième ; et ainsi de suite.\nC’est simple mais lent sur de grandes listes : le temps grandit comme le carré de la taille (on dit « O(n²) » : 10 fois plus d’éléments, 100 fois plus de temps).",
+      en: "Sorting means arranging from smallest to largest. Selection sort works like arranging cards: find the smallest and put it first; then the smallest of the rest, put it second; and so on.\nIt is simple but slow on big lists: the time grows like the square of the size (called “O(n²)”: 10 times more items, 100 times more time).",
     },
     example: 'liste = [3, 1, 2]\nliste[0], liste[1] = liste[1], liste[0]   # échange',
     task: { fr: 'Écris tri(liste) qui renvoie une nouvelle liste triée, SANS utiliser sorted() ni .sort().', en: 'Write tri(liste) returning a new sorted list WITHOUT using sorted() or .sort().' },
@@ -147,8 +147,8 @@ export const pyLessons: Lesson[] = [
     id: 'py-stack', lang: 'py', group: 'py-algo',
     title: { fr: 'Piles', en: 'Stacks' },
     explain: {
-      fr: 'Une pile est une structure « dernier arrivé, premier sorti » : on empile (append) et on dépile (pop). Une liste Python s’en sert très bien. Les piles servent à vérifier des parenthèses, annuler une action, parcourir un arbre…',
-      en: 'A stack is “last in, first out”: you push (append) and pop. A Python list works well. Stacks check parentheses, undo actions, walk trees…',
+      fr: "Une pile, c’est une pile d’assiettes : la dernière posée est la première reprise. On dit « dernier arrivé, premier sorti ».\nEn Python, une liste fait très bien la pile : append pose une assiette en haut, pop reprend celle du haut.\nÀ quoi ça sert ? Vérifier que les parenthèses sont bien fermées, annuler la dernière action (Ctrl+Z), parcourir un arbre.",
+      en: "A stack is a pile of plates: the last one put down is the first one taken back. We say “last in, first out”.\nIn Python, a list makes a very good stack: append puts a plate on top, pop takes the top one back.\nWhat for? Checking parentheses are closed properly, undoing the last action (Ctrl+Z), walking through a tree.",
     },
     example: 'pile = []\npile.append("(")\npile.pop()',
     task: { fr: 'Écris equilibre(s) : True si les parenthèses ( ) de s sont bien fermées dans le bon ordre.', en: 'Write equilibre(s): True if the parentheses ( ) in s are correctly closed in order.' },
@@ -161,8 +161,8 @@ export const pyLessons: Lesson[] = [
     id: 'py-set', lang: 'py', group: 'py-algo',
     title: { fr: 'Ensembles et coût', en: 'Sets and cost' },
     explain: {
-      fr: 'Un ensemble (set) teste « x est-il dedans ? » en temps presque constant, alors qu’une liste doit tout parcourir. Choisir la bonne structure change le coût : comparer chaque paire de n éléments coûte n², passer par un ensemble coûte n.',
-      en: 'A set tests “is x inside?” in near-constant time, while a list must scan everything. Choosing the right structure changes the cost: comparing every pair of n items costs n², using a set costs n.',
+      fr: "Un ensemble (set) est un sac de valeurs sans doublon et sans ordre. Sa force : demander « est-ce que x est dedans ? » est quasi instantané, même avec un million de valeurs. Dans une liste, Python doit regarder les éléments un par un.\nChoisir la bonne structure peut changer la vitesse d’un programme : comparer chaque paire d’éléments coûte n × n opérations ; passer par un ensemble n’en coûte que n.",
+      en: "A set is a bag of values with no duplicates and no order. Its strength: asking “is x inside?” is almost instant, even with a million values. In a list, Python must look at the items one by one.\nPicking the right structure can change a program’s speed: comparing every pair of items costs n × n operations; going through a set costs only n.",
     },
     example: 'vus = set()\nvus.add(3)\nprint(3 in vus)',
     task: { fr: 'Écris a_doublons(liste) : True si un élément apparaît deux fois. Doit rester rapide sur 200 000 éléments.', en: 'Write a_doublons(liste): True if an item appears twice. It must stay fast on 200,000 items.' },
@@ -175,8 +175,8 @@ export const pyLessons: Lesson[] = [
     id: 'py-memo', lang: 'py', group: 'py-algo',
     title: { fr: 'Mémoïsation', en: 'Memoization' },
     explain: {
-      fr: 'Calculer fibonacci(n) = fibonacci(n-1) + fibonacci(n-2) de façon naïve refait les mêmes calculs un nombre exponentiel de fois. En gardant les résultats déjà calculés dans un dictionnaire, chaque valeur n’est calculée qu’une fois.',
-      en: 'Computing fibonacci(n) = fibonacci(n-1) + fibonacci(n-2) naively repeats the same work exponentially often. Keeping computed results in a dictionary computes each value only once.',
+      fr: "Calculer fibonacci(n) = fibonacci(n-1) + fibonacci(n-2) de façon naïve refait les mêmes calculs des milliers de fois : comme si tu refaisais la même multiplication à chaque fois qu’on te la demande.\nLa solution est la mémoïsation : tu notes chaque résultat dans un dictionnaire (un carnet). Avant de calculer, tu regardes dans le carnet : si la réponse y est, tu la lis ; sinon tu calcules et tu la notes. Chaque valeur n’est calculée qu’une seule fois.",
+      en: "Computing fibonacci(n) = fibonacci(n-1) + fibonacci(n-2) the naive way redoes the same calculations thousands of times: like redoing the same multiplication each time someone asks.\nThe fix is memoization: you write each result in a dictionary (a notebook). Before computing, you look in the notebook: if the answer is there, you read it; otherwise you compute it and write it down. Each value is computed only once.",
     },
     example: 'cache = {}\ndef f(n):\n    if n not in cache:\n        cache[n] = ...  # calcul\n    return cache[n]',
     task: { fr: 'Écris fibonacci(n) (0, 1, 1, 2, 3, 5…) avec un cache : fibonacci(80) doit répondre tout de suite.', en: 'Write fibonacci(n) (0, 1, 1, 2, 3, 5…) with a cache: fibonacci(80) must answer immediately.' },
@@ -189,8 +189,8 @@ export const pyLessons: Lesson[] = [
     id: 'py-class', lang: 'py', group: 'py-algo',
     title: { fr: 'Classes', en: 'Classes' },
     explain: {
-      fr: 'Une classe regroupe des données et des actions. __init__ prépare un nouvel objet ; self désigne l’objet lui-même. Chaque objet a ses propres valeurs.',
-      en: 'A class groups data and actions. __init__ sets up a new object; self is the object itself. Each object has its own values.',
+      fr: "Une classe est un moule pour fabriquer des objets. Image : le plan d’une maison. Avec le même plan, tu construis plusieurs maisons, chacune avec ses propres meubles.\n__init__ est la fonction qui prépare un nouvel objet (c’est l’aménagement de départ). self veut dire « cet objet-ci » : self.nom = nom range le nom dans CET objet.\nChaque objet a ses propres valeurs, mais tous partagent les mêmes actions (les fonctions de la classe).",
+      en: "A class is a mould for making objects. Picture a house plan. With the same plan, you build several houses, each with its own furniture.\n__init__ is the function that sets up a new object (the starting layout). self means “this very object”: self.name = name stores the name inside THIS object.\nEach object has its own values, but all share the same actions (the class functions).",
     },
     example: 'class Chien:\n    def __init__(self, nom):\n        self.nom = nom\n    def parle(self):\n        return self.nom + " aboie"',
     task: { fr: 'Écris une classe Compteur : valeur commence à 0 ; la méthode incremente() ajoute 1.', en: 'Write a class Compteur: valeur starts at 0; the method incremente() adds 1.' },
@@ -232,8 +232,8 @@ export const pyLessons: Lesson[] = [
     id: 'py-graph', lang: 'py', group: 'py-algo',
     title: { fr: 'Graphes : parcours en largeur', en: 'Graphs: breadth-first search' },
     explain: {
-      fr: 'Un graphe relie des sommets par des arêtes ; on le range dans un dictionnaire : {"A": ["B", "C"]}. Le parcours en largeur visite d’abord les voisins, puis les voisins des voisins, avec une file : il trouve le plus court chemin en nombre d’arêtes.',
-      en: 'A graph links vertices with edges; store it in a dictionary: {"A": ["B", "C"]}. Breadth-first search visits neighbours first, then their neighbours, using a queue: it finds the shortest path in number of edges.',
+      fr: "Un graphe, c’est des points reliés par des traits : des villes reliées par des routes, des amis reliés par une amitié. Les points s’appellent sommets, les traits arêtes.\nEn Python on le range dans un dictionnaire : {\"A\": [\"B\", \"C\"]} veut dire « A est relié à B et à C ».\nLe parcours en largeur visite d’abord les voisins, puis les voisins des voisins, comme une vague qui s’étend. Il trouve le chemin qui passe par le moins d’arêtes.",
+      en: "A graph is points joined by lines: cities joined by roads, friends joined by friendship. The points are called vertices, the lines edges.\nIn Python it is stored in a dictionary: {\"A\": [\"B\", \"C\"]} means “A is linked to B and to C”.\nBreadth-first search visits the neighbours first, then the neighbours of the neighbours, like a spreading wave. It finds the path using the fewest edges.",
     },
     example: 'file = [("A", 0)]\nvus = {"A"}\nsommet, d = file.pop(0)',
     task: { fr: 'Écris distance(graphe, depart, arrivee) : nombre minimum d’arêtes, ou -1 si aucun chemin.', en: 'Write distance(graphe, depart, arrivee): minimum number of edges, or -1 if no path.' },
@@ -246,8 +246,8 @@ export const pyLessons: Lesson[] = [
     id: 'py-linked', lang: 'py', group: 'py-algo',
     title: { fr: 'Liste chaînée', en: 'Linked list' },
     explain: {
-      fr: 'Une liste chaînée est faite de maillons : chacun garde une valeur et le maillon suivant. Ajouter en tête est immédiat (pas de décalage), mais accéder au k-ième élément oblige à parcourir la chaîne.',
-      en: 'A linked list is made of nodes: each keeps a value and the next node. Adding at the head is instant (no shifting), but reaching the k-th item means walking the chain.',
+      fr: "Une liste chaînée, c’est une chasse au trésor : chaque indice contient une valeur et dit où est le suivant. Chaque case s’appelle un maillon.\nAvantage : ajouter un maillon au début est immédiat, sans rien décaler. Défaut : pour atteindre le 50e maillon, il faut passer par les 49 premiers, alors qu’une liste normale y va directement.",
+      en: "A linked list is a treasure hunt: each clue holds a value and says where the next one is. Each cell is called a link.\nAdvantage: adding a link at the start is instant, nothing to shift. Drawback: to reach the 50th link you must go through the first 49, whereas a normal list goes straight there.",
     },
     example: 'class Noeud:\n    def __init__(self, valeur, suivant=None):\n        self.valeur = valeur\n        self.suivant = suivant',
     task: { fr: 'Complète la classe Liste : ajoute(x) met x en tête ; en_liste() renvoie les valeurs de la tête à la fin sous forme de liste Python.', en: 'Complete class Liste: ajoute(x) puts x at the head; en_liste() returns the values from head to end as a Python list.' },
@@ -342,7 +342,10 @@ export const pyLessons: Lesson[] = [
   {
     id: 'py-pgcd', lang: 'py', group: 'py-algo',
     title: { fr: 'Récursivité : PGCD', en: 'Recursion: GCD' },
-    explain: { fr: 'L’algorithme d’Euclide : pgcd(a, b) = pgcd(b, a % b), et pgcd(a, 0) = a. Un des plus anciens algorithmes connus, et un excellent exemple de récursivité qui converge vite.', en: 'Euclid’s algorithm: gcd(a, b) = gcd(b, a % b), and gcd(a, 0) = a. One of the oldest known algorithms, and a great example of fast-converging recursion.' },
+    explain: {
+      fr: "Le PGCD de deux nombres est le plus grand nombre qui divise les deux. Pour 12 et 18, c’est 6.\nEuclide a trouvé une astuce il y a plus de 2000 ans : pgcd(a, b) = pgcd(b, a % b), où a % b est le reste de la division. On recommence jusqu’à ce que le reste soit 0 : alors la réponse est l’autre nombre.\nC’est un bel exemple de récursion : le problème devient vite très petit.",
+      en: "The GCD of two numbers is the largest number that divides both. For 12 and 18, it is 6.\nEuclid found a trick over 2000 years ago: gcd(a, b) = gcd(b, a % b), where a % b is the remainder of the division. Repeat until the remainder is 0: then the answer is the other number.\nIt is a nice example of recursion: the problem quickly becomes very small.",
+    },
     example: 'print(18 % 12)',
     task: { fr: 'Écris pgcd(a, b) de façon récursive.', en: 'Write pgcd(a, b) recursively.' },
     starter: 'def pgcd(a, b):\n    pass\n',
@@ -353,7 +356,10 @@ export const pyLessons: Lesson[] = [
   {
     id: 'py-binary', lang: 'py', group: 'py-algo',
     title: { fr: 'Conversion en binaire', en: 'Binary conversion' },
-    explain: { fr: 'Un ordinateur compte en base 2. Pour écrire n en binaire : on divise par 2 en gardant les restes ; lus à l’envers, ils donnent les chiffres. Exemple : 6 → 3 reste 0, 3 → 1 reste 1, 1 → 0 reste 1 : "110".', en: 'A computer counts in base 2. To write n in binary: divide by 2 keeping the remainders; read backwards they give the digits. Example: 6 → 3 r 0, 3 → 1 r 1, 1 → 0 r 1: "110".' },
+    explain: {
+      fr: "Un ordinateur ne connaît que 0 et 1 : il compte en base 2. Comme en base 10 où chaque colonne vaut 10 fois la précédente, ici chaque colonne vaut 2 fois la précédente (1, 2, 4, 8…).\nPour écrire un nombre en binaire : divise par 2 et note le reste, recommence avec le résultat, puis lis les restes à l’envers.\nExemple : 6 → 3 reste 0 ; 3 → 1 reste 1 ; 1 → 0 reste 1. À l’envers : \"110\".",
+      en: "A computer only knows 0 and 1: it counts in base 2. Like in base 10 where each column is worth 10 times the previous, here each column is worth 2 times the previous (1, 2, 4, 8…).\nTo write a number in binary: divide by 2 and note the remainder, repeat with the result, then read the remainders backwards.\nExample: 6 → 3 remainder 0; 3 → 1 remainder 1; 1 → 0 remainder 1. Backwards: \"110\".",
+    },
     example: 'print(7 // 2, 7 % 2)',
     task: { fr: 'Écris binaire(n) : texte des chiffres binaires de n ≥ 0 (binaire(0) = "0"), sans utiliser bin().', en: 'Write binaire(n): text of the binary digits of n ≥ 0 (binaire(0) = "0"), without using bin().' },
     starter: 'def binaire(n):\n    pass\n',
@@ -364,7 +370,10 @@ export const pyLessons: Lesson[] = [
   {
     id: 'py-anagram', lang: 'py', group: 'py-algo',
     title: { fr: 'Anagrammes et tri', en: 'Anagrams and sorting' },
-    explain: { fr: 'Deux mots sont des anagrammes s’ils ont les mêmes lettres. Trier les lettres donne une « forme canonique » : deux anagrammes ont la même. Une idée réutilisable pour regrouper des objets équivalents.', en: 'Two words are anagrams if they have the same letters. Sorting the letters gives a “canonical form”: anagrams share it. A reusable idea to group equivalent objects.' },
+    explain: {
+      fr: "Deux mots sont des anagrammes s’ils ont exactement les mêmes lettres : « chien » et « niche ».\nL’astuce : trie les lettres de chaque mot. « chien » et « niche » donnent tous les deux « cehin ». Si les formes triées sont identiques, ce sont des anagrammes.\nCette idée sert partout : pour regrouper des choses équivalentes, donne-leur la même « étiquette standard ».",
+      en: "Two words are anagrams if they have exactly the same letters: “listen” and “silent”.\nThe trick: sort the letters of each word. Both give “eilnst”. If the sorted forms are identical, they are anagrams.\nThis idea is used everywhere: to group equivalent things, give them the same “standard label”.",
+    },
     example: 'print(sorted("chien"))',
     task: { fr: 'Écris anagrammes(a, b) : True si a et b sont des anagrammes (casse ignorée).', en: 'Write anagrammes(a, b): True if a and b are anagrams (case ignored).' },
     starter: 'def anagrammes(a, b):\n    pass\n',
@@ -375,7 +384,10 @@ export const pyLessons: Lesson[] = [
   {
     id: 'py-merge', lang: 'py', group: 'py-algo',
     title: { fr: 'Fusion de listes triées', en: 'Merging sorted lists' },
-    explain: { fr: 'Fusionner deux listes déjà triées se fait en un seul passage : on compare les deux premiers éléments restants et on prend le plus petit. C’est le cœur du tri fusion, en O(n log n).', en: 'Merging two already sorted lists takes a single pass: compare the first remaining items and take the smaller. It is the heart of merge sort, in O(n log n).' },
+    explain: {
+      fr: "Tu as deux piles de cartes, chacune déjà triée. Pour les fusionner : regarde la carte du dessus de chaque pile, prends la plus petite, et recommence. En un seul passage, tout est trié.\nC’est le cœur du tri fusion, un tri très rapide : il découpe la liste en deux, trie chaque moitié, puis fusionne. Son coût est de l’ordre de n × log n, bien mieux que n × n.",
+      en: "You have two piles of cards, each already sorted. To merge them: look at the top card of each pile, take the smaller one, and repeat. In a single pass, everything is sorted.\nThis is the heart of merge sort, a very fast sort: it splits the list in two, sorts each half, then merges. Its cost is about n × log n, much better than n × n.",
+    },
     example: 'a[i:]',
     task: { fr: 'Écris fusion(a, b) : liste triée contenant les éléments de a et b (déjà triées), sans utiliser sorted().', en: 'Write fusion(a, b): sorted list containing the items of a and b (already sorted), without sorted().' },
     starter: 'def fusion(a, b):\n    res = []\n    i = j = 0\n    # tant qu’il reste des éléments dans a ET b ...\n    return res\n',
@@ -386,7 +398,10 @@ export const pyLessons: Lesson[] = [
   {
     id: 'py-queue', lang: 'py', group: 'py-algo',
     title: { fr: 'Files', en: 'Queues' },
-    explain: { fr: 'Une file est « premier arrivé, premier sorti » : on enfile à la fin, on défile au début. C’est la structure des files d’attente (impressions, messages, parcours en largeur).', en: 'A queue is “first in, first out”: enqueue at the end, dequeue from the front. It models waiting lines (printing, messages, breadth-first search).' },
+    explain: {
+      fr: "Une file, c’est la queue devant une boulangerie : le premier arrivé est le premier servi. On dit « premier arrivé, premier sorti ».\nOn ajoute à la fin, on retire au début. C’est la structure des files d’attente : impressions, messages, et le parcours en largeur d’un graphe.",
+      en: "A queue is the line at a bakery: first come, first served. We say “first in, first out”.\nYou add at the end and remove from the start. It is the structure behind waiting lines: print jobs, messages, and the breadth-first walk of a graph.",
+    },
     example: 'f = []\nf.append(1)\nf.pop(0)',
     task: { fr: 'Écris la classe File : enfile(x), defile() (renvoie le plus ancien ; lève IndexError si vide), est_vide().', en: 'Write class File: enfile(x), defile() (returns the oldest; raises IndexError if empty), est_vide().' },
     starter: 'class File:\n    def __init__(self):\n        self.items = []\n\n    def enfile(self, x):\n        pass\n\n    def defile(self):\n        pass\n\n    def est_vide(self):\n        pass\n',

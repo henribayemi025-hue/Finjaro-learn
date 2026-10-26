@@ -5,7 +5,10 @@ export const archiLessons: Lesson[] = [
   {
     id: "archi-nand", lang: 'py', group: "archi",
     title: { fr: "Portes logiques : tout avec NAND", en: "Logic gates: everything from NAND" },
-    explain: { fr: "Un processeur est fait de portes logiques : des circuits qui prennent des bits (0 ou 1) et en renvoient un. NAND (NON-ET) donne 0 seulement si les deux entrées valent 1. Découverte fondamentale : avec NAND SEULE on reconstruit toutes les autres portes. NON(a) = NAND(a, a) ; ET(a, b) = NON(NAND(a, b)) ; OU(a, b) = NAND(NON(a), NON(b)). Les puces réelles s'appuient sur cette idée d'universalité.", en: "A processor is built from logic gates: circuits that take bits (0 or 1) and return one. NAND (NOT-AND) gives 0 only if both inputs are 1. A fundamental discovery: with NAND ALONE you can rebuild every other gate. NOT(a) = NAND(a, a); AND(a, b) = NOT(NAND(a, b)); OR(a, b) = NAND(NOT(a), NOT(b)). Real chips rely on this universality." },
+    explain: {
+      fr: "Un processeur est fait de portes logiques : de petits circuits qui reçoivent des bits (0 ou 1) et en renvoient un. La porte NAND (NON-ET) donne 0 seulement quand ses deux entrées valent 1, sinon 1.\nDécouverte fondamentale : avec la seule porte NAND, on peut reconstruire toutes les autres. NON(a) = NAND(a, a). ET(a, b) = NON(NAND(a, b)). OU(a, b) = NAND(NON(a), NON(b)).\nC’est pour ça que les vraies puces sont bâties sur cette seule brique.",
+      en: "A processor is made of logic gates: tiny circuits that receive bits (0 or 1) and return one. The NAND gate (NOT-AND) gives 0 only when both inputs are 1, otherwise 1.\nFundamental discovery: with the NAND gate alone, you can rebuild every other gate. NOT(a) = NAND(a, a). AND(a, b) = NOT(NAND(a, b)). OR(a, b) = NAND(NOT(a), NOT(b)).\nThat is why real chips are built on this single brick.",
+    },
     example: "def nand(a, b):\n    return 0 if (a and b) else 1\nprint([nand(a, b) for a in (0, 1) for b in (0, 1)])",
     task: { fr: "À partir de nand (fournie), écris non_, et_, ou_ en n'utilisant QUE nand.", en: "From nand (provided), write non_, et_, ou_ using ONLY nand." },
     starter: "def nand(a, b):\n    return 0 if (a and b) else 1\n\ndef non_(a):\n    pass\n\ndef et_(a, b):\n    pass\n\ndef ou_(a, b):\n    pass\n",
@@ -16,7 +19,10 @@ export const archiLessons: Lesson[] = [
   {
     id: "archi-xor", lang: 'py', group: "archi",
     title: { fr: "Le OU exclusif (XOR)", en: "The exclusive OR (XOR)" },
-    explain: { fr: "XOR vaut 1 quand les deux bits sont DIFFÉRENTS. C'est la porte de l'addition : 0+0=0, 0+1=1, 1+0=1, et 1+1=0 (avec retenue 1). On le construit avec ET, OU et NON : a XOR b = (a OU b) ET NON(a ET b) — « l'un ou l'autre, mais pas les deux ». Les portes se composent : c'est ainsi qu'on bâtit des circuits complexes à partir de briques simples.", en: "XOR is 1 when the two bits DIFFER. It is the addition gate: 0+0=0, 0+1=1, 1+0=1, and 1+1=0 (carry 1). Build it from AND, OR and NOT: a XOR b = (a OR b) AND NOT(a AND b) — “one or the other, but not both”. Gates compose: that is how complex circuits are built from simple bricks." },
+    explain: {
+      fr: "XOR vaut 1 quand les deux bits sont différents, 0 quand ils sont pareils. C’est la porte de l’addition : 0+0=0, 0+1=1, 1+0=1, et 1+1=0 (on retient 1).\nOn la construit avec les portes précédentes : a XOR b = (a OU b) ET NON(a ET b), c’est-à-dire « l’un ou l’autre, mais pas les deux ».\nLes portes se composent comme des briques de Lego : c’est ainsi qu’on fabrique des circuits complexes.",
+      en: "XOR is 1 when the two bits are different, 0 when they are the same. It is the addition gate: 0+0=0, 0+1=1, 1+0=1, and 1+1=0 (carry 1).\nIt is built from the previous gates: a XOR b = (a OR b) AND NOT(a AND b), meaning “one or the other, but not both”.\nGates combine like Lego bricks: that is how complex circuits are made.",
+    },
     example: "print([a ^ b for a in (0, 1) for b in (0, 1)])",
     task: { fr: "Écris xor_(a, b) avec les portes et_, ou_, non_ fournies (sans l'opérateur ^).", en: "Write xor_(a, b) with the provided gates et_, ou_, non_ (without the ^ operator)." },
     starter: "def non_(a): return 1 - a\ndef et_(a, b): return a & b\ndef ou_(a, b): return a | b\n\ndef xor_(a, b):\n    pass\n",
@@ -27,7 +33,10 @@ export const archiLessons: Lesson[] = [
   {
     id: "archi-additionneur", lang: 'py', group: "archi",
     title: { fr: "Additionneur complet", en: "Full adder" },
-    explain: { fr: "Additionner deux bits donne une SOMME et une RETENUE : le demi-additionneur (somme = a XOR b, retenue = a ET b). Mais dès la deuxième colonne il faut aussi ajouter la retenue entrante : c'est l'ADDITIONNEUR COMPLET, à trois entrées (a, b, retenue_in) et deux sorties (somme, retenue_out). Somme = a XOR b XOR r ; retenue_out = 1 si au moins deux des trois entrées valent 1.", en: "Adding two bits gives a SUM and a CARRY: the half adder (sum = a XOR b, carry = a AND b). But from the second column you also must add the incoming carry: the FULL ADDER, with three inputs (a, b, carry_in) and two outputs (sum, carry_out). Sum = a XOR b XOR c; carry_out = 1 if at least two of the three inputs are 1." },
+    explain: {
+      fr: "Additionner deux bits donne une somme et une retenue, comme en CE1 quand 9 + 5 = 14 : on écrit 4 et on retient 1.\nLe demi-additionneur : somme = a XOR b, retenue = a ET b. Mais dans la colonne suivante, il faut aussi ajouter la retenue qui arrive. Il y a donc 3 entrées (a, b, retenue entrante) et 2 sorties (somme, retenue sortante) : c’est l’additionneur complet.\nSomme = a XOR b XOR retenue_in. Retenue sortante = 1 si au moins deux des trois entrées valent 1.",
+      en: "Adding two bits gives a sum and a carry, like in primary school when 9 + 5 = 14: write 4 and carry 1.\nThe half adder: sum = a XOR b, carry = a AND b. But in the next column you must also add the incoming carry. So there are 3 inputs (a, b, carry in) and 2 outputs (sum, carry out): this is the full adder.\nSum = a XOR b XOR carry_in. Carry out = 1 if at least two of the three inputs are 1.",
+    },
     example: "a, b, r = 1, 1, 1\nprint(a + b + r)",
     task: { fr: "Écris additionneur(a, b, r) → (somme, retenue) en utilisant les opérateurs de bits ^, & et |.", en: "Write additionneur(a, b, r) → (sum, carry) using the bit operators ^, & and |." },
     starter: "def additionneur(a, b, r):\n    pass\n",
@@ -38,7 +47,10 @@ export const archiLessons: Lesson[] = [
   {
     id: "archi-binaire", lang: 'py', group: "archi",
     title: { fr: "Additionner des nombres de n bits", en: "Adding n-bit numbers" },
-    explain: { fr: "En chaînant des additionneurs complets, la retenue de l'un entrant dans le suivant, on additionne des nombres entiers : c'est l'ADDITIONNEUR À PROPAGATION DE RETENUE. Un nombre est une liste de bits, du poids FAIBLE au poids fort (le bit 0 d'abord) : 6 = [0, 1, 1]. Si la retenue finale vaut 1 sur n bits, le résultat déborde : c'est le dépassement (overflow) d'entier, source de vrais bugs.", en: "By chaining full adders, each carry feeding the next, you add whole numbers: the RIPPLE-CARRY ADDER. A number is a list of bits, from LEAST significant to most (bit 0 first): 6 = [0, 1, 1]. If the final carry is 1 on n bits, the result overflows: integer overflow, a source of real bugs." },
+    explain: {
+      fr: "En mettant plusieurs additionneurs complets à la suite, la retenue de l’un entrant dans le suivant, on additionne de vrais nombres entiers.\nUn nombre est une liste de bits, du poids faible au poids fort (le bit 0 d’abord) : 6 s’écrit [0, 1, 1].\nSi à la fin il reste une retenue de 1, le résultat ne tient plus dans le nombre de bits : c’est le dépassement (overflow). C’est une vraie source de bugs, même dans de grands systèmes.",
+      en: "By chaining several full adders, the carry of one feeding the next, we add real whole numbers.\nA number is a list of bits, from the least significant to the most (bit 0 first): 6 is written [0, 1, 1].\nIf a carry of 1 is left at the end, the result no longer fits in the number of bits: this is overflow. It is a real source of bugs, even in large systems.",
+    },
     example: "print(bin(6), int('110', 2))",
     task: { fr: "Écris additionne(a, b) : listes de bits de même longueur (poids faible d'abord) ; renvoie (bits_somme, retenue_finale).", en: "Write additionne(a, b): equal-length lists of bits (least significant first); return (sum_bits, final_carry)." },
     starter: "def additionne(a, b):\n    pass\n",
@@ -49,7 +61,10 @@ export const archiLessons: Lesson[] = [
   {
     id: "archi-deux", lang: 'py', group: "archi",
     title: { fr: "Complément à deux : les négatifs", en: "Two's complement: negatives" },
-    explain: { fr: "Comment un ordinateur représente-t-il −5 avec seulement des bits ? Par le COMPLÉMENT À DEUX sur n bits : on garde la valeur modulo 2ⁿ. Sur 8 bits, −5 est 256 − 5 = 251 = 11111011. Astuce : inverser tous les bits puis ajouter 1. Le bit de poids fort sert de signe (1 = négatif). Avantage décisif : l'additionneur est le MÊME pour les positifs et les négatifs. Plage sur n bits : de −2ⁿ⁻¹ à 2ⁿ⁻¹ − 1.", en: "How does a computer represent −5 using only bits? With TWO'S COMPLEMENT on n bits: keep the value modulo 2ⁿ. On 8 bits, −5 is 256 − 5 = 251 = 11111011. Trick: invert all bits then add 1. The top bit acts as sign (1 = negative). A decisive advantage: the adder is the SAME for positives and negatives. Range on n bits: −2ⁿ⁻¹ to 2ⁿ⁻¹ − 1." },
+    explain: {
+      fr: "Comment représenter −5 avec seulement des 0 et des 1 ? Par le complément à deux. Sur 8 bits, on garde la valeur modulo 256 : −5 devient 256 − 5 = 251, soit 11111011.\nRecette : inverse tous les bits de 5 (00000101 → 11111010), puis ajoute 1.\nLe premier bit sert de signe (1 = négatif). Grand avantage : le même additionneur marche pour les nombres positifs et négatifs. Sur n bits, on couvre de −2ⁿ⁻¹ à 2ⁿ⁻¹ − 1.",
+      en: "How do you represent −5 with only 0s and 1s? With two’s complement. On 8 bits, we keep the value modulo 256: −5 becomes 256 − 5 = 251, i.e. 11111011.\nRecipe: flip all the bits of 5 (00000101 → 11111010), then add 1.\nThe first bit works as a sign (1 = negative). Big advantage: the same adder works for positive and negative numbers. On n bits, we cover −2ⁿ⁻¹ to 2ⁿ⁻¹ − 1.",
+    },
     example: "print(-5 % 256, format(-5 % 256, '08b'))",
     task: { fr: "Écris vers_bits(x, n) (chaîne de n caractères '0'/'1') et depuis_bits(s) (entier signé, d'après le bit de poids fort).", en: "Write vers_bits(x, n) (string of n '0'/'1' characters) and depuis_bits(s) (signed integer, from the top bit)." },
     starter: "def vers_bits(x, n):\n    pass\n\ndef depuis_bits(s):\n    pass\n",
@@ -60,7 +75,10 @@ export const archiLessons: Lesson[] = [
   {
     id: "archi-alu", lang: 'py', group: "archi",
     title: { fr: "Une mini-UAL", en: "A mini ALU" },
-    explain: { fr: "L'UNITÉ ARITHMÉTIQUE ET LOGIQUE (UAL, « ALU ») est le calculateur du processeur : elle reçoit deux nombres et un CODE D'OPÉRATION, et renvoie le résultat plus des DRAPEAUX (flags) : Z = le résultat vaut zéro ; N = il est négatif. Les instructions de comparaison et de saut (« si égal, sauter ») s'appuient sur ces drapeaux. Ici sur 8 bits signés : toute valeur est ramenée dans l'intervalle −128 à 127 (débordement).", en: "The ARITHMETIC AND LOGIC UNIT (ALU) is the processor's calculator: it receives two numbers and an OPERATION CODE, and returns the result plus FLAGS: Z = the result is zero; N = it is negative. Compare and jump instructions (“if equal, jump”) rely on these flags. Here on signed 8 bits: every value is wrapped into −128 to 127 (overflow)." },
+    explain: {
+      fr: "L’UAL (unité arithmétique et logique, « ALU ») est la calculatrice du processeur. Elle reçoit deux nombres et un code d’opération (additionner, soustraire, comparer…), et renvoie le résultat plus des drapeaux, de petits signaux : Z = le résultat vaut zéro ; N = il est négatif.\nLes comparaisons et les « si égal, saute » s’appuient sur ces drapeaux.\nIci sur 8 bits signés : toute valeur est ramenée entre −128 et 127 (si ça déborde, on revient de l’autre côté).",
+      en: "The ALU (arithmetic logic unit) is the processor’s calculator. It receives two numbers and an operation code (add, subtract, compare…), and returns the result plus flags, small signals: Z = the result is zero; N = it is negative.\nComparisons and “if equal, jump” rely on these flags.\nHere on 8 signed bits: every value is brought back between −128 and 127 (if it overflows, it wraps around).",
+    },
     example: "x = 100 + 100\nprint((x + 128) % 256 - 128)",
     task: { fr: "Écris ual(op, a, b) → (resultat, Z, N). Opérations : 'ADD', 'SUB', 'ET', 'OU', 'XOR'. Le résultat est ramené sur 8 bits signés : (r + 128) % 256 - 128. Z = 1 si résultat 0, N = 1 si < 0 (sinon 0).", en: "Write ual(op, a, b) → (result, Z, N). Operations: 'ADD', 'SUB', 'ET', 'OU', 'XOR'. The result is wrapped to signed 8 bits: (r + 128) % 256 - 128. Z = 1 if result is 0, N = 1 if < 0 (else 0)." },
     starter: "def ual(op, a, b):\n    pass\n",
@@ -71,7 +89,10 @@ export const archiLessons: Lesson[] = [
   {
     id: "archi-cpu", lang: 'py', group: "archi",
     title: { fr: "Un processeur minuscule", en: "A tiny processor" },
-    explain: { fr: "Un processeur répète sans cesse : LIRE l'instruction à l'adresse du compteur de programme (PC), l'EXÉCUTER, avancer le PC. Les données vivent dans des REGISTRES (petites cases ultra-rapides). Voici une machine à 4 instructions : ('SET', r, v) met v dans le registre r ; ('ADD', r1, r2) fait r1 = r1 + r2 ; ('JNZ', r, cible) saute à l'instruction « cible » si le registre r n'est pas nul ; ('SUBI', r, v) retire v au registre r. Avec ça, on programme une boucle — donc, en principe, n'importe quel calcul.", en: "A processor endlessly repeats: FETCH the instruction at the program counter (PC) address, EXECUTE it, advance the PC. Data lives in REGISTERS (tiny ultra-fast cells). Here is a 4-instruction machine: ('SET', r, v) puts v in register r; ('ADD', r1, r2) does r1 = r1 + r2; ('JNZ', r, target) jumps to instruction “target” if register r is not zero; ('SUBI', r, v) subtracts v from register r. With that you program a loop — so, in principle, any computation." },
+    explain: {
+      fr: "Un processeur répète sans cesse trois temps : lire l’instruction à l’adresse indiquée par le compteur de programme (PC), l’exécuter, avancer le PC. Les données vivent dans des registres, de petites cases ultra-rapides.\nVoici une machine à 4 instructions : ('SET', r, v) met la valeur v dans le registre r ; ('ADD', r1, r2) fait r1 = r1 + r2 ; ('SUBI', r, v) retire v au registre r ; ('JNZ', r, cible) saute à l’instruction « cible » si le registre r n’est pas nul.\nAvec ça on écrit une boucle, donc en principe n’importe quel calcul.",
+      en: "A processor endlessly repeats three beats: read the instruction at the address given by the program counter (PC), run it, move the PC forward. Data lives in registers, small ultra-fast cells.\nHere is a 4-instruction machine: ('SET', r, v) puts value v in register r; ('ADD', r1, r2) does r1 = r1 + r2; ('SUBI', r, v) subtracts v from register r; ('JNZ', r, target) jumps to instruction “target” if register r is not zero.\nWith that you can write a loop, so in principle any computation.",
+    },
     example: "programme = [('SET', 'a', 2)]\nprint(programme[0][0])",
     task: { fr: "Écris execute(programme) : registres dans un dict (0 par défaut), PC qui démarre à 0 et s'arrête quand il dépasse la fin ; renvoie le dict des registres. Protège-toi contre les boucles infinies : au plus 10 000 instructions exécutées.", en: "Write execute(programme): registers in a dict (default 0), PC starting at 0 and stopping when it passes the end; return the registers dict. Guard against infinite loops: at most 10,000 instructions executed." },
     starter: "def execute(programme):\n    pass\n",

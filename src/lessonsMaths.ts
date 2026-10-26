@@ -5,7 +5,10 @@ export const mathsLessons: Lesson[] = [
   {
     id: "maths-dot", lang: 'py', group: "maths",
     title: { fr: "Vecteurs : produit scalaire et norme", en: "Vectors: dot product and norm" },
-    explain: { fr: "Un vecteur est une liste de nombres : un point, une flèche, ou les « caractéristiques » d'un objet. Deux opérations sont partout en IA. Le PRODUIT SCALAIRE : on multiplie terme à terme puis on additionne (a·b = a1·b1 + a2·b2 + …). La NORME : la longueur du vecteur, √(a·a). Un neurone artificiel calcule justement un produit scalaire entre ses entrées et ses poids.", en: "A vector is a list of numbers: a point, an arrow, or an object's “features”. Two operations are everywhere in AI. The DOT PRODUCT: multiply term by term then add (a·b = a1·b1 + a2·b2 + …). The NORM: the vector's length, √(a·a). An artificial neuron computes exactly a dot product between its inputs and its weights." },
+    explain: {
+      fr: "Un vecteur, c’est juste une liste de nombres. Ça peut être un point sur une carte, une flèche, ou la fiche d’un objet : [taille, poids, âge]. En IA, tout devient des vecteurs.\nDeux opérations reviennent partout. Le produit scalaire : tu multiplies les nombres deux à deux, puis tu additionnes. Pour [1, 2] et [3, 4] : 1×3 + 2×4 = 11. La norme : la longueur de la flèche.\nUn neurone artificiel ne fait rien d’autre qu’un produit scalaire entre ses entrées et ses poids.",
+      en: "A vector is just a list of numbers. It can be a point on a map, an arrow, or an object’s card: [height, weight, age]. In AI, everything becomes vectors.\nTwo operations come back everywhere. The dot product: multiply the numbers pair by pair, then add up. For [1, 2] and [3, 4]: 1×3 + 2×4 = 11. The norm: the length of the arrow.\nAn artificial neuron does nothing but a dot product between its inputs and its weights.",
+    },
     example: "a = [1, 2]\nb = [3, 4]\nprint(sum(x * y for x, y in zip(a, b)))",
     task: { fr: "Écris produit_scalaire(a, b) et norme(a) (la racine carrée avec math.sqrt).", en: "Write produit_scalaire(a, b) and norme(a) (square root with math.sqrt)." },
     starter: "import math\n\ndef produit_scalaire(a, b):\n    pass\n\ndef norme(a):\n    pass\n",
@@ -16,7 +19,10 @@ export const mathsLessons: Lesson[] = [
   {
     id: "maths-cos", lang: 'py', group: "maths",
     title: { fr: "Similarité cosinus", en: "Cosine similarity" },
-    explain: { fr: "Comment savoir si deux textes (représentés par des vecteurs, les « embeddings ») se ressemblent ? On regarde l'ANGLE entre eux : cos θ = (a·b) / (‖a‖·‖b‖). Résultat entre −1 et 1 : 1 = même direction, 0 = sans rapport (perpendiculaires), −1 = opposés. C'est la mesure qu'utilisent la recherche sémantique et le RAG. La longueur des vecteurs ne compte pas, seulement leur direction.", en: "How do you tell whether two texts (represented as vectors, “embeddings”) are alike? Look at the ANGLE between them: cos θ = (a·b) / (‖a‖·‖b‖). Result between −1 and 1: 1 = same direction, 0 = unrelated (perpendicular), −1 = opposite. This is what semantic search and RAG use. Length doesn't matter, only direction." },
+    explain: {
+      fr: "Comment savoir si deux textes se ressemblent ? On les transforme en vecteurs (des flèches), puis on regarde l’angle entre les deux flèches. Petit angle = flèches dans la même direction = textes proches.\nLa mesure s’appelle la similarité cosinus : elle vaut 1 si les flèches pointent pareil, 0 si elles n’ont aucun rapport, −1 si elles sont opposées. Seule la direction compte, pas la longueur.\nC’est ce qu’utilisent la recherche par le sens et le RAG.",
+      en: "How do we know whether two texts look alike? We turn them into vectors (arrows), then look at the angle between the two arrows. Small angle = same direction = close texts.\nThe measure is called cosine similarity: 1 if the arrows point the same way, 0 if they are unrelated, −1 if opposite. Only the direction counts, not the length.\nThis is what meaning-based search and RAG use.",
+    },
     example: "import math\nprint(math.sqrt(2) / 2)",
     task: { fr: "Écris cosinus(a, b). Si l'un des vecteurs est nul, renvoie 0.0.", en: "Write cosinus(a, b). If either vector is zero, return 0.0." },
     starter: "import math\n\ndef cosinus(a, b):\n    pass\n",
@@ -27,7 +33,10 @@ export const mathsLessons: Lesson[] = [
   {
     id: "maths-matmul", lang: 'py', group: "maths",
     title: { fr: "Produit de matrices", en: "Matrix product" },
-    explain: { fr: "Une matrice est un tableau de nombres ; une couche de réseau de neurones, c'est une multiplication de matrices. La case (i, j) du produit A×B est le produit scalaire de la ligne i de A avec la colonne j de B. Condition : le nombre de colonnes de A égale le nombre de lignes de B. Une matrice 2×3 fois une 3×2 donne une 2×2.", en: "A matrix is a table of numbers; a neural network layer is a matrix multiplication. Cell (i, j) of A×B is the dot product of row i of A with column j of B. Condition: A's number of columns equals B's number of rows. A 2×3 times a 3×2 gives a 2×2." },
+    explain: {
+      fr: "Une matrice est un tableau de nombres (des lignes et des colonnes). Une couche d’un réseau de neurones, c’est une multiplication de matrices.\nPour multiplier A par B : la case (ligne i, colonne j) du résultat est le produit scalaire de la ligne i de A avec la colonne j de B (on multiplie deux à deux et on additionne).\nCondition : le nombre de colonnes de A doit être égal au nombre de lignes de B. Une matrice 2×3 fois une 3×2 donne une 2×2.",
+      en: "A matrix is a table of numbers (rows and columns). A neural network layer is a matrix multiplication.\nTo multiply A by B: the cell (row i, column j) of the result is the dot product of row i of A with column j of B (multiply pair by pair and add).\nCondition: the number of columns of A must equal the number of rows of B. A 2×3 matrix times a 3×2 gives a 2×2.",
+    },
     example: "A = [[1, 2], [3, 4]]\nprint(A[0], [row[0] for row in A])",
     task: { fr: "Écris produit_matrices(A, B) (listes de listes) sans NumPy.", en: "Write produit_matrices(A, B) (lists of lists) without NumPy." },
     starter: "def produit_matrices(A, B):\n    pass\n",
@@ -38,7 +47,10 @@ export const mathsLessons: Lesson[] = [
   {
     id: "maths-deriv", lang: 'py', group: "maths",
     title: { fr: "Dérivée : la pente", en: "Derivative: the slope" },
-    explain: { fr: "La dérivée d'une fonction en un point est sa PENTE : de combien f varie quand x bouge un tout petit peu. On peut l'approcher sans formule : f'(x) ≈ (f(x+h) − f(x−h)) / (2h) avec h très petit (1e-5). C'est la base de l'apprentissage : pour savoir dans quel sens changer un poids, on regarde la pente de l'erreur.", en: "A function's derivative at a point is its SLOPE: how much f changes when x moves a tiny bit. It can be approximated without a formula: f'(x) ≈ (f(x+h) − f(x−h)) / (2h) with h very small (1e-5). It is the basis of learning: to know which way to change a weight, look at the slope of the error." },
+    explain: {
+      fr: "La dérivée dit à quelle vitesse une fonction monte ou descend à un endroit précis. C’est la pente, comme celle d’une route : positive si ça monte, négative si ça descend.\nSans formule, on l’estime : on regarde de combien f change quand x bouge d’un tout petit pas h. f'(x) ≈ (f(x+h) − f(x−h)) / (2h), avec h très petit.\nPourquoi c’est essentiel : pour apprendre, un réseau regarde la pente de son erreur pour savoir dans quel sens changer ses poids.",
+      en: "The derivative says how fast a function goes up or down at a precise spot. It is the slope, like a road’s: positive if it climbs, negative if it descends.\nWithout a formula, we estimate it: we see how much f changes when x moves by a tiny step h. f'(x) ≈ (f(x+h) − f(x−h)) / (2h), with h very small.\nWhy it matters: to learn, a network looks at the slope of its error to know which way to change its weights.",
+    },
     example: "f = lambda x: x ** 2\nh = 1e-5\nprint((f(3 + h) - f(3 - h)) / (2 * h))",
     task: { fr: "Écris derivee(f, x, h=1e-5) : la pente numérique centrée.", en: "Write derivee(f, x, h=1e-5): the centered numerical slope." },
     starter: "def derivee(f, x, h=1e-5):\n    pass\n",
@@ -49,7 +61,10 @@ export const mathsLessons: Lesson[] = [
   {
     id: "maths-descente", lang: 'py', group: "maths",
     title: { fr: "Descente de gradient", en: "Gradient descent" },
-    explain: { fr: "Pour minimiser une fonction, on descend la pente : x ← x − taux × f'(x). Pente positive → on recule, négative → on avance ; la pente s'aplatit près du minimum, donc les pas raccourcissent d'eux-mêmes. Le TAUX d'apprentissage règle la taille des pas : trop petit, c'est lent ; trop grand, on rebondit et on diverge. Entraîner un réseau, c'est exactement ça, avec des millions de x.", en: "To minimize a function, walk down the slope: x ← x − rate × f'(x). Positive slope → step back, negative → step forward; the slope flattens near the minimum, so steps shrink by themselves. The learning RATE sets the step size: too small is slow; too big and you bounce and diverge. Training a network is exactly this, with millions of x." },
+    explain: {
+      fr: "Imagine-toi dans le brouillard sur une montagne : pour descendre, tu sens la pente sous tes pieds et tu fais un pas vers le bas. C’est la descente de gradient.\nLa règle : x ← x − taux × pente. Pente positive : tu recules ; négative : tu avances. Près du fond, la pente s’aplatit, donc tes pas raccourcissent seuls.\nLe taux d’apprentissage règle la taille du pas : trop petit, tu mets une éternité ; trop grand, tu rebondis d’un bord à l’autre. Entraîner un réseau, c’est ça, avec des millions de x.",
+      en: "Imagine yourself in fog on a mountain: to go down, you feel the slope under your feet and take a step downhill. That is gradient descent.\nThe rule: x ← x − rate × slope. Positive slope: you step back; negative: you step forward. Near the bottom, the slope flattens, so your steps shrink by themselves.\nThe learning rate sets the step size: too small, it takes forever; too big, you bounce from side to side. Training a network is exactly this, with millions of x.",
+    },
     example: "x = 5.0\nfor _ in range(3):\n    x = x - 0.1 * (2 * x)\nprint(x)",
     task: { fr: "Écris descente(derivee, x0, taux, pas) : part de x0, applique « pas » mises à jour x = x − taux × derivee(x), renvoie x.", en: "Write descente(derivee, x0, taux, pas): start at x0, apply “pas” updates x = x − taux × derivee(x), return x." },
     starter: "def descente(derivee, x0, taux, pas):\n    pass\n",
@@ -60,7 +75,10 @@ export const mathsLessons: Lesson[] = [
   {
     id: "maths-moyenne", lang: 'py', group: "maths",
     title: { fr: "Moyenne, variance, écart-type", en: "Mean, variance, standard deviation" },
-    explain: { fr: "La MOYENNE résume le centre d'une série. La VARIANCE mesure sa dispersion : la moyenne des carrés des écarts à la moyenne. L'ÉCART-TYPE est sa racine carrée, dans la même unité que les données. Deux séries de même moyenne peuvent être très différentes : [5, 5, 5] et [0, 5, 10] ont toutes deux la moyenne 5. Normaliser (retirer la moyenne, diviser par l'écart-type) est la première étape de presque tout apprentissage.", en: "The MEAN summarizes a series' center. The VARIANCE measures its spread: the mean of squared deviations from the mean. The STANDARD DEVIATION is its square root, in the data's unit. Two series with the same mean can be very different: [5, 5, 5] and [0, 5, 10] both have mean 5. Normalizing (subtract the mean, divide by the standard deviation) is the first step of almost all learning." },
+    explain: {
+      fr: "La moyenne résume le centre d’une série de nombres. Mais elle ne dit pas tout : [5, 5, 5] et [0, 5, 10] ont la même moyenne, 5, et pourtant ce ne sont pas du tout les mêmes séries.\nLa variance mesure à quel point les nombres sont éparpillés : c’est la moyenne des carrés des écarts à la moyenne. L’écart-type est sa racine carrée, dans la même unité que tes données.\nNormaliser (retirer la moyenne, diviser par l’écart-type) est la première étape de presque tout apprentissage.",
+      en: "The mean sums up the centre of a series of numbers. But it does not say everything: [5, 5, 5] and [0, 5, 10] have the same mean, 5, yet they are very different series.\nThe variance measures how scattered the numbers are: it is the mean of the squared gaps to the mean. The standard deviation is its square root, in the same unit as your data.\nNormalising (subtract the mean, divide by the standard deviation) is the first step of almost all learning.",
+    },
     example: "xs = [2, 4, 6]\nm = sum(xs) / len(xs)\nprint(m, sum((x - m) ** 2 for x in xs) / len(xs))",
     task: { fr: "Écris moyenne(xs), variance(xs) (population : on divise par n) et ecart_type(xs).", en: "Write moyenne(xs), variance(xs) (population: divide by n) and ecart_type(xs)." },
     starter: "import math\n\ndef moyenne(xs):\n    pass\n\ndef variance(xs):\n    pass\n\ndef ecart_type(xs):\n    pass\n",
@@ -71,7 +89,10 @@ export const mathsLessons: Lesson[] = [
   {
     id: "maths-bayes", lang: 'py', group: "maths",
     title: { fr: "Probabilités : le théorème de Bayes", en: "Probability: Bayes theorem" },
-    explain: { fr: "Un test médical est fiable à 99 % : s'il est positif, vous êtes malade à 99 % ? Non — tout dépend de la RARETÉ de la maladie. Bayes : P(A|B) = P(B|A) × P(A) / P(B), où P(B) = P(B|A)·P(A) + P(B|non A)·P(non A). Il corrige l'intuition et fonde le filtre anti-spam, le diagnostic, et une grande famille de modèles.", en: "A medical test is 99% reliable: if positive, are you 99% likely to be ill? No — it depends on how RARE the illness is. Bayes: P(A|B) = P(B|A) × P(A) / P(B), where P(B) = P(B|A)·P(A) + P(B|not A)·P(not A). It corrects intuition and underlies spam filters, diagnosis, and a large family of models." },
+    explain: {
+      fr: "Un test médical est fiable à 99 %. Il est positif : es-tu malade à 99 % ? Non ! Tout dépend de la rareté de la maladie. Si 1 personne sur 10 000 est malade, la plupart des tests positifs sont des erreurs sur des gens en bonne santé.\nLa formule de Bayes corrige cette intuition : P(A|B) = P(B|A) × P(A) / P(B). Elle sert au filtre anti-spam, au diagnostic, et à toute une famille de modèles.",
+      en: "A medical test is 99% reliable. It is positive: are you 99% likely to be ill? No! It all depends on how rare the disease is. If 1 person in 10,000 is ill, most positive tests are errors on healthy people.\nBayes’ formula fixes this intuition: P(A|B) = P(B|A) × P(A) / P(B). It powers spam filters, diagnosis, and a whole family of models.",
+    },
     example: "print(0.9 * 0.1 + 0.2 * 0.9)",
     task: { fr: "Écris bayes(p_a, p_b_si_a, p_b_si_non_a) : renvoie P(A|B).", en: "Write bayes(p_a, p_b_si_a, p_b_si_non_a): return P(A|B)." },
     starter: "def bayes(p_a, p_b_si_a, p_b_si_non_a):\n    pass\n",
@@ -82,7 +103,10 @@ export const mathsLessons: Lesson[] = [
   {
     id: "maths-esperance", lang: 'py', group: "maths",
     title: { fr: "Espérance et simulation", en: "Expected value and simulation" },
-    explain: { fr: "L'ESPÉRANCE d'une variable aléatoire est sa moyenne « à long terme » : Σ valeur × probabilité. Un dé à 6 faces : (1+2+…+6)/6 = 3,5, même si aucun lancer ne donne 3,5. La loi des grands nombres dit que la moyenne de beaucoup de tirages s'en approche — c'est pourquoi on peut estimer par simulation (Monte-Carlo) ce qu'on ne sait pas calculer.", en: "The EXPECTED VALUE of a random variable is its “long-run” mean: Σ value × probability. A 6-sided die: (1+2+…+6)/6 = 3.5, even though no roll gives 3.5. The law of large numbers says the mean of many draws approaches it — which is why we can estimate by simulation (Monte Carlo) what we can't compute." },
+    explain: {
+      fr: "L’espérance, c’est la moyenne « à long terme » : chaque valeur multipliée par sa probabilité, le tout additionné. Un dé à 6 faces : (1+2+3+4+5+6)/6 = 3,5, alors qu’aucun lancer ne donne 3,5.\nLa loi des grands nombres dit que la moyenne de beaucoup de tirages se rapproche de l’espérance. C’est pourquoi on peut simuler (méthode de Monte-Carlo) pour estimer ce qu’on ne sait pas calculer.",
+      en: "The expectation is the “long-run” average: each value times its probability, all added up. A 6-sided die: (1+2+3+4+5+6)/6 = 3.5, though no roll gives 3.5.\nThe law of large numbers says the average of many draws gets close to the expectation. That is why we can simulate (Monte Carlo method) to estimate what we cannot compute.",
+    },
     example: "import random\nrandom.seed(0)\nprint(sum(random.randint(1, 6) for _ in range(1000)) / 1000)",
     task: { fr: "Écris esperance(valeurs, probas) et simule(valeurs, probas, n, graine) : moyenne de n tirages (random.choices avec random.seed(graine)).", en: "Write esperance(valeurs, probas) and simule(valeurs, probas, n, graine): mean of n draws (random.choices with random.seed(graine))." },
     starter: "import random\n\ndef esperance(valeurs, probas):\n    pass\n\ndef simule(valeurs, probas, n, graine):\n    pass\n",
@@ -93,7 +117,10 @@ export const mathsLessons: Lesson[] = [
   {
     id: "maths-entropie", lang: 'py', group: "maths",
     title: { fr: "Entropie : mesurer l'incertitude", en: "Entropy: measuring uncertainty" },
-    explain: { fr: "L'ENTROPIE mesure l'incertitude d'une distribution : H = −Σ p·log₂(p), en bits. Une pièce équilibrée : 1 bit (on ne peut rien prédire). Une pièce truquée presque toujours « face » : proche de 0. Un dé équilibré : log₂ 6 ≈ 2,58 bits. On convient que 0·log 0 = 0. C'est la base de la compression des données et de la perte d'entropie croisée des classifieurs.", en: "ENTROPY measures a distribution's uncertainty: H = −Σ p·log₂(p), in bits. A fair coin: 1 bit (nothing predictable). A coin almost always “heads”: near 0. A fair die: log₂ 6 ≈ 2.58 bits. By convention 0·log 0 = 0. It underlies data compression and the cross-entropy loss of classifiers." },
+    explain: {
+      fr: "L’entropie mesure l’incertitude : à quel point il est difficile de prédire. On la compte en bits : H = −Σ p·log₂(p).\nUne pièce équilibrée : 1 bit (impossible de deviner). Une pièce truquée qui tombe presque toujours sur face : proche de 0 (facile à deviner). Un dé équilibré : environ 2,58 bits.\nOn convient que 0·log 0 = 0. L’entropie est la base de la compression des données et de la perte d’entropie croisée qui entraîne les classifieurs.",
+      en: "Entropy measures uncertainty: how hard something is to predict. It is counted in bits: H = −Σ p·log₂(p).\nA fair coin: 1 bit (impossible to guess). A rigged coin that almost always lands heads: close to 0 (easy to guess). A fair die: about 2.58 bits.\nWe agree that 0·log 0 = 0. Entropy is the basis of data compression and of the cross-entropy loss that trains classifiers.",
+    },
     example: "import math\nprint(-sum(p * math.log2(p) for p in [0.5, 0.5]))",
     task: { fr: "Écris entropie(probas) en bits, en ignorant les probabilités nulles.", en: "Write entropie(probas) in bits, ignoring zero probabilities." },
     starter: "import math\n\ndef entropie(probas):\n    pass\n",
@@ -104,7 +131,10 @@ export const mathsLessons: Lesson[] = [
   {
     id: "maths-softmax", lang: 'py', group: "maths",
     title: { fr: "Softmax et perte d'entropie croisée", en: "Softmax and cross-entropy loss" },
-    explain: { fr: "Un classifieur produit des scores bruts (« logits »). SOFTMAX les transforme en probabilités positives de somme 1 : p_i = e^{z_i} / Σ e^{z_j}. Astuce de stabilité : soustraire le maximum avant l'exponentielle, sinon e^1000 déborde ; le résultat est identique. La PERTE d'entropie croisée mesure l'écart avec la bonne classe : −log(p_bonne). Proche de 0 si le modèle est sûr et juste, énorme s'il est sûr et faux.", en: "A classifier outputs raw scores (“logits”). SOFTMAX turns them into positive probabilities summing to 1: p_i = e^{z_i} / Σ e^{z_j}. Stability trick: subtract the maximum before the exponential, otherwise e^1000 overflows; the result is identical. The cross-entropy LOSS measures the gap with the right class: −log(p_right). Near 0 if the model is sure and right, huge if sure and wrong." },
+    explain: {
+      fr: "Un classifieur donne d’abord des scores bruts, parfois négatifs ou énormes (les « logits »). Softmax les transforme en probabilités : toutes positives, et leur somme fait 1. Formule : p_i = e^{z_i} / Σ e^{z_j}.\nAstuce de stabilité : retire le plus grand score avant l’exponentielle, sinon e^1000 déborde. Le résultat est identique.\nLa perte d’entropie croisée mesure l’écart avec la bonne réponse : −log(p de la bonne classe). Proche de 0 si le modèle est sûr et juste, énorme s’il est sûr et faux.",
+      en: "A classifier first outputs raw scores, sometimes negative or huge (the “logits”). Softmax turns them into probabilities: all positive, summing to 1. Formula: p_i = e^{z_i} / Σ e^{z_j}.\nStability trick: subtract the largest score before the exponential, otherwise e^1000 overflows. The result is identical.\nThe cross-entropy loss measures the gap with the right answer: −log(p of the right class). Close to 0 if the model is sure and right, huge if it is sure and wrong.",
+    },
     example: "import math\nz = [2.0, 1.0]\nprint([math.exp(v) for v in z])",
     task: { fr: "Écris softmax(z) (stable) et perte(z, i) = −log de la probabilité de la classe i.", en: "Write softmax(z) (stable) and perte(z, i) = −log of class i's probability." },
     starter: "import math\n\ndef softmax(z):\n    pass\n\ndef perte(z, i):\n    pass\n",
