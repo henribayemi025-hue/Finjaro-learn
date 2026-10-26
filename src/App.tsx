@@ -21,6 +21,7 @@ import { ui, type Lang } from './i18n'
 import { lessons, enLangue, cleCode } from './lessons'
 import AgentPanel from './AgentPanel'
 import Classe from './Classe'
+import { contexteSql } from './sqlBase'
 import TravailSujet from './espace/TravailSujet'
 import RetourProjet from './RetourProjet'
 import Quiz from './Quiz'
@@ -433,6 +434,7 @@ export default function App() {
             <span className="chip shrink-0">{lesson.langue === 'c' ? '⚙️ C' : lesson.langue === 'cpp' ? '⚙️ C++' : lesson.lang === 'sql' ? '🗄️ SQL' : lesson.lang === 'py' ? '🐍 Python' : '⚡ JavaScript'}</span>
           </div>
           <Classe key={lesson.id} lang={lang} titre={lesson.title[lang]} pos={pos} total={trackLessons.length} parcours={acuName(lang, track)} track={track} langage={lesson.lang ?? 'js'}
+            contexte={lesson.lang === 'sql' && lesson.sql ? contexteSql(lesson.title[lang], lesson.sql.setup, lang) : undefined}
             tache={lesson.task[lang]} indice={lesson.hint[lang]} aExemple={!!lesson.example} signedIn={!!session} ai={ai} code={code} sortie={res?.output.join('\n') ?? ''}
             etat={!res ? 'rien' : res.passed ? 'ok' : res.error ? 'erreur' : res.passed === false ? 'ko' : 'rien'}
             erreur={res?.error ? (expliqueErreur(res.error, lang) ?? res.error.split('\n').filter(Boolean).pop() ?? '') : ''}

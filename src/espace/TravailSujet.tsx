@@ -1,11 +1,13 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { agents } from '../agents'
 import AgentFace from '../AgentFace'
 import { askTutor } from '../tutor'
 import { profDe } from '../Classe'
 import { Md } from '../Md'
 import type { Lesson } from '../lessons'
-import type { RunResult } from '../runner'
+import { lireBase, type RunResult, type TableVue } from '../runner'
+import { contexteSql, tablesDe } from '../sqlBase'
+import { expliqueErreur } from '../explainError'
 import type { Lang } from '../i18n'
 
 // TRAVAILLER UN SUJET AVEC LES AGENTS IA, dans le même cadre que l'Atelier de code (Beau, 14/10 : « quand je choisis de faire avec
@@ -14,7 +16,7 @@ import type { Lang } from '../i18n'
 // discussion de hauteur fixe, saisie toujours en bas. Au téléphone : une vue à la fois, onglets en bas.
 // La discussion est la même que celle de la classe (même clé locale) : on la retrouve en revenant à la leçon.
 
-type Centre = 'code' | 'prompts' | 'notes'
+type Centre = 'code' | 'prompts' | 'notes' | 'base'
 type Vue = 'lecon' | 'travail' | 'agent'
 type Echange = { q: string; a: string; prof: string; ok?: boolean }
 
@@ -28,6 +30,11 @@ const T = {
     thinking: 'réfléchit…', aiOff: 'Active l’IA dans les réglages de Learn pour parler à l’agent.', needLogin: 'Connecte-toi pour parler à l’agent.',
     quota: 'Limite de questions atteinte pour aujourd’hui.', down: (n: string) => `${n} est indisponible pour l’instant, réessaie plus tard.`,
     prev: 'Leçon précédente', next: 'Leçon suivante', login: 'Connexion', tabs: { lecon: 'Leçon', travail: 'Travail', agent: 'Agent' }, points: 'Les points de la page',
+    base: 'Base de données', tables: 'Tables', viewRows: 'Voir les données', baseHelp: 'La base de l’exercice est déjà prête : voici ses tables et leurs lignes. Écris ta requête dans l’onglet Code.',
+    baseLoading: 'Chargement de la base…', baseFail: 'La base n’a pas pu se charger : vérifie ta connexion puis rouvre cet onglet.',
+    rows: (n: number) => `${n} ligne${n > 1 ? 's' : ''}`, tryIt: 'Essayer : SELECT *',
+    baseHello: 'La base de l’exercice est déjà prête : ouvre l’onglet « Base de données » pour voir ses tables avant d’écrire ta requête.',
+    widen: 'Agrandir le chat', narrow: 'Réduire le chat', resize: 'Glisse pour changer la taille du chat',
   },
   en: {
     close: 'Back to the lesson', lesson: 'Lesson', explain: 'Explanation', example: 'Example', task: 'Your task', hint: 'Hint', showHint: 'Show the hint',
@@ -38,6 +45,11 @@ const T = {
     thinking: 'is thinking…', aiOff: 'Turn on AI in Learn’s settings to talk to the agent.', needLogin: 'Sign in to talk to the agent.',
     quota: 'Question limit reached for today.', down: (n: string) => `${n} is unavailable right now, try again later.`,
     prev: 'Previous lesson', next: 'Next lesson', login: 'Sign in', tabs: { lecon: 'Lesson', travail: 'Work', agent: 'Agent' }, points: 'The points on this page',
+    base: 'Database', tables: 'Tables', viewRows: 'See the data', baseHelp: 'The exercise database is already set up: here are its tables and rows. Write your query in the Code tab.',
+    baseLoading: 'Loading the database…', baseFail: 'The database could not load: check your connection, then reopen this tab.',
+    rows: (n: number) => `${n} row${n === 1 ? '' : 's'}`, tryIt: 'Try: SELECT *',
+    baseHello: 'The exercise database is already set up: open the “Database” tab to see its tables before writing your query.',
+    widen: 'Make the chat wider', narrow: 'Make the chat narrower', resize: 'Drag to resize the chat',
   },
 } as const
 
@@ -57,6 +69,32 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
   const titre = lesson.title[lang]
   const aCode = !lesson.predict && !lesson.lecture
   const aPrompts = PROMPTS.has(track) || lesson.group === 'pe'
+  // SQL : la base de l'exercice existe déjà ; on la montre (tables et lignes) et on la décrit au prof.
+  const estSql = lesson.lang === 'sql' && !!lesson.sql
+  const setupSql = lesson.sql?.setup ?? ''
+  const tables = useMemo(() => (estSql ? tablesDe(setupSql) : []), [estSql, setupSql])
+  const [baseLue, setBaseLue] = useState<{ setup: string; tables: TableVue[] } | null>(null)
+  const base = baseLue && baseLue.setup === setupSql ? baseLue.tables : null // null = pas encore lue pour cette leçon
+  useEffect(() => {
+    if (!estSql) return
+    let ok = true
+    void lireBase(setupSql).then((b) => { if (ok) setBaseLue({ setup: setupSql, tables: b }) })
+    return () => { ok = false }
+  }, [estSql, setupSql])
+  // Largeur du chat de l'agent, réglable (Beau, 26/10 : « je dois pouvoir augmenter la taille du chat ») et gardée sur l'appareil.
+  const bornesLarg = () => [300, Math.max(320, Math.min(900, Math.round((typeof window !== 'undefined' ? window.innerWidth : 1400) * 0.65)))] as const
+  const [largChoisie, setLargChoisie] = useState(() => { const v = Number(lire('learn:agentW')); return v >= 300 ? v : (typeof window !== 'undefined' && window.innerWidth >= 1536 ? 440 : 380) })
+  const larg = Math.min(largChoisie, bornesLarg()[1])
+  const fixerLarg = (w: number) => { const [a, b] = bornesLarg(); const v = Math.round(Math.min(b, Math.max(a, w))); setLargChoisie(v); ecrire('learn:agentW', String(v)) }
+  const glisser = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    const x0 = e.clientX, w0 = larg, el = e.currentTarget
+    el.setPointerCapture(e.pointerId)
+    const mv = (ev: PointerEvent) => fixerLarg(w0 + (x0 - ev.clientX))
+    const fin = () => { el.removeEventListener('pointermove', mv); el.removeEventListener('pointerup', fin); el.removeEventListener('pointercancel', fin) }
+    el.addEventListener('pointermove', mv); el.addEventListener('pointerup', fin); el.addEventListener('pointercancel', fin)
+  }
+  const large = larg >= 560
   const [centre, setCentre] = useState<Centre>(aCode ? 'code' : 'notes')
   const [vue, setVue] = useState<Vue>('travail')
   const [voirIndice, setVoirIndice] = useState(false)
@@ -92,7 +130,7 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
     enBas.current = true; setBusy(true); setQuestion('')
     setFil((f) => [...f, { q, a: '', prof: prof.id }])
     const history = fil.filter((e) => e.prof === prof.id && e.ok !== false && e.a).slice(-3).flatMap((e) => [{ role: 'user' as const, text: e.q }, { role: 'model' as const, text: e.a }])
-    const r = await askTutor({ question: q, code: aCode ? code : notes, lesson: `[${langage}] ${titre}`, output: res?.output.join('\n') ?? '', lang, agentId: prof.id, history })
+    const r = await askTutor({ question: q, code: aCode ? code : notes, lesson: estSql ? contexteSql(titre, setupSql, lang) : `[${langage}] ${titre}`, output: res?.output.join('\n') ?? '', lang, agentId: prof.id, history })
     const a = r.answer ?? (r.error === 'quota' ? t.quota : t.down(prof.name))
     setFil((f) => {
       const suite = [...f.slice(0, -1), { q, a, prof: prof.id, ok: !!r.answer }].slice(-20)
@@ -144,13 +182,13 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
   )
 
   // ───────── Centre : ce que demande le sujet ─────────
-  const onglets: Centre[] = [...(aCode ? ['code' as const] : []), ...(aPrompts ? ['prompts' as const] : []), 'notes']
+  const onglets: Centre[] = [...(aCode ? ['code' as const] : []), ...(estSql ? ['base' as const] : []), ...(aPrompts ? ['prompts' as const] : []), 'notes']
   const colonneCentre = (
     <div className="h-full flex flex-col min-h-0">
       <div className="shrink-0 flex items-center gap-1 h-11 px-2 border-b border-white/10" role="tablist" aria-label={titre}>
         {onglets.map((k) => (
           <button key={k} role="tab" aria-selected={centre === k} onClick={() => setCentre(k)} className={btnTab(centre === k)}>
-            {k === 'code' ? '‹/› ' + t.code : k === 'prompts' ? '✦ ' + t.prompts : '✎ ' + t.notes}
+            {k === 'code' ? '‹/› ' + t.code : k === 'base' ? '🗄️ ' + t.base : k === 'prompts' ? '✦ ' + t.prompts : '✎ ' + t.notes}
           </button>
         ))}
         <span className="flex-1" />
@@ -162,6 +200,13 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
       </div>
       {centre === 'code' && (
         <div className="flex-1 min-h-0 flex flex-col">
+          {estSql && tables.length > 0 && (
+            <div className="shrink-0 flex flex-wrap items-center gap-x-4 gap-y-1 px-3 py-2 border-b border-white/10 bg-white/5 text-[12px] font-mono text-[#C9D4E5]">
+              <span className="font-sans text-[11px] font-bold uppercase tracking-wider text-[#93A1B8]">{t.tables}</span>
+              {tables.map((x) => <span key={x.nom}><span className="text-[#FF8A3D]">{x.nom}</span>({x.colonnes.join(', ')})</span>)}
+              <button onClick={() => setCentre('base')} className="ml-auto font-sans text-[12px] font-semibold text-[#FF8A3D] underline min-h-8">{t.viewRows}</button>
+            </div>
+          )}
           <textarea value={code} onChange={(e) => onCode(e.target.value)} spellCheck={false} autoCapitalize="off" autoCorrect="off" aria-label={t.code}
             onKeyDown={(e) => {
               if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); void onRun() }
@@ -179,11 +224,37 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
               {!res ? <p className="text-[#64748B]">{t.noRun}</p> : <>
                 <pre className="whitespace-pre-wrap text-[#EDF1F8]">{res.output.length ? res.output.join('\n') : t.noOutput}</pre>
                 {res.error && <pre className="whitespace-pre-wrap text-[#FDA4AF]">{res.error}</pre>}
+                {res.error && expliqueErreur(res.error, lang) && <p className="mt-2 rounded-lg border border-[#FF8A3D]/40 bg-[#FF8A3D]/10 p-2 font-sans text-[13px] text-[#EDF1F8]">💡 {expliqueErreur(res.error, lang)}</p>}
                 {res.passed === true && <p className="mt-1 font-sans font-semibold text-[#5FC8C0]">✅ {t.ok}</p>}
                 {res.passed === false && <p className="mt-1 font-sans text-[#FDA4AF]">{t.ko}</p>}
               </>}
             </div>
           </div>
+        </div>
+      )}
+      {centre === 'base' && (
+        <div className="flex-1 min-h-0 overflow-y-auto p-3 space-y-4">
+          <p className="text-[12px] text-[#93A1B8]">{t.baseHelp}</p>
+          {base === null ? <p className="text-[13px] text-[#93A1B8]" role="status">{t.baseLoading}</p>
+            : base.length === 0 ? <p className="text-[13px] text-[#FDA4AF]" role="alert">{t.baseFail}</p>
+            : base.map((tb) => (
+              <section key={tb.nom} className="space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-mono text-[14px] font-bold text-[#FF8A3D]">{tb.nom}</h3>
+                  <span className="text-[11px] text-[#93A1B8]">{t.rows(tb.total)}</span>
+                  <button onClick={() => { onCode(`SELECT * FROM ${tb.nom};`); setCentre('code') }}
+                    className="ml-auto rounded-full border border-white/15 px-3 min-h-9 text-[12px] font-semibold text-[#C9D4E5] hover:bg-white/5">{t.tryIt}</button>
+                </div>
+                <div className="overflow-x-auto rounded-lg border border-white/10">
+                  <table className="w-full text-left text-[12.5px] font-mono">
+                    <thead><tr className="bg-white/10 text-[#93A1B8]">{tb.colonnes.map((c) => <th key={c} className="px-2.5 py-1.5 font-semibold whitespace-nowrap">{c}</th>)}</tr></thead>
+                    <tbody>{tb.lignes.map((l, i) => (
+                      <tr key={i} className="border-t border-white/10">{l.map((v, j) => <td key={j} className="px-2.5 py-1.5 whitespace-nowrap text-[#EDF1F8]">{v === null ? <span className="text-[#64748B]">NULL</span> : String(v)}</td>)}</tr>
+                    ))}</tbody>
+                  </table>
+                </div>
+              </section>
+            ))}
         </div>
       )}
       {centre === 'prompts' && (
@@ -216,11 +287,14 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
     <div className="h-full flex flex-col min-h-0">
       <div className="shrink-0 flex items-center gap-2.5 h-14 px-3 border-b border-white/10">
         <span className="scale-75 -m-1.5"><AgentFace src={prof.face} initial={prof.name[0]} size="sm" thinking={busy} /></span>
-        <div className="min-w-0"><p className="text-[13px] font-bold text-white">{prof.name}</p><p className="text-[11px] text-[#93A1B8] truncate">{prof.role[lang]}</p></div>
+        <div className="min-w-0 flex-1"><p className="text-[13px] font-bold text-white">{prof.name}</p><p className="text-[11px] text-[#93A1B8] truncate">{prof.role[lang]}</p></div>
+        <button onClick={() => fixerLarg(large ? 380 : 640)} aria-label={large ? t.narrow : t.widen} title={large ? t.narrow : t.widen}
+          className="hidden lg:grid size-9 shrink-0 place-items-center rounded-full text-[16px] text-[#C9D4E5] hover:bg-white/10">{large ? '⤡' : '⤢'}</button>
       </div>
       <div ref={boite} onScroll={(e) => { const el = e.currentTarget; enBas.current = el.scrollHeight - el.scrollTop - el.clientHeight < 48 }}
         className="flex-1 min-h-0 overflow-y-auto p-3 space-y-3 text-[13.5px] leading-relaxed" aria-live="polite">
         <div className="rounded-2xl rounded-tl-sm bg-white/6 px-3 py-2 text-[#EDF1F8]">{t.hello(prof.name, titre)}</div>
+        {estSql && <div className="rounded-2xl rounded-tl-sm bg-white/6 px-3 py-2 text-[#EDF1F8]">{t.baseHello}</div>}
         {fil.map((e, i) => (
           <div key={i} className="space-y-2">
             <div className="flex justify-end"><p className="max-w-[85%] rounded-2xl rounded-tr-sm bg-[#FF8A3D] text-[#0B1120] px-3 py-2 font-medium whitespace-pre-wrap break-words">{e.q}</p></div>
@@ -252,10 +326,16 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
         <p className="min-w-0 flex-1 font-semibold text-white truncate">{titre}</p>
         <span className="hidden sm:inline rounded-full border border-white/12 px-3 py-1 text-[12px] text-[#C9D4E5]">{langage}</span>
       </div>
-      <div className="flex-1 min-h-0 lg:grid lg:grid-cols-[300px_minmax(0,1fr)_380px] 2xl:grid-cols-[340px_minmax(0,1fr)_440px]">
+      <div className="flex-1 min-h-0 lg:grid lg:grid-cols-[300px_minmax(0,1fr)_var(--aw)] 2xl:grid-cols-[340px_minmax(0,1fr)_var(--aw)]" style={{ '--aw': larg + 'px' } as CSSProperties}>
         <div className={`${vue === 'lecon' ? 'block' : 'hidden'} lg:block h-full min-h-0 bg-[#0F172A] lg:border-r border-white/10`}>{colonneLecon}</div>
         <div className={`${vue === 'travail' ? 'flex' : 'hidden'} lg:flex h-full min-h-0 flex-col`}>{colonneCentre}</div>
-        <div className={`${vue === 'agent' ? 'block' : 'hidden'} lg:block h-full min-h-0 bg-[#0F172A] lg:border-l border-white/10`}>{colonneAgent}</div>
+        <div className={`${vue === 'agent' ? 'block' : 'hidden'} lg:block relative h-full min-h-0 bg-[#0F172A] lg:border-l border-white/10`}>
+          <div role="separator" aria-orientation="vertical" tabIndex={0} aria-label={t.resize} aria-valuenow={larg} aria-valuemin={300} aria-valuemax={bornesLarg()[1]}
+            onPointerDown={glisser}
+            onKeyDown={(e) => { if (e.key === 'ArrowLeft') { e.preventDefault(); fixerLarg(larg + 32) } else if (e.key === 'ArrowRight') { e.preventDefault(); fixerLarg(larg - 32) } }}
+            className="hidden lg:block absolute inset-y-0 -left-1 z-10 w-2 cursor-col-resize touch-none hover:bg-[#FF8A3D]/40 focus-visible:bg-[#FF8A3D]/60 outline-none" />
+          {colonneAgent}
+        </div>
       </div>
       <nav className="lg:hidden shrink-0 grid grid-cols-3 border-t border-white/10 bg-[#0F172A]" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }} role="tablist" aria-label={titre}>
         {(['lecon', 'travail', 'agent'] as const).map((k) => (

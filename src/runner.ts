@@ -238,10 +238,12 @@ const table = (r) => {
 }
 const exec = (setup, code) => { const db = new SQL.Database(); try { db.run(setup); const r = db.exec(code); return r[r.length - 1] || null } finally { db.close() } }
 const cle = (r, ordre) => { const rows = (r ? r.values : []).map((v) => JSON.stringify(v.map((x) => (typeof x === 'number' ? Math.round(x * 1e6) / 1e6 : x)))); return JSON.stringify(ordre ? rows : rows.sort()) }
+const voir = (setup) => { const db = new SQL.Database(); try { db.run(setup); const n = db.exec("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY rowid"); return (n[0] ? n[0].values : []).map((v) => { const r = db.exec('SELECT * FROM "' + v[0] + '"'); return { nom: v[0], colonnes: r[0] ? r[0].columns : [], lignes: r[0] ? r[0].values.slice(0, 50) : [], total: r[0] ? r[0].values.length : 0 } }) } finally { db.close() } }
 onmessage = async (e) => {
-  const { setup, code, solution, ordre } = e.data
+  const { setup, code, solution, ordre, voir: veut } = e.data
   try {
     if (!SQL) { importScripts('${SQLJS}sql-wasm.js'); SQL = await initSqlJs({ locateFile: (f) => '${SQLJS}' + f }) }
+    if (veut) { postMessage({ base: voir(setup) }); return }
     const r = exec(setup, code)
     const attendu = exec(setup, solution)
     postMessage({ output: table(r), error: null, passed: cle(r, ordre) === cle(attendu, ordre) })
@@ -260,6 +262,21 @@ export function runSql(code: string, solution: string, setup: string, ordre: boo
     w.onmessage = (e) => done(e.data)
     w.onerror = (e) => done({ output: [], error: e.message, passed: false })
     w.postMessage({ setup, code, solution, ordre })
+  })
+}
+
+export interface TableVue { nom: string; colonnes: string[]; lignes: (string | number | null)[][]; total: number }
+
+/** Les tables de la base d'une leçon SQL avec leurs lignes (50 au plus par table) : pour les montrer à l'élève avant qu'il écrive sa requête. */
+export function lireBase(setup: string): Promise<TableVue[]> {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(new Blob([sqlWorkerSrc], { type: 'text/javascript' }))
+    const w = new Worker(url)
+    const done = (r: TableVue[]) => { clearTimeout(t); w.terminate(); URL.revokeObjectURL(url); resolve(r) }
+    const t = setTimeout(() => done([]), 15000)
+    w.onmessage = (e) => done(Array.isArray(e.data.base) ? e.data.base : [])
+    w.onerror = () => done([])
+    w.postMessage({ setup, voir: true })
   })
 }
 

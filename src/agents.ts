@@ -38,6 +38,18 @@ export const agents: Agent[] = [
     ready: true,
   },
   {
+    // Samir : le prof de SQL (Beau, 26/10 : « sur SQL il n'y a pas l'agent avec un nom, comme Idris sur Python »).
+    id: 'sql',
+    face: import.meta.env.BASE_URL + 'visages/05.jpg',
+    name: 'Samir',
+    role: { fr: 'Prof de SQL et de bases de données', en: 'SQL and databases teacher' },
+    personality: {
+      fr: 'Prof de SQL et de bases de données : patient et concret. Il part toujours des vraies tables de l’exercice, sans jamais en inventer une autre. Il donne des indices pas à pas et fait lire le résultat de la requête.',
+      en: 'SQL and databases teacher: patient and concrete. He always starts from the exercise’s real tables and never invents another one. He gives step-by-step hints and has the learner read the query result.',
+    },
+    ready: true,
+  },
+  {
     id: 'cv',
     face: import.meta.env.BASE_URL + 'visages/03.jpg',
     name: 'Camille',
