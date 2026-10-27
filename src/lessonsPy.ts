@@ -102,6 +102,35 @@ export const pyLessons: Lesson[] = [
     checks: ['compter(["a", "b", "a"]) == {"a": 2, "b": 1}', 'compter([]) == {}'],
   },
   {
+    id: 'py-import', lang: 'py', group: 'py-bases',
+    title: { fr: 'Importer : utiliser le code des autres', en: 'Importing: using other people’s code' },
+    explain: {
+      fr: "Python vient avec des boîtes à outils déjà écrites : on les appelle des modules. Pour s’en servir, on écrit import en haut du fichier.\nimport math donne accès à tout ce qui est dans « math » : math.sqrt(16) calcule la racine carrée. Le nom du module, un point, puis l’outil.\nfrom statistics import median va chercher un seul outil : on l’appelle ensuite directement, median([1, 2, 3]).\nimport math as m donne un surnom plus court au module : m.sqrt(16). C’est exactement ce qu’on fera plus tard avec import numpy as np et import pandas as pd.\nTu n’as rien à installer pour math, random ou statistics : ils sont fournis avec Python.",
+      en: "Python comes with ready-made toolboxes called modules. To use one, write import at the top of the file.\nimport math gives access to everything inside “math”: math.sqrt(16) computes the square root. The module name, a dot, then the tool.\nfrom statistics import median fetches a single tool: you then call it directly, median([1, 2, 3]).\nimport math as m gives the module a shorter nickname: m.sqrt(16). That is exactly what we will do later with import numpy as np and import pandas as pd.\nYou install nothing for math, random or statistics: they ship with Python.",
+    },
+    example: 'import math\nfrom statistics import median\nprint(math.sqrt(16), median([3, 1, 2]))',
+    task: { fr: 'Écris racine(n) avec math.sqrt, et mediane(liste) avec statistics.median. mediane([1, 2, 3, 4]) vaut 2.5.', en: 'Write racine(n) with math.sqrt, and mediane(liste) with statistics.median. mediane([1, 2, 3, 4]) is 2.5.' },
+    starter: 'import math\nfrom statistics import median\n\ndef racine(n):\n    pass\n\ndef mediane(liste):\n    pass\n',
+    hint: { fr: 'racine : return math.sqrt(n). mediane : return median(liste).', en: 'racine: return math.sqrt(n). mediane: return median(liste).' },
+    solution: 'import math\nfrom statistics import median\n\ndef racine(n):\n    return math.sqrt(n)\n\ndef mediane(liste):\n    return median(liste)',
+    checks: ['racine(16) == 4.0', 'abs(racine(2) - 1.4142135) < 1e-6', 'mediane([3, 1, 2]) == 2', 'mediane([1, 2, 3, 4]) == 2.5'],
+  },
+  {
+    id: 'py-bibliotheques', lang: 'py', group: 'py-bases',
+    packages: ['numpy', 'pandas', 'matplotlib'],
+    title: { fr: 'Les trois bibliothèques de base : numpy, pandas, matplotlib', en: 'The three core libraries: numpy, pandas, matplotlib' },
+    explain: {
+      fr: "En IA et en données, tout le monde commence par les trois mêmes lignes :\nimport numpy as np (le calcul sur de gros tableaux de nombres)\nimport pandas as pd (les tableaux de données, comme un Excel dans le code)\nimport matplotlib.pyplot as plt (les graphiques)\nnp, pd et plt sont des surnoms que tout le monde utilise : tu les verras dans chaque tutoriel.\nUne Series de pandas, c’est une colonne de valeurs : pd.Series([1, 2, 3]). Elle sait calculer .mean() (la moyenne), .max(), .min(), .sum().\nPour dessiner : plt.plot(x, y) trace la courbe, puis plt.show() l’affiche sous ton code.\nIci, ces bibliothèques se chargent toutes seules quand tu les importes : rien à installer.",
+      en: "In AI and data, everyone starts with the same three lines:\nimport numpy as np (maths on big arrays of numbers)\nimport pandas as pd (data tables, like Excel inside code)\nimport matplotlib.pyplot as plt (charts)\nnp, pd and plt are nicknames everyone uses: you will see them in every tutorial.\nA pandas Series is a column of values: pd.Series([1, 2, 3]). It can compute .mean() (the average), .max(), .min(), .sum().\nTo draw: plt.plot(x, y) draws the curve, then plt.show() displays it under your code.\nHere these libraries load by themselves when you import them: nothing to install.",
+    },
+    example: 'import numpy as np\nimport pandas as pd\nimport matplotlib.pyplot as plt\n\nx = np.arange(0, 5)\nserie = pd.Series(x ** 2)\nprint(serie.mean())\nplt.plot(x, x ** 2)\nplt.show()',
+    task: { fr: 'Écris resume(valeurs) avec pandas : renvoie {"moyenne": moyenne arrondie à 2 décimales, "max": le maximum, "n": le nombre de valeurs}. Importe aussi matplotlib.pyplot as plt et trace les valeurs avec plt.plot.', en: 'Write resume(valeurs) with pandas: return {"moyenne": average rounded to 2 decimals, "max": the maximum, "n": the number of values}. Also import matplotlib.pyplot as plt and plot the values with plt.plot.' },
+    starter: 'import numpy as np\nimport pandas as pd\nimport matplotlib.pyplot as plt\n\ndef resume(valeurs):\n    pass\n',
+    hint: { fr: 's = pd.Series(valeurs) ; return {"moyenne": round(s.mean(), 2), "max": s.max(), "n": len(s)}. Ajoute plt.plot(valeurs) puis plt.show() à la fin du programme.', en: 's = pd.Series(valeurs); return {"moyenne": round(s.mean(), 2), "max": s.max(), "n": len(s)}. Add plt.plot(valeurs) then plt.show() at the end of the program.' },
+    solution: 'import numpy as np\nimport pandas as pd\nimport matplotlib.pyplot as plt\n\ndef resume(valeurs):\n    s = pd.Series(valeurs)\n    return {"moyenne": round(float(s.mean()), 2), "max": s.max(), "n": len(s)}\n\nplt.plot([1, 2, 3, 4])\nplt.show()',
+    checks: ['resume([1, 2, 3, 4]) == {"moyenne": 2.5, "max": 4, "n": 4}', 'resume([10, 20]) == {"moyenne": 15.0, "max": 20, "n": 2}', 'resume([2.5, 3.5, 6]) == {"moyenne": 4.0, "max": 6.0, "n": 3}', '"matplotlib.pyplot" in __import__("sys").modules'],
+  },
+  {
     id: 'py-recursion', lang: 'py', group: 'py-algo',
     title: { fr: 'Récursivité', en: 'Recursion' },
     explain: {
