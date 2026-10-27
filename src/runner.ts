@@ -11,7 +11,7 @@ export interface RunResult {
   error: string | null
   passed: boolean | null
   /** Tests réussis / total (affichés à l'élève). */
-  tests?: { ok: number; total: number }
+  tests?: { ok: number; total: number; detail?: boolean[] }
   figures?: Figure[]
   /** Images produites par matplotlib (PNG en data URL). */
   images?: string[]
@@ -25,7 +25,7 @@ onmessage = (e) => {
   try {
     const run = new Function('console', '__out', code + '\\n;return [' + checks.join(',') + ']')
     const res = run(console, __out)
-    postMessage({ output: __out, error: null, passed: checks.length === 0 ? null : res.every(Boolean), tests: { ok: res.filter(Boolean).length, total: checks.length } })
+    postMessage({ output: __out, error: null, passed: checks.length === 0 ? null : res.every(Boolean), tests: { ok: res.filter(Boolean).length, total: checks.length, detail: res.map(Boolean) } })
   } catch (err) {
     postMessage({ output: __out, error: String(err), passed: false })
   }
@@ -125,13 +125,46 @@ const PY_CAPTURE = [
   'json.dumps(__imgs)',
 ].join('\n')
 
+// Terminal et notebooks : un interpréteur qui garde ses variables d'une commande à l'autre (comme IPython).
+const PY_REPL = [
+  'import ast',
+  'def __repl(src):',
+  '    tree = ast.parse(src, "<terminal>", "exec")',
+  '    last = None',
+  '    if tree.body and isinstance(tree.body[-1], ast.Expr):',
+  '        last = ast.Expression(tree.body.pop().value)',
+  '    exec(compile(tree, "<terminal>", "exec"), globals())',
+  '    if last is not None:',
+  '        v = eval(compile(last, "<terminal>", "eval"), globals())',
+  '        if v is not None:',
+  '            return repr(v)',
+  '    return None',
+].join('\n')
+
 const pyWorkerSrc = `
 const HELPERS = ${JSON.stringify(PY_HELPERS)}
 const TRACE = ${JSON.stringify(PY_TRACE)}
 const CAPTURE = ${JSON.stringify(PY_CAPTURE)}
+const REPLDEF = ${JSON.stringify(PY_REPL)}
 const figures = (py, ns, from, to) => { try { return JSON.parse(py.runPython('import json\\njson.dumps(__figs[' + (from || 0) + ':' + (to === undefined ? '' : to) + '])', { globals: ns })) } catch (e) { return [] } }
 const nfigs = (py, ns) => { try { return py.runPython('len(__figs)', { globals: ns }) } catch (e) { return 0 } }
 let py = null
+let replNs = null
+let ecrits = new Set()
+// Les fichiers du projet (modules .py, données .csv…) sont posés dans le dossier de travail : import utils, pd.read_csv("data.csv") marchent.
+const ecrireFichiers = (files) => {
+  const nouveaux = new Set(Object.keys(files || {}))
+  const mods = []
+  for (const n of ecrits) if (!nouveaux.has(n)) { try { py.FS.unlink(n) } catch (e) { /* déjà absent */ } }
+  for (const [n, c] of Object.entries(files || {})) {
+    try { const i = n.lastIndexOf('/'); if (i > 0) py.FS.mkdirTree(n.slice(0, i)); py.FS.writeFile(n, c) } catch (e) { /* ignoré */ }
+    if (/^[A-Za-z_][A-Za-z0-9_]*\\.py$/.test(n)) mods.push(n.slice(0, -3))
+  }
+  for (const n of ecrits) if (/^[A-Za-z_][A-Za-z0-9_]*\\.py$/.test(n)) mods.push(n.slice(0, -3))
+  ecrits = nouveaux
+  try { py.runPython('import sys\\nif "" not in sys.path: sys.path.insert(0, "")\\nfor __m in ' + JSON.stringify(mods) + ':\\n    sys.modules.pop(__m, None)') } catch (e) { /* ignoré */ }
+}
+const dernieres = (err, n) => String(err && err.message ? err.message : err).trim().split('\\n').slice(-n).join('\\n')
 onmessage = async (e) => {
   const d = e.data
   try {
@@ -147,6 +180,7 @@ onmessage = async (e) => {
       py.setStderr({ batched: (s) => out.push(s) })
       const ns = py.globals.get('dict')()
       try {
+        ecrireFichiers(d.files)
         ns.set('__code', d.code)
         py.runPython(HELPERS, { globals: ns })
         py.runPython(TRACE, { globals: ns })
@@ -157,6 +191,33 @@ onmessage = async (e) => {
       } finally { ns.destroy() }
       return
     }
+    if (d.type === 'repl') {
+      const out = []
+      py.setStdout({ batched: (s) => out.push(s) })
+      py.setStderr({ batched: (s) => out.push(s) })
+      if (!replNs) { replNs = py.globals.get('dict')(); py.runPython(REPLDEF, { globals: replNs }) }
+      ecrireFichiers(d.files)
+      try { await py.loadPackagesFromImports(d.code, { messageCallback: () => {}, errorCallback: () => {} }) } catch (e) { /* hors ligne */ }
+      if (/matplotlib|pyplot/.test(d.code)) { try { py.runPython('import matplotlib, warnings\\nmatplotlib.use("AGG")\\nwarnings.filterwarnings("ignore", message=".*non-interactive.*")', { globals: replNs }) } catch (e) { /* ignoré */ } }
+      replNs.set('__src', d.code)
+      let valeur = null, erreur = null
+      try { valeur = py.runPython('__repl(__src)', { globals: replNs }) } catch (err) { erreur = dernieres(err, 3) }
+      let images = []
+      try { images = JSON.parse(py.runPython(CAPTURE, { globals: replNs })) } catch (e) { /* ignoré */ }
+      postMessage({ type: 'repld', output: out, valeur: valeur === undefined ? null : valeur, error: erreur, images })
+      return
+    }
+    if (d.type === 'replreset') { if (replNs) { try { replNs.destroy() } catch (e) { /* ignoré */ } replNs = null } postMessage({ type: 'resetok' }); return }
+    if (d.type === 'pip') {
+      try {
+        await py.loadPackage('micropip')
+        const mp = py.pyimport('micropip')
+        await mp.install(d.pkgs)
+        postMessage({ type: 'pipd', ok: true })
+      } catch (err) { postMessage({ type: 'pipd', ok: false, error: dernieres(err, 2) }) }
+      return
+    }
+    if (d.type === 'pkgs') { postMessage({ type: 'pkgsd', pkgs: Object.keys(py.loadedPackages || {}) }); return }
     if (d.type === 'load') { await py.loadPackage(d.packages); postMessage({ type: 'loaded' }); return }
     const out = []
     py.setStdout({ batched: (s) => out.push(s) })
@@ -164,9 +225,10 @@ onmessage = async (e) => {
     const ns = py.globals.get('dict')()
     try {
       // Les bibliothèques importées par le code (pandas, matplotlib, scikit-learn…) se chargent toutes seules.
-      try { await py.loadPackagesFromImports(d.code) } catch (e) { /* hors ligne : l'import dira l'erreur */ }
+      try { await py.loadPackagesFromImports(d.code, { messageCallback: () => {}, errorCallback: () => {} }) } catch (e) { /* hors ligne : l'import dira l'erreur */ }
+      ecrireFichiers(d.files)
       py.runPython(HELPERS, { globals: ns })
-      if (/matplotlib|pyplot/.test(d.code)) { try { py.runPython('import matplotlib\\nmatplotlib.use("AGG")', { globals: ns }) } catch (e) { /* ignoré */ } }
+      if (/matplotlib|pyplot/.test(d.code)) { try { py.runPython('import matplotlib, warnings\\nmatplotlib.use("AGG")\\nwarnings.filterwarnings("ignore", message=".*non-interactive.*")', { globals: ns }) } catch (e) { /* ignoré */ } }
       py.runPython(d.code, { globals: ns })
       let images = []
       if (/matplotlib|pyplot/.test(d.code)) { try { images = JSON.parse(py.runPython(CAPTURE, { globals: ns })) } catch (e) { /* ignoré */ } }
@@ -183,7 +245,7 @@ onmessage = async (e) => {
         if (!shown.length && after > before) shown = figures(py, ns, before, after)
         return ok
       })
-      postMessage({ type: 'done', output: out, error: null, passed: d.checks.length === 0 ? null : results.every(Boolean), tests: { ok: results.filter(Boolean).length, total: d.checks.length }, figures: shown, images })
+      postMessage({ type: 'done', output: out, error: null, passed: d.checks.length === 0 ? null : results.every(Boolean), tests: { ok: results.filter(Boolean).length, total: d.checks.length, detail: results }, figures: shown, images })
     } catch (err) {
       const msg = String(err && err.message ? err.message : err).trim().split('\\n').slice(-3).join('\\n')
       postMessage({ type: 'done', output: out, error: msg, passed: false, figures: figures(py, ns) })
@@ -232,14 +294,77 @@ async function ensurePackages(pkgs: string[]) {
   })
 }
 
-export async function runPython(code: string, checks: string[], packages: string[] = []): Promise<RunResult> {
+async function runPythonBrut(code: string, checks: string[], packages: string[] = []): Promise<RunResult> {
   try { await startPython(); await ensurePackages(packages) } catch (e) { return { output: [], error: String((e as Error).message), passed: false } }
   const w = pyWorker!
   return new Promise<RunResult>((resolve) => {
     const t = setTimeout(() => { reset(); resolve({ output: [], error: 'Timeout (boucle infinie ?)', passed: false }) }, 20000)
     w.onmessage = (e) => { if (e.data.type === 'done') { clearTimeout(t); resolve({ output: e.data.output, error: e.data.error, passed: e.data.passed, tests: e.data.tests, figures: e.data.figures, images: e.data.images }) } }
     w.onerror = (e) => { clearTimeout(t); reset(); resolve({ output: [], error: e.message, passed: false }) }
-    w.postMessage({ type: 'run', code, checks })
+    w.postMessage({ type: 'run', code, checks, files: fichiersProjet.courant })
+  })
+}
+
+
+// ───────── Une seule demande à la fois pour l'interpréteur (lancer, terminal, installer…) ─────────
+let fileAttente: Promise<unknown> = Promise.resolve()
+function enfiler<T>(f: () => Promise<T>): Promise<T> {
+  const p = fileAttente.then(f, f)
+  fileAttente = p.catch(() => undefined)
+  return p
+}
+export const runPython = (code: string, checks: string[], packages: string[] = []) => enfiler(() => runPythonBrut(code, checks, packages))
+export const tracePython = (code: string, packages: string[] = []) => enfiler(() => tracePythonBrut(code, packages))
+
+/** Les fichiers du projet (modules, données) vus par le code : `import utils`, `pd.read_csv("data.csv")`. */
+export const fichiersProjet: { courant: Record<string, string> } = { courant: {} }
+export function definirFichiers(f: Record<string, string>) { fichiersProjet.courant = f }
+
+export interface SortieTerminal { output: string[]; valeur: string | null; error: string | null; images: string[] }
+/** Terminal et cellules de notebook : les variables restent d'une commande à l'autre. */
+export function terminalPython(code: string): Promise<SortieTerminal> {
+  return enfiler(async () => {
+    try { await startPython() } catch (e) { return { output: [], valeur: null, error: String((e as Error).message), images: [] } }
+    const w = pyWorker!
+    return new Promise<SortieTerminal>((resolve) => {
+      const t = setTimeout(() => { reset(); resolve({ output: [], valeur: null, error: 'Timeout (boucle infinie ?)', images: [] }) }, 30000)
+      w.onmessage = (e) => { if (e.data.type === 'repld') { clearTimeout(t); resolve({ output: e.data.output, valeur: e.data.valeur, error: e.data.error, images: e.data.images ?? [] }) } }
+      w.onerror = (e) => { clearTimeout(t); reset(); resolve({ output: [], valeur: null, error: e.message, images: [] }) }
+      w.postMessage({ type: 'repl', code, files: fichiersProjet.courant })
+    })
+  })
+}
+export function redemarrerTerminal(): Promise<void> {
+  return enfiler(async () => {
+    if (!pyWorker || !pyOk) return
+    const w = pyWorker
+    await new Promise<void>((resolve) => { w.onmessage = (e) => { if (e.data.type === 'resetok') resolve() }; w.postMessage({ type: 'replreset' }) })
+  })
+}
+/** pip install : les paquets Python purs de PyPI, installés dans le navigateur. */
+export function pipInstaller(pkgs: string[]): Promise<{ ok: boolean; error?: string }> {
+  return enfiler(async () => {
+    try { await startPython() } catch (e) { return { ok: false, error: String((e as Error).message) } }
+    const w = pyWorker!
+    return new Promise<{ ok: boolean; error?: string }>((resolve) => {
+      const t = setTimeout(() => resolve({ ok: false, error: 'Timeout (réseau ?)' }), 120000)
+      w.onmessage = (e) => { if (e.data.type === 'pipd') { clearTimeout(t); resolve({ ok: e.data.ok, error: e.data.error }) } }
+      w.postMessage({ type: 'pip', pkgs })
+    })
+  })
+}
+/** Les bibliothèques actuellement chargées dans l'interpréteur. */
+export function paquetsCharges(): Promise<string[]> {
+  return enfiler(async () => {
+    if (!pyWorker || !pyOk) return []
+    const w = pyWorker
+    return new Promise<string[]>((resolve) => { w.onmessage = (e) => { if (e.data.type === 'pkgsd') resolve(e.data.pkgs) }; w.postMessage({ type: 'pkgs' }) })
+  })
+}
+/** Charge des bibliothèques Pyodide (numpy, pandas…) à la demande depuis le gestionnaire de paquets. */
+export function chargerPaquets(noms: string[]): Promise<{ ok: boolean; error?: string }> {
+  return enfiler(async () => {
+    try { await startPython(); await ensurePackages(noms); return { ok: true } } catch (e) { return { ok: false, error: String((e as Error).message) } }
   })
 }
 
@@ -308,13 +433,13 @@ export interface TraceStep { ligne: number; evt: string; fn: string; vars: Recor
 export interface TraceResult { steps: TraceStep[]; output: string[]; error: string | null }
 
 /** Exécute le code Python en enregistrant chaque ligne (max 600 étapes) pour le rejouer pas à pas. */
-export async function tracePython(code: string, packages: string[] = []): Promise<TraceResult> {
+async function tracePythonBrut(code: string, packages: string[] = []): Promise<TraceResult> {
   try { await startPython(); await ensurePackages(packages) } catch (e) { return { steps: [], output: [], error: String((e as Error).message) } }
   const w = pyWorker!
   return new Promise<TraceResult>((resolve) => {
     const t = setTimeout(() => { reset(); resolve({ steps: [], output: [], error: 'Timeout (boucle infinie ?)' }) }, 20000)
     w.onmessage = (e) => { if (e.data.type === 'traced') { clearTimeout(t); resolve({ steps: e.data.steps, output: e.data.output, error: e.data.error }) } }
     w.onerror = (e) => { clearTimeout(t); reset(); resolve({ steps: [], output: [], error: e.message }) }
-    w.postMessage({ type: 'trace', code })
+    w.postMessage({ type: 'trace', code, files: fichiersProjet.courant })
   })
 }
