@@ -444,6 +444,7 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
               )}
               {!res ? <p className="text-slate-500">{t.noRun}</p> : <>
                 <pre className="whitespace-pre-wrap text-slate-100">{res.output.length ? res.output.join('\n') : t.noOutput}</pre>
+                {res.images?.map((src, i) => <img key={i} src={src} alt={'Plot ' + (i + 1)} className="mt-2 max-w-full rounded-lg border border-slate-700 bg-white" />)}
                 {res.error && (() => {
                   const lignes = res.error.split('\n').filter(Boolean)
                   const derniere = lignes[lignes.length - 1]

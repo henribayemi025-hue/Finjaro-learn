@@ -616,6 +616,7 @@ export default function App() {
                   <pre className="p-4 text-sm whitespace-pre-wrap font-mono overflow-x-auto">{res.output.length ? res.output.join('\n') : t.noOutput}</pre>
                 </div>
                 {res.figures?.map((f, i) => <Chart key={i} fig={f} />)}
+                {res.images?.map((src, i) => <img key={i} src={src} alt={lang === 'fr' ? 'Graphique ' + (i + 1) : 'Plot ' + (i + 1)} className="max-w-full rounded-lg border border-brass bg-white" />)}
                 {res.error && (() => {
                   const simple = expliqueErreur(res.error, lang, code)
                   return (

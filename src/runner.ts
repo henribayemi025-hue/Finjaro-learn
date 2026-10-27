@@ -13,6 +13,8 @@ export interface RunResult {
   /** Tests réussis / total (affichés à l'élève). */
   tests?: { ok: number; total: number }
   figures?: Figure[]
+  /** Images produites par matplotlib (PNG en data URL). */
+  images?: string[]
 }
 
 const workerSrc = `
@@ -109,9 +111,24 @@ const PY_TRACE = [
   '__resultat = json.dumps({"steps": __steps, "erreur": __erreur})',
 ].join('\n')
 
+// Graphiques matplotlib : on les range en images pour la page (le Worker n'a pas d'écran).
+const PY_CAPTURE = [
+  'import io, base64, json, sys',
+  '__imgs = []',
+  'if "matplotlib.pyplot" in sys.modules:',
+  '    import matplotlib.pyplot as __plt',
+  '    for __n in __plt.get_fignums():',
+  '        __b = io.BytesIO()',
+  '        __plt.figure(__n).savefig(__b, format="png", dpi=110, bbox_inches="tight", facecolor="white")',
+  '        __imgs.append("data:image/png;base64," + base64.b64encode(__b.getvalue()).decode())',
+  '    __plt.close("all")',
+  'json.dumps(__imgs)',
+].join('\n')
+
 const pyWorkerSrc = `
 const HELPERS = ${JSON.stringify(PY_HELPERS)}
 const TRACE = ${JSON.stringify(PY_TRACE)}
+const CAPTURE = ${JSON.stringify(PY_CAPTURE)}
 const figures = (py, ns, from, to) => { try { return JSON.parse(py.runPython('import json\\njson.dumps(__figs[' + (from || 0) + ':' + (to === undefined ? '' : to) + '])', { globals: ns })) } catch (e) { return [] } }
 const nfigs = (py, ns) => { try { return py.runPython('len(__figs)', { globals: ns }) } catch (e) { return 0 } }
 let py = null
@@ -146,8 +163,13 @@ onmessage = async (e) => {
     py.setStderr({ batched: (s) => out.push(s) })
     const ns = py.globals.get('dict')()
     try {
+      // Les bibliothèques importées par le code (pandas, matplotlib, scikit-learn…) se chargent toutes seules.
+      try { await py.loadPackagesFromImports(d.code) } catch (e) { /* hors ligne : l'import dira l'erreur */ }
       py.runPython(HELPERS, { globals: ns })
+      if (/matplotlib|pyplot/.test(d.code)) { try { py.runPython('import matplotlib\\nmatplotlib.use("AGG")', { globals: ns }) } catch (e) { /* ignoré */ } }
       py.runPython(d.code, { globals: ns })
+      let images = []
+      if (/matplotlib|pyplot/.test(d.code)) { try { images = JSON.parse(py.runPython(CAPTURE, { globals: ns })) } catch (e) { /* ignoré */ } }
       // Figures tracées par le code de l'élève lui-même ; sinon, celles du premier test qui en produit.
       let shown = figures(py, ns)
       ns.set('__out', out.join('\\n'))
@@ -161,7 +183,7 @@ onmessage = async (e) => {
         if (!shown.length && after > before) shown = figures(py, ns, before, after)
         return ok
       })
-      postMessage({ type: 'done', output: out, error: null, passed: d.checks.length === 0 ? null : results.every(Boolean), tests: { ok: results.filter(Boolean).length, total: d.checks.length }, figures: shown })
+      postMessage({ type: 'done', output: out, error: null, passed: d.checks.length === 0 ? null : results.every(Boolean), tests: { ok: results.filter(Boolean).length, total: d.checks.length }, figures: shown, images })
     } catch (err) {
       const msg = String(err && err.message ? err.message : err).trim().split('\\n').slice(-3).join('\\n')
       postMessage({ type: 'done', output: out, error: msg, passed: false, figures: figures(py, ns) })
@@ -215,7 +237,7 @@ export async function runPython(code: string, checks: string[], packages: string
   const w = pyWorker!
   return new Promise<RunResult>((resolve) => {
     const t = setTimeout(() => { reset(); resolve({ output: [], error: 'Timeout (boucle infinie ?)', passed: false }) }, 20000)
-    w.onmessage = (e) => { if (e.data.type === 'done') { clearTimeout(t); resolve({ output: e.data.output, error: e.data.error, passed: e.data.passed, tests: e.data.tests, figures: e.data.figures }) } }
+    w.onmessage = (e) => { if (e.data.type === 'done') { clearTimeout(t); resolve({ output: e.data.output, error: e.data.error, passed: e.data.passed, tests: e.data.tests, figures: e.data.figures, images: e.data.images }) } }
     w.onerror = (e) => { clearTimeout(t); reset(); resolve({ output: [], error: e.message, passed: false }) }
     w.postMessage({ type: 'run', code, checks })
   })
