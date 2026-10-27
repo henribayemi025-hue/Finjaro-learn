@@ -393,6 +393,8 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
     const parties: string[] = []
     if (joints.includes('selection') && selection) parties.push('[' + X.jSelection + ']\n' + selection.slice(0, 1500))
     if (joints.includes('fichier') && fichierActif) parties.push('[' + fichierActif + ']\n' + contenuActif.slice(0, 2500))
+    if (joints.includes('sortie') && res) parties.push('[' + X.jSortie + ']\n' + ((res.output.join('\n') + (res.error ? '\n' + res.error : '')).slice(0, 1200) || X.sansSortie))
+    if (joints.includes('tests') && res?.tests) parties.push('[' + X.tests + ' ' + res.tests.ok + '/' + res.tests.total + ']\n' + lesson.checks.map((c, i) => (res.tests?.detail?.[i] === false ? '✗ ' : '✓ ') + c.slice(0, 140)).slice(0, 12).join('\n'))
     if (joints.includes('problemes') && diags.length) parties.push('[' + X.jProblemes + ']\n' + diags.slice(0, 12).map((d) => `${X.ligne} ${d.ligne}: ${d.message}`).join('\n'))
     if (joints.includes('terminal') && termLignes.length) parties.push('[' + X.jTerminal + ']\n' + termLignes.slice(-12).map((l) => (l.k === 'img' ? '' : l.t)).join('\n').slice(0, 1200))
     return parties.length ? '\n\n' + parties.join('\n\n') : ''
@@ -403,6 +405,16 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
     void poser(base + contexteJoint())
     setJoints([])
   }
+
+  // Les menus se ferment avec Échap ou en cliquant ailleurs.
+  useEffect(() => {
+    if (!menuJoindre && !menuSessions && !reglages) return
+    const ferme = () => { setMenuJoindre(false); setMenuSessions(false); setReglages(false) }
+    const kd = (e: KeyboardEvent) => { if (e.key === 'Escape') ferme() }
+    const md = (e: MouseEvent) => { if (!(e.target as HTMLElement).closest('[data-menu]')) ferme() }
+    window.addEventListener('keydown', kd); window.addEventListener('mousedown', md)
+    return () => { window.removeEventListener('keydown', kd); window.removeEventListener('mousedown', md) }
+  }, [menuJoindre, menuSessions, reglages])
 
   // Raccourcis clavier (comme VS Code).
   useEffect(() => {
@@ -813,13 +825,15 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
   const optionsJoindre = [
     ...(fichierActif ? [['fichier', X.jFichier + ' : ' + fichierActif] as const] : []),
     ...(selection ? [['selection', X.jSelection] as const] : []),
+    ...(res ? [['sortie', X.jSortie] as const] : []),
+    ...(res?.tests ? [['tests', X.tests + ' ' + res.tests.ok + '/' + res.tests.total] as const] : []),
     ...(diags.length ? [['problemes', X.jProblemes + ' (' + diags.length + ')'] as const] : []),
     ...(termLignes.length ? [['terminal', X.jTerminal] as const] : []),
   ]
   const colonneAgent = (
     <div className="h-full flex flex-col min-h-0 bg-[var(--b0)]">
       <div className="shrink-0 h-9 px-2 flex items-center gap-1 border-b border-[var(--bd)] relative">
-        <button onClick={() => setMenuSessions((o) => !o)} aria-expanded={menuSessions} className="flex items-center gap-1.5 min-w-0 h-7 px-2 rounded hover:bg-[#ffffff14] text-[12.5px] text-[var(--tx)]">
+        <button data-menu="1" onClick={() => setMenuSessions((o) => !o)} aria-expanded={menuSessions} className="flex items-center gap-1.5 min-w-0 h-7 px-2 rounded hover:bg-[#ffffff14] text-[12.5px] text-[var(--tx)]">
           <Ico n="chat" className="size-3.5 text-[var(--tx2)]" /><span className="truncate max-w-[160px]">{session.nom || X.nouvelleSession}</span><Ico n="down" className="size-3 text-[var(--tx2)]" />
         </button>
         <span className="flex-1" />
@@ -827,7 +841,7 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
         <button onClick={() => fixerLarg(large ? 380 : 640)} aria-label={large ? t.narrow : t.widen} title={large ? t.narrow : t.widen} className="hidden lg:grid size-7 place-items-center rounded hover:bg-[#ffffff14] text-[var(--tx2)] hover:text-white"><Ico n={large ? 'minimize' : 'maximize'} className="size-3.5" /></button>
         <button onClick={basculerAgent} title={X.agents} aria-label={X.agents} className="hidden lg:grid size-7 place-items-center rounded hover:bg-[#ffffff14] text-[var(--tx2)] hover:text-white"><Ico n="x" className="size-3.5" /></button>
         {menuSessions && (
-          <div className="absolute left-2 right-2 top-9 z-30 rounded-md border border-[#454545] bg-[#252526] shadow-2xl shadow-black/50 max-h-[60vh] flex flex-col">
+          <div data-menu="1" className="absolute left-2 right-2 top-9 z-30 rounded-md border border-[#454545] bg-[#252526] shadow-2xl shadow-black/50 max-h-[60vh] flex flex-col">
             <div className="p-2 border-b border-[var(--bd)]"><input value={rechSession} onChange={(e) => setRechSession(e.target.value)} placeholder={X.chercherSession} aria-label={X.chercherSession} className="w-full bg-[#3c3c3c] px-2 py-1 text-[13px] outline-none text-white placeholder:text-[var(--tx3)] border border-transparent focus:border-[var(--ac)]" /></div>
             <div className="overflow-y-auto py-1">
               {sessionsFiltrees.map((s) => (
@@ -905,14 +919,14 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
           <div className="flex flex-wrap gap-1.5">
             {joints.map((j) => (
               <span key={j} className="inline-flex items-center gap-1 rounded-full bg-[#2d2d30] border border-[var(--bd)] pl-2 pr-1 h-6 text-[11.5px] text-[var(--tx)]">
-                <Ico n="clip" className="size-3 text-[var(--tx2)]" />{({ fichier: X.jFichier, selection: X.jSelection, problemes: X.jProblemes, terminal: X.jTerminal } as Record<string, string>)[j]}
+                <Ico n="clip" className="size-3 text-[var(--tx2)]" />{({ fichier: X.jFichier, selection: X.jSelection, problemes: X.jProblemes, terminal: X.jTerminal, sortie: X.jSortie, tests: X.tests } as Record<string, string>)[j]}
                 <button onClick={() => setJoints((l) => l.filter((x) => x !== j))} aria-label="x" className="size-4 grid place-items-center rounded-full hover:bg-[#ffffff1f]"><Ico n="x" className="size-2.5" /></button>
               </span>
             ))}
           </div>
         )}
         {menuJoindre && (
-          <div className="absolute left-2.5 bottom-[3.6rem] z-30 w-56 rounded-md border border-[#454545] bg-[#252526] py-1 shadow-2xl shadow-black/50">
+          <div data-menu="1" className="absolute left-2.5 bottom-[3.6rem] z-30 w-56 rounded-md border border-[#454545] bg-[#252526] py-1 shadow-2xl shadow-black/50">
             {optionsJoindre.length === 0 && <p className="px-3 py-2 text-[12px] text-[var(--tx3)]">{lang === 'fr' ? 'Rien à joindre pour l’instant (ouvre un fichier ou sélectionne du code).' : 'Nothing to attach yet (open a file or select code).'}</p>}
             {optionsJoindre.map(([k, nom]) => (
               <button key={k} onClick={() => { setJoints((l) => (l.includes(k) ? l : [...l, k])); setMenuJoindre(false) }} className="w-full flex items-center gap-2 px-3 h-8 text-left text-[12.5px] text-[var(--tx)] hover:bg-[#04395e]"><Ico n="clip" className="size-3.5 text-[var(--tx2)]" /><span className="truncate">{nom}</span></button>
@@ -920,7 +934,7 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
           </div>
         )}
         <form onSubmit={(e) => { e.preventDefault(); poserAvecContexte() }} className="flex items-end gap-1.5 rounded-md border border-[var(--bd)] bg-[var(--b1)] p-1.5 focus-within:border-[var(--ac)]">
-          <button type="button" onClick={() => setMenuJoindre((o) => !o)} title={X.joindre} aria-label={X.joindre} aria-expanded={menuJoindre} className="size-8 shrink-0 grid place-items-center rounded hover:bg-[#ffffff14] text-[var(--tx2)] hover:text-white"><Ico n="plus" className="size-4" /></button>
+          <button type="button" data-menu="1" onClick={() => setMenuJoindre((o) => !o)} title={X.joindre} aria-label={X.joindre} aria-expanded={menuJoindre} className="size-8 shrink-0 grid place-items-center rounded hover:bg-[#ffffff14] text-[var(--tx2)] hover:text-white"><Ico n="plus" className="size-4" /></button>
           <textarea value={question} rows={1} maxLength={2000} placeholder={t.ask} aria-label={t.ask} disabled={!ai || !signedIn}
             onChange={(e) => { setQuestion(e.target.value); e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight, 140) + 'px' }}
             ref={(el) => { if (el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 140) + 'px' } }}
@@ -1019,7 +1033,7 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
         tests={res?.tests && res.tests.total > 0 ? { ok: res.tests.ok, total: res.tests.total } : null} onTests={() => afficherPanneau('tests')} instantanes={instantanes.length} onHistorique={() => basculerLat('historique')} />
       {notif && <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[70] rounded border border-[#454545] bg-[#252526] px-3 py-1.5 text-[12.5px] text-white shadow-xl" role="status">{notif}</div>}
       {reglages && (
-        <div className="fixed left-12 bottom-6 z-[65] w-64 rounded-md border border-[#454545] bg-[#252526] p-3 shadow-2xl text-[12.5px]" role="dialog" aria-label={X.reglages}>
+        <div data-menu="1" className="fixed left-12 bottom-6 z-[65] w-64 rounded-md border border-[#454545] bg-[#252526] p-3 shadow-2xl text-[12.5px]" role="dialog" aria-label={X.reglages}>
           <p className="mb-2 font-semibold text-white">{X.reglages}</p>
           <div className="flex items-center justify-between py-1"><span>{X.taille}</span><span className="flex items-center gap-1"><button onClick={() => changerTaille(-1)} className="size-6 rounded border border-[var(--bd)] hover:bg-[#ffffff14]" aria-label={X.cmdFontDown}>−</button><span className="w-8 text-center">{taille}</span><button onClick={() => changerTaille(1)} className="size-6 rounded border border-[var(--bd)] hover:bg-[#ffffff14]" aria-label={X.cmdFontUp}>+</button></span></div>
           <button onClick={() => { void redemarrerTerminal(); setTermLignes([]); setReglages(false) }} className="mt-1 w-full h-7 rounded border border-[var(--bd)] hover:bg-[#ffffff14] text-left px-2">{X.redemarrer}</button>
