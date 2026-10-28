@@ -982,7 +982,7 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
     { id: 'close', titre: X.cmdClose, section: X.commandes, icone: 'x', run: onClose },
     { id: 'f:main', titre: nomFichier, section: X.fichiers, icone: iconeFichier(nomFichier).n, run: () => ouvrir('code') },
     ...fichiers.map((f) => ({ id: 'f:' + f.nom, titre: f.nom, section: X.fichiers, icone: iconeFichier(f.nom).n, run: () => ouvrir('f:' + f.nom) })),
-    ...CATALOGUE.map((p) => ({ id: 'pkg:' + p.id, titre: X.installer + ' ' + p.id, section: X.bibliotheques, icone: 'pkg' as const, mots: p.import, run: () => { void chargerPaquets([nomPyodide(p.id)]).then(actualiserCharges); inserer(p.import) } })),
+    ...CATALOGUE.map((p) => ({ id: 'pkg:' + p.id, titre: X.installer + ' ' + p.id, section: X.bibliotheques, icone: 'pkg' as const, mots: p.import, run: () => { void (p.pip ? pipInstaller([p.id]) : chargerPaquets([nomPyodide(p.id)])).then(actualiserCharges); inserer(p.import) } })),
   ]
 
   const avionTexte = largLat // largeur de la barre latérale

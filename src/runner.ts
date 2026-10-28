@@ -164,6 +164,14 @@ const ecrireFichiers = (files) => {
   ecrits = nouveaux
   try { py.runPython('import sys\\nif "" not in sys.path: sys.path.insert(0, "")\\nfor __m in ' + JSON.stringify(mods) + ':\\n    sys.modules.pop(__m, None)') } catch (e) { /* ignoré */ }
 }
+// Quelques bibliothèques Python pures ne sont pas dans Pyodide mais s'installent depuis PyPI : on les installe toutes seules à l'import (liste fermée : jamais un nom tapé au hasard).
+const AUTO_PIP = { seaborn: 'seaborn', tabulate: 'tabulate', tqdm: 'tqdm', faker: 'faker', xlrd: 'xlrd' }
+const installerManquants = async (code) => {
+  const noms = [...new Set([...code.matchAll(/^\\s*(?:import|from)\\s+([A-Za-z_][A-Za-z0-9_]*)/gm)].map((m) => m[1]))].filter((n) => AUTO_PIP[n])
+  const need = noms.filter((n) => !py.runPython('import importlib.util\\nimportlib.util.find_spec("' + n + '") is not None'))
+  if (!need.length) return
+  try { await py.loadPackage('micropip'); const mp = py.pyimport('micropip'); await mp.install(need.map((n) => AUTO_PIP[n])) } catch (e) { /* l'import dira l'erreur */ }
+}
 const dernieres = (err, n) => String(err && err.message ? err.message : err).trim().split('\\n').slice(-n).join('\\n')
 onmessage = async (e) => {
   const d = e.data
@@ -198,6 +206,7 @@ onmessage = async (e) => {
       if (!replNs) { replNs = py.globals.get('dict')(); py.runPython(REPLDEF, { globals: replNs }) }
       ecrireFichiers(d.files)
       try { await py.loadPackagesFromImports(d.code, { messageCallback: () => {}, errorCallback: () => {} }) } catch (e) { /* hors ligne */ }
+      await installerManquants(d.code)
       if (/matplotlib|pyplot/.test(d.code)) { try { py.runPython('import matplotlib, warnings\\nmatplotlib.use("AGG")\\nwarnings.filterwarnings("ignore", message=".*non-interactive.*")', { globals: replNs }) } catch (e) { /* ignoré */ } }
       replNs.set('__src', d.code)
       let valeur = null, erreur = null
@@ -226,6 +235,7 @@ onmessage = async (e) => {
     try {
       // Les bibliothèques importées par le code (pandas, matplotlib, scikit-learn…) se chargent toutes seules.
       try { await py.loadPackagesFromImports(d.code, { messageCallback: () => {}, errorCallback: () => {} }) } catch (e) { /* hors ligne : l'import dira l'erreur */ }
+      await installerManquants(d.code)
       ecrireFichiers(d.files)
       py.runPython(HELPERS, { globals: ns })
       if (/matplotlib|pyplot/.test(d.code)) { try { py.runPython('import matplotlib, warnings\\nmatplotlib.use("AGG")\\nwarnings.filterwarnings("ignore", message=".*non-interactive.*")', { globals: ns }) } catch (e) { /* ignoré */ } }

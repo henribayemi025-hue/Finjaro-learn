@@ -1,5 +1,5 @@
 // Le catalogue de bibliothèques proposées dans l'espace de travail : elles se chargent dans le navigateur (Pyodide), rien à installer sur la machine.
-export interface Paquet { id: string; import: string; categorie: 'donnees' | 'calcul' | 'ia' | 'image' | 'texte' | 'outils'; fr: string; en: string }
+export interface Paquet { /** Installé depuis PyPI (pip), pas fourni par Pyodide. */ pip?: boolean; id: string; import: string; categorie: 'donnees' | 'calcul' | 'ia' | 'image' | 'texte' | 'outils'; fr: string; en: string }
 
 export const CATALOGUE: Paquet[] = [
   { id: 'numpy', import: 'import numpy as np', categorie: 'calcul', fr: 'Calcul sur de grands tableaux de nombres.', en: 'Maths on big arrays of numbers.' },
@@ -7,7 +7,7 @@ export const CATALOGUE: Paquet[] = [
   { id: 'matplotlib', import: 'import matplotlib.pyplot as plt', categorie: 'donnees', fr: 'Graphiques : courbes, barres, nuages de points.', en: 'Charts: lines, bars, scatter plots.' },
   { id: 'scipy', import: 'import scipy', categorie: 'calcul', fr: 'Sciences : statistiques, optimisation, algèbre.', en: 'Science: statistics, optimisation, algebra.' },
   { id: 'scikit-learn', import: 'from sklearn.linear_model import LinearRegression', categorie: 'ia', fr: 'Apprentissage automatique classique.', en: 'Classic machine learning.' },
-  { id: 'seaborn', import: 'import seaborn as sns', categorie: 'donnees', fr: 'Graphiques statistiques élégants.', en: 'Elegant statistical charts.' },
+  { id: 'seaborn', pip: true, import: 'import seaborn as sns', categorie: 'donnees', fr: 'Graphiques statistiques élégants.', en: 'Elegant statistical charts.' },
   { id: 'sympy', import: 'import sympy as sp', categorie: 'calcul', fr: 'Maths symboliques : équations, dérivées.', en: 'Symbolic maths: equations, derivatives.' },
   { id: 'networkx', import: 'import networkx as nx', categorie: 'calcul', fr: 'Graphes et réseaux.', en: 'Graphs and networks.' },
   { id: 'statsmodels', import: 'import statsmodels.api as sm', categorie: 'ia', fr: 'Modèles statistiques et séries temporelles.', en: 'Statistical models and time series.' },

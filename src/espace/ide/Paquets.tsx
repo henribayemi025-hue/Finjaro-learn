@@ -26,7 +26,7 @@ export default function PaquetsVue({ lang, charges, onCharger, onInserer, onPip,
 
   const installer = async (p: Paquet) => {
     setOccupe((o) => [...o, p.id]); setErreurs((e) => { const n = { ...e }; delete n[p.id]; return n })
-    const r = await onCharger(nomPyodide(p.id))
+    const r = p.pip ? await onPip(p.id) : await onCharger(nomPyodide(p.id))
     setOccupe((o) => o.filter((x) => x !== p.id))
     if (!r.ok) setErreurs((e) => ({ ...e, [p.id]: r.error ?? t.pipKo }))
     onActualiser()
