@@ -130,7 +130,7 @@ const PROMPTS = new Set(['prompt', 'nlp', 'eng', 'outils'])
 export default function TravailSujet({ lang, lesson, track, code, onCode, onRun, res, running, ai, signedIn, onClose, onPrev, onNext, projet }: {
   lang: Lang; lesson: Lesson; track: string; code: string; onCode: (v: string) => void; onRun: () => unknown
   projet?: ProjetProps
-  res: RunResult | null; running: boolean; ai: boolean; signedIn: boolean; onClose: () => void; onPrev?: () => void; onNext?: () => void
+  res: RunResult | null; running: boolean; ai: boolean; signedIn: boolean; onClose: () => void; onPrev?: () => void; onNext?: () => Promise<{ ok: boolean; texte: string }> | void
 }) {
   const t = T[lang]
   const titre = lesson.title[lang]
@@ -271,6 +271,12 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
   }, [fichiers, lesson.id])
   useEffect(() => () => definirFichiers({}), [])
   const nomsPris = [nomFichier, ...fichiers.map((f) => f.nom)]
+  // « Leçon suivante » vérifie le travail d'abord (comme le bouton « J'ai terminé ») : si les tests ne passent pas, on le dit ici, dans l'espace.
+  const suivante = async () => {
+    if (!onNext) return
+    const v = await onNext()
+    if (v && !v.ok) { setNotif(v.texte); setPanneau('tests'); setPanneauOuvert(true) }
+  }
   const [vueLat, setVueLat] = useState<VueLaterale>(() => (lire('learn:ide:vue') as VueLaterale) || 'lecon')
   const [latOuverte, setLatOuverte] = useState(() => lire('learn:ide:lat') !== '0')
   const [agentOuvert, setAgentOuvert] = useState(() => lire('learn:ide:agent') !== '0')
@@ -356,7 +362,7 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
   // Historique local : un instantané à chaque réussite, ou à la demande.
   const instantane = (etiquette: string) => { setInstantanes(ajouterInstantane(lesson.id, code, etiquette)); setNotif(X.fichierOk) }
   useEffect(() => { if (res?.passed === true) setInstantanes(ajouterInstantane(lesson.id, code, 'tests')) }, [res]) // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => { if (!notif) return; const id = setTimeout(() => setNotif(''), 2200); return () => clearTimeout(id) }, [notif])
+  useEffect(() => { if (!notif) return; const id = setTimeout(() => setNotif(''), 5000); return () => clearTimeout(id) }, [notif])
 
   // Exécuter un autre fichier Python du projet (script libre : pas de tests).
   const lancerFichier = async () => {
@@ -503,7 +509,7 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
       {(onPrev || onNext) && (
         <div className="flex gap-2">
           {onPrev && <button onClick={onPrev} className="flex-1 rounded-lg border border-slate-700 min-h-10 text-[12px] text-slate-300 hover:bg-slate-800"><Gl>{'‹ ' + t.prev}</Gl></button>}
-          {onNext && <button onClick={onNext} className="flex-1 rounded-lg border border-slate-700 min-h-10 text-[12px] text-slate-300 hover:bg-slate-800"><Gl>{t.next + ' ›'}</Gl></button>}
+          {onNext && <button onClick={() => void suivante()} className="flex-1 rounded-lg border border-slate-700 min-h-10 text-[12px] text-slate-300 hover:bg-slate-800"><Gl>{t.next + ' ›'}</Gl></button>}
         </div>
       )}
     </div>
@@ -977,7 +983,7 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
     { id: 'hint', titre: X.cmdHint, section: X.commandes, icone: 'bulb', run: () => { setVue('agent'); if (!agentOuvert) basculerAgent(); void poser(t.chips[1][1]) } },
     { id: 'find', titre: X.cmdFind, section: X.commandes, icone: 'bug', run: () => { setVue('agent'); if (!agentOuvert) basculerAgent(); void poser(t.chips[2][1]) } },
     ...(selection ? [{ id: 'sel', titre: X.cmdSelect, section: X.commandes, icone: 'chat' as const, run: () => { setVue('agent'); if (!agentOuvert) basculerAgent(); void poser(X.questionSel + '\n```\n' + selection.slice(0, 1500) + '\n```') } }] : []),
-    ...(onNext ? [{ id: 'next', titre: X.cmdNext, section: X.commandes, icone: 'right' as const, run: onNext }] : []),
+    ...(onNext ? [{ id: 'next', titre: X.cmdNext, section: X.commandes, icone: 'right' as const, run: () => void suivante() }] : []),
     ...(onPrev ? [{ id: 'prev', titre: X.cmdPrev, section: X.commandes, icone: 'left' as const, run: onPrev }] : []),
     { id: 'close', titre: X.cmdClose, section: X.commandes, icone: 'x', run: onClose },
     { id: 'f:main', titre: nomFichier, section: X.fichiers, icone: iconeFichier(nomFichier).n, run: () => ouvrir('code') },
@@ -1031,7 +1037,7 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
       <BarreEtat lang={lang} erreurs={nbErreurs} avertissements={nbAvert} onProblemes={() => afficherPanneau('problemes')} ligne={curseur.l} colonne={curseur.c} langage={langage}
         bibliotheques={charges.length} onBibliotheques={() => basculerLat('paquets')} agent={{ nom: prof.name, face: prof.face }} agentEtat={!ai || !signedIn ? 'hors' : busy ? 'reflechit' : 'pret'}
         tests={res?.tests && res.tests.total > 0 ? { ok: res.tests.ok, total: res.tests.total } : null} onTests={() => afficherPanneau('tests')} instantanes={instantanes.length} onHistorique={() => basculerLat('historique')} />
-      {notif && <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[70] rounded border border-[#454545] bg-[#252526] px-3 py-1.5 text-[12.5px] text-white shadow-xl" role="status">{notif}</div>}
+      {notif && <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[70] max-w-[92vw] rounded border border-[#454545] bg-[#252526] px-3 py-1.5 text-[12.5px] text-white shadow-xl" role="status">{notif}</div>}
       {reglages && (
         <div data-menu="1" className="fixed left-12 bottom-6 z-[65] w-64 rounded-md border border-[#454545] bg-[#252526] p-3 shadow-2xl text-[12.5px]" role="dialog" aria-label={X.reglages}>
           <p className="mb-2 font-semibold text-white">{X.reglages}</p>

@@ -260,22 +260,26 @@ export default function App() {
   const jalon = JALONS.find((j) => j.apres === lesson.id && projetEnAttente(j.id))
   const portailProjet = jalon ? jalon.id : dernierDuModule && moduleDe && projetEnAttente(moduleDe.id) ? moduleDe.id : null
   const verslasuite = (i: number | null) => { if (portailProjet) nav('#/projet/' + portailProjet); else if (i !== null) ouvre(i) }
-  const terminer = async () => {
+  const terminer = async (): Promise<{ ok: boolean; texte: string }> => {
     const suivante = pos < trackLessons.length ? trackLessons[pos].i : null
-    if (done.includes(lesson.id)) { verslasuite(suivante); return }
+    if (done.includes(lesson.id)) { verslasuite(suivante); return { ok: true, texte: '' } }
     if (lesson.predict || lesson.lecture) {
       document.getElementById('exercice')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      setVerdict({ etat: 'ko', texte: lang === 'fr' ? 'Pas encore : réponds d’abord à l’exercice de la leçon, puis valide-le.' : 'Not yet: answer the lesson’s exercise first, then validate it.' })
-      return
+      const texte = lang === 'fr' ? 'Pas encore : réponds d’abord à l’exercice de la leçon, puis valide-le.' : 'Not yet: answer the lesson’s exercise first, then validate it.'
+      setVerdict({ etat: 'ko', texte })
+      return { ok: false, texte }
     }
     setVerdict({ etat: 'verif', texte: lang === 'fr' ? 'Vérification de ton travail…' : 'Checking your work…' })
     const r = await run()
     if (r?.passed) {
       setVerdict({ etat: 'ok', texte: lang === 'fr' ? 'Vérifié : tous les tests passent, la leçon est terminée.' : 'Checked: all tests pass, the lesson is done.' })
       if (suivante !== null || portailProjet) setTimeout(() => verslasuite(suivante), 1200)
+      return { ok: true, texte: '' }
     } else {
       const err = r?.error ? (expliqueErreur(r.error, lang, code) ?? r.error.split('\n').filter(Boolean).pop() ?? '') : ''
-      setVerdict({ etat: 'ko', texte: (lang === 'fr' ? 'Pas encore terminé : ton code ne passe pas tous les tests. ' : 'Not finished yet: your code does not pass all the tests. ') + err })
+      const texte = (lang === 'fr' ? 'Pas encore terminé : ton code ne passe pas tous les tests' + (r?.tests ? ` (${r.tests.ok} sur ${r.tests.total})` : '') + '. ' : 'Not finished yet: your code does not pass all the tests' + (r?.tests ? ` (${r.tests.ok} of ${r.tests.total})` : '') + '. ') + err
+      setVerdict({ etat: 'ko', texte })
+      return { ok: false, texte }
     }
   }
 
@@ -452,7 +456,7 @@ export default function App() {
       {route.v === 'lecon' && travail && (
         <TravailSujet key={lesson.id} lang={lang} lesson={lesson} track={track} code={code} onCode={(v) => { setCode(v); save(cleCode(lesson, lang), v) }}
           onRun={run} res={res} running={!!running} ai={ai} signedIn={!!session} onClose={() => setTravail(false)}
-          onPrev={pos > 1 ? () => ouvre(trackLessons[pos - 2].i) : undefined} onNext={pos < trackLessons.length || portailProjet ? () => void terminer() : undefined} />
+          onPrev={pos > 1 ? () => ouvre(trackLessons[pos - 2].i) : undefined} onNext={pos < trackLessons.length || portailProjet ? () => terminer() : undefined} />
       )}
       {route.v === 'lecon' && <div id="lecon" className="max-w-6xl mx-auto px-4 py-4">
         <div className="space-y-4 min-w-0">
