@@ -17,6 +17,7 @@ export const TX = {
     cmdExplain: 'Agent : expliquer mon code', cmdHint: 'Agent : un indice', cmdFind: 'Agent : chercher l’erreur', cmdSelect: 'Agent : expliquer la sélection', cmdFontUp: 'Agrandir le texte', cmdFontDown: 'Réduire le texte',
     vueLecon: 'Afficher : Leçon', vueFichiers: 'Afficher : Explorateur', vueRecherche: 'Afficher : Recherche', vuePaquets: 'Afficher : Bibliothèques', vuePlan: 'Afficher : Plan du fichier', vueHist: 'Afficher : Historique local',
     questionSel: 'Explique-moi simplement cette partie de mon code :', fichierOk: 'Fichier enregistré',
+    juste: 'Juste', fauxLabel: 'Faux', toutPasse: 'Tous les tests passent.', testsRates: (a: number, b: number) => `${a} test${a > 1 ? 's' : ''} sur ${b} réussi${a > 1 ? 's' : ''}.`, premierRate: 'Le premier test raté :', voirTests: 'Voir les tests', suivante: 'Leçon suivante',
   },
   en: {
     palette: 'Search a command, a file…', sortie: 'Output', problemes: 'Problems', tests: 'Tests', terminal: 'Terminal', graphiques: 'Plots',
@@ -35,5 +36,6 @@ export const TX = {
     cmdExplain: 'Agent: explain my code', cmdHint: 'Agent: a hint', cmdFind: 'Agent: find the error', cmdSelect: 'Agent: explain the selection', cmdFontUp: 'Increase text size', cmdFontDown: 'Decrease text size',
     vueLecon: 'Show: Lesson', vueFichiers: 'Show: Explorer', vueRecherche: 'Show: Search', vuePaquets: 'Show: Libraries', vuePlan: 'Show: Outline', vueHist: 'Show: Local history',
     questionSel: 'Explain this part of my code simply:', fichierOk: 'File saved',
+    juste: 'Correct', fauxLabel: 'Wrong', toutPasse: 'All tests pass.', testsRates: (a: number, b: number) => `${a} of ${b} test${b > 1 ? 's' : ''} passed.`, premierRate: 'First failing test:', voirTests: 'See the tests', suivante: 'Next lesson',
   },
 }

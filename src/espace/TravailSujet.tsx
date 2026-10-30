@@ -535,6 +535,21 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
           <button onClick={projet.onSuite} className="mt-2 rounded bg-[var(--ac)] hover:bg-[#1a8ae6] px-3 min-h-8 text-[12.5px] font-semibold text-white">{t.pj.suite}</button>
         </div>
       )}
+      {centre === 'code' && res && (res.passed === true || res.passed === false) && (() => {
+        const ok = res.passed === true
+        const rate = !ok && res.tests?.detail ? lesson.checks.find((_, i) => res.tests?.detail?.[i] === false) : undefined
+        return (
+          <div className={`mb-2 rounded-md border p-2.5 font-sans text-[13px] flex items-start gap-2.5 ${ok ? 'border-[#2ea04366] bg-[#2ea04318] text-emerald-100' : 'border-[#f14c4c66] bg-[#f14c4c14] text-rose-100'}`} role="status">
+            <Ico n={ok ? 'ok' : 'x'} className={`size-5 mt-0.5 ${ok ? 'text-[var(--ok)]' : 'text-[var(--er)]'}`} />
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold">{ok ? X.juste : X.fauxLabel} — {ok ? X.toutPasse : res.tests ? X.testsRates(res.tests.ok, res.tests.total) : t.ko}</p>
+              {rate && <p className="mt-1 text-[12px] text-slate-300 font-mono break-words">{X.premierRate} {rate.length > 140 ? rate.slice(0, 140) + '…' : rate}</p>}
+            </div>
+            {!ok && res.tests && <button onClick={() => afficherPanneau('tests')} className="shrink-0 h-7 px-2.5 rounded border border-[var(--bd)] bg-[var(--b2)] hover:bg-[var(--b3)] text-[12px] text-white">{X.voirTests}</button>}
+            {ok && onNext && <button onClick={() => void suivante()} className="shrink-0 h-7 px-3 rounded bg-[var(--ac)] hover:bg-[#1a8ae6] text-[12.5px] font-semibold text-white">{X.suivante} ›</button>}
+          </div>
+        )
+      })()}
       {!resAffiche ? <p className="text-[var(--tx3)] font-sans">{X.pasLance}</p> : <>
         {fichierActif && sortieFichier && <p className="mb-1 font-sans text-[11px] text-[var(--tx3)]">{X.fichierLibre} : {sortieFichier.nom}</p>}
         <pre className="whitespace-pre-wrap text-[var(--tx)]">{resAffiche.output.length ? resAffiche.output.join('\n') : X.sansSortie}</pre>
@@ -649,6 +664,8 @@ export default function TravailSujet({ lang, lesson, track, code, onCode, onRun,
             <button onClick={executer} disabled={enCours} title={(fichierActif ? X.executerFichier : X.cmdRun) + ' (Ctrl+Entrée)'} className={brique + ' bg-[var(--ac)] hover:bg-[#1a8ae6] text-white'}>
               <Ico n={enCours ? 'spin' : 'play'} className="size-3.5" />{enCours ? t.running : X.executer}
             </button>
+            {onNext && centre === 'code' && <button onClick={() => void suivante()} disabled={enCours} title={res?.passed ? X.suivante : lang === 'fr' ? 'Vérifie ton travail puis passe à la suite' : 'Checks your work, then moves on'}
+              className={brique + (res?.passed === true ? ' bg-[#2ea043] hover:bg-[#3fb950] text-white' : ' border border-[var(--bd)] text-[var(--tx)] hover:bg-[#ffffff14]')}>{X.suivante}<Ico n="right" className="size-3.5" /></button>}
           </div>
         )}
       </div>
