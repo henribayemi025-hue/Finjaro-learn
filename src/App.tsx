@@ -29,6 +29,7 @@ import AgentPanel from './AgentPanel'
 import Classe from './Classe'
 import { contexteSql } from './sqlBase'
 import TravailSujet from './espace/TravailSujet'
+import EspaceLibre from './espace/EspaceLibre'
 import RetourProjet from './RetourProjet'
 import Quiz from './Quiz'
 import { profDe } from './Classe'
@@ -67,6 +68,8 @@ function acuName(lang: Lang, key: string) {
 
 function getLang(): Lang {
   try {
+    const q = new URLSearchParams(window.location.search).get('lang')
+    if (q === 'fr' || q === 'en') return q
     const s = localStorage.getItem('learn:lang')
     if (s === 'fr' || s === 'en') return s
   } catch { /* stockage indisponible */ }
@@ -80,16 +83,17 @@ function save(key: string, v: string) {
   try { localStorage.setItem('learn:' + key, v) } catch { /* ignoré */ }
 }
 
-type Route = { v: 'accueil' } | { v: 'cursus' } | { v: 'projet'; m: string } | { v: 'parcours'; k: string } | { v: 'lecon'; id: string } | { v: 'lettre'; date: string | null } | { v: 'atelier'; id: string | null } | { v: 'progression' | 'espaces' | 'outils' | 'entraide' }
+type Route = { v: 'accueil' } | { v: 'cursus' } | { v: 'projet'; m: string } | { v: 'parcours'; k: string } | { v: 'lecon'; id: string } | { v: 'lettre'; date: string | null } | { v: 'atelier'; id: string | null } | { v: 'espace' } | { v: 'progression' | 'espaces' | 'outils' | 'entraide' }
 function lireRoute(): Route {
   const h = decodeURIComponent(window.location.hash.replace(/^#\/?/, ''))
-  const [a, b] = h.split('/')
+  const [a, b] = h.split('?')[0].split('/')
   if (a === 'lettre') return { v: 'lettre', date: /^\d{4}-\d{2}-\d{2}$/.test(b ?? '') ? b : null }
   if (a === 'parcours' && b && trackFromSlug(b)) return { v: 'parcours', k: trackFromSlug(b)! }
   if (a === 'parcours') return { v: 'accueil' }
   if (a === 'cursus') return { v: 'cursus' }
   if (a === 'projet' && b && PROJETS[b]) return { v: 'projet', m: b }
   if (a === 'lecon' && b && lessons.some((l) => l.id === b)) return { v: 'lecon', id: b }
+  if (a === 'espace') return { v: 'espace' }
   if (a === 'atelier') return { v: 'atelier', id: b && /^[a-z0-9]{4,40}$/.test(b) ? b : null }
   if (a === 'progression' || a === 'espaces' || a === 'outils' || a === 'entraide') return { v: a }
   if (!h && new URLSearchParams(window.location.search).has('join')) return { v: 'espaces' }
@@ -453,6 +457,7 @@ export default function App() {
       )}
       {burst > 0 && <Burst key={burst} />}
       {chrono && <Chrono lang={lang} sound={sound} onClose={() => setChrono(false)} onPlayed={recordDay} />}
+      {route.v === 'espace' && <EspaceLibre lang={lang} signedIn={!!session} ai={ai} onClose={() => { if (window.parent !== window) window.parent.postMessage('finjaro:fermer', '*'); else nav('#/') }} />}
       {route.v === 'lecon' && travail && (
         <TravailSujet key={lesson.id} lang={lang} lesson={lesson} track={track} code={code} onCode={(v) => { setCode(v); save(cleCode(lesson, lang), v) }}
           onRun={run} res={res} running={!!running} ai={ai} signedIn={!!session} onClose={() => setTravail(false)}
